@@ -37,6 +37,7 @@
 /* BSP MCU Specific Includes. */
 #include "bsp_elc.h"
 #include "bsp_feature.h"
+#include "bsp_cache.h"
 
 /***********************************************************************************************************************
  * Macro definitions

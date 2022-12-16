@@ -175,6 +175,9 @@ i2c_slave_api_t const g_i2c_slave_on_iic =
 /******************************************************************************************************************//**
  * Opens the I2C slave device.
  *
+ * Example:
+ * @snippet r_iic_slave_example.c R_IIC_SLAVE_Open
+ *
  * @retval  FSP_SUCCESS                       I2C slave device opened successfully.
  * @retval  FSP_ERR_ALREADY_OPEN              Module is already open.
  * @retval  FSP_ERR_IP_CHANNEL_NOT_PRESENT    Channel is not available on this MCU.
@@ -261,6 +264,9 @@ fsp_err_t R_IIC_SLAVE_Open (i2c_slave_ctrl_t * const p_api_ctrl, i2c_slave_cfg_t
  * In case the master continues to write more data, an I2C_SLAVE_EVENT_RX_MORE_REQUEST will be issued via callback.
  * In case of errors, an I2C_SLAVE_EVENT_ABORTED will be issued via callback.
  *
+ * Example:
+ * @snippet r_iic_slave_example.c R_IIC_SLAVE_Read
+ *
  * @retval  FSP_SUCCESS        Function executed without issue
  * @retval  FSP_ERR_ASSERTION  p_api_ctrl, bytes or p_dest is NULL.
  * @retval  FSP_ERR_IN_USE     Another transfer was in progress.
@@ -283,6 +289,9 @@ fsp_err_t R_IIC_SLAVE_Read (i2c_slave_ctrl_t * const p_api_ctrl, uint8_t * const
  * I2C_SLAVE_EVENT_TX_COMPLETE in the callback.
  * In case the master continues to read more data, an I2C_SLAVE_EVENT_TX_MORE_REQUEST will be issued via callback.
  * In case of errors, an I2C_SLAVE_EVENT_ABORTED will be issued via callback.
+ *
+ * Example:
+ * @snippet r_iic_slave_example.c R_IIC_SLAVE_Write
  *
  * @retval  FSP_SUCCESS        Function executed without issue.
  * @retval  FSP_ERR_ASSERTION  p_api_ctrl or p_src is NULL.

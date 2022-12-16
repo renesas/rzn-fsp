@@ -96,59 +96,53 @@
 #define EL1_MPU_REGION02_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX1 + REGION_ENABLE
 #define EL1_MPU_REGION02_LIMIT_H    (0x1017 & 0xFFFF)
 
-/* region 3 (Area for Boot ROM) */
-#define EL1_MPU_REGION03_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION03_BASE_H     (0x1100 & 0xFFFF)
-#define EL1_MPU_REGION03_LIMIT_L    (0x7FFF & 0xFFC0) + ATTRINDEX5 + REGION_ENABLE
-#define EL1_MPU_REGION03_LIMIT_H    (0x1100 & 0xFFFF)
+/* region 3 (System RAM mirror) */
+#define EL1_MPU_REGION03_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_ENABLE
+#define EL1_MPU_REGION03_BASE_H     (0x3000 & 0xFFFF)
+#define EL1_MPU_REGION03_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX3 + REGION_ENABLE
+#define EL1_MPU_REGION03_LIMIT_H    (0x3017 & 0xFFFF)
 
-/* region 4 (System RAM mirror) */
+/* region 4 (External Address Space mirror) */
 #define EL1_MPU_REGION04_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_ENABLE
-#define EL1_MPU_REGION04_BASE_H     (0x3000 & 0xFFFF)
+#define EL1_MPU_REGION04_BASE_H     (0x4000 & 0xFFFF)
 #define EL1_MPU_REGION04_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX3 + REGION_ENABLE
-#define EL1_MPU_REGION04_LIMIT_H    (0x3017 & 0xFFFF)
+#define EL1_MPU_REGION04_LIMIT_H    (0x5FFF & 0xFFFF)
 
-/* region 5 (External Address Space mirror) */
-#define EL1_MPU_REGION05_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_ENABLE
-#define EL1_MPU_REGION05_BASE_H     (0x4000 & 0xFFFF)
-#define EL1_MPU_REGION05_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX3 + REGION_ENABLE
-#define EL1_MPU_REGION05_LIMIT_H    (0x5FFF & 0xFFFF)
+/* region 5 (External Address Space) */
+#define EL1_MPU_REGION05_BASE_L     (0x0000 & 0xFFC0) + NON_SHAREABLE + EL1RW_EL0RW + EXECUTE_ENABLE
+#define EL1_MPU_REGION05_BASE_H     (0x6000 & 0xFFFF)
+#define EL1_MPU_REGION05_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX1 + REGION_ENABLE
+#define EL1_MPU_REGION05_LIMIT_H    (0x7FFF & 0xFFFF)
 
-/* region 6 (External Address Space) */
-#define EL1_MPU_REGION06_BASE_L     (0x0000 & 0xFFC0) + NON_SHAREABLE + EL1RW_EL0RW + EXECUTE_ENABLE
-#define EL1_MPU_REGION06_BASE_H     (0x6000 & 0xFFFF)
-#define EL1_MPU_REGION06_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX1 + REGION_ENABLE
-#define EL1_MPU_REGION06_LIMIT_H    (0x7FFF & 0xFFFF)
+/* region 6 (Non-Safety Peripheral) */
+#define EL1_MPU_REGION06_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
+#define EL1_MPU_REGION06_BASE_H     (0x8000 & 0xFFFF)
+#define EL1_MPU_REGION06_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX5 + REGION_ENABLE
+#define EL1_MPU_REGION06_LIMIT_H    (0x80FF & 0xFFFF)
 
-/* region 7 (Non-Safety Peripheral) */
+/* region 7 (Safety Peripheral) */
 #define EL1_MPU_REGION07_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION07_BASE_H     (0x8000 & 0xFFFF)
+#define EL1_MPU_REGION07_BASE_H     (0x8100 & 0xFFFF)
 #define EL1_MPU_REGION07_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX5 + REGION_ENABLE
-#define EL1_MPU_REGION07_LIMIT_H    (0x80FF & 0xFFFF)
+#define EL1_MPU_REGION07_LIMIT_H    (0x81FF & 0xFFFF)
 
-/* region 8 (Safety Peripheral) */
+/* region 8 (LLPP0 Peripheral) */
 #define EL1_MPU_REGION08_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION08_BASE_H     (0x8100 & 0xFFFF)
+#define EL1_MPU_REGION08_BASE_H     (0x9000 & 0xFFFF)
 #define EL1_MPU_REGION08_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX5 + REGION_ENABLE
-#define EL1_MPU_REGION08_LIMIT_H    (0x81FF & 0xFFFF)
+#define EL1_MPU_REGION08_LIMIT_H    (0x901F & 0xFFFF)
 
-/* region 9 (LLPP0 Peripheral) */
+/* region 9 (GIC0) */
 #define EL1_MPU_REGION09_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION09_BASE_H     (0x9000 & 0xFFFF)
-#define EL1_MPU_REGION09_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX5 + REGION_ENABLE
-#define EL1_MPU_REGION09_LIMIT_H    (0x901F & 0xFFFF)
+#define EL1_MPU_REGION09_BASE_H     (0x9400 & 0xFFFF)
+#define EL1_MPU_REGION09_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX4 + REGION_ENABLE
+#define EL1_MPU_REGION09_LIMIT_H    (0x941F & 0xFFFF)
 
-/* region 10 (GIC0) */
-#define EL1_MPU_REGION10_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION10_BASE_H     (0x9400 & 0xFFFF)
-#define EL1_MPU_REGION10_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX4 + REGION_ENABLE
-#define EL1_MPU_REGION10_LIMIT_H    (0x941F & 0xFFFF)
-
-/* region 12 (Debug Private) */
-#define EL1_MPU_REGION12_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
-#define EL1_MPU_REGION12_BASE_H     (0xC000 & 0xFFFF)
-#define EL1_MPU_REGION12_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX4 + REGION_ENABLE
-#define EL1_MPU_REGION12_LIMIT_H    (0xC0FF & 0xFFFF)
+/* region 11 (Debug Private) */
+#define EL1_MPU_REGION11_BASE_L     (0x0000 & 0xFFC0) + OUTER_SHAREABLE + EL1RW_EL0RW + EXECUTE_NEVER
+#define EL1_MPU_REGION11_BASE_H     (0xC000 & 0xFFFF)
+#define EL1_MPU_REGION11_LIMIT_L    (0xFFFF & 0xFFC0) + ATTRINDEX4 + REGION_ENABLE
+#define EL1_MPU_REGION11_LIMIT_H    (0xC0FF & 0xFFFF)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -213,9 +207,12 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void bsp_mpu_init(void);
  #pragma section="LDR_DATA_RBLOCK"
  #pragma section="LDR_DATA_WBLOCK"
  #pragma section="LDR_DATA_ZBLOCK"
+
+ #pragma section="SHARED_NONCACHE_BUFFER_ZBLOCK"
+ #pragma section="NONCACHE_BUFFER_ZBLOCK"
 #endif
 
-void        vector_table(void) BSP_PLACE_IN_SECTION(".intvec");
+void        __Vectors(void) BSP_PLACE_IN_SECTION(".intvec");
 __WEAK void IRQ_Handler(void);
 void        Default_Handler(void);
 
@@ -275,7 +272,7 @@ BSP_DONT_REMOVE static uint8_t g_heap[BSP_CFG_HEAP_BYTES] BSP_ALIGN_VARIABLE(BSP
     BSP_PLACE_IN_SECTION(BSP_SECTION_HEAP);
 #endif
 
-BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void vector_table (void)
+BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void __Vectors (void)
 {
     __asm volatile (
         "    ldr pc,=Reset_Handler            \n"
@@ -310,7 +307,7 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void system_init (void)
 
     __asm volatile (
         "set_vbar:                           \n"
-        "    LDR   r0, =vector_table         \n"
+        "    LDR   r0, =__Vectors            \n"
         "    MCR   p15, #0, r0, c12, c0, #0  \n" /* Write r0 to VBAR */
         ::: "memory");
 
@@ -429,23 +426,23 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void stack_init (void)
         "loader_data_init:                                  \n"
 
         "    mov  r1, %[sfb_ldr_data_wblock]                \n"
-        ::[sfb_ldr_data_wblock] "r" (__section_begin("LDR_DATA_WBLOCK")) : "memory");
+        ::[sfb_ldr_data_wblock] "r" (__section_begin("LDR_DATA_WBLOCK")) : "r1");
 
     __asm volatile (
         "    mov  r2, %[sizeof_ldr_data_wblock]             \n"
-        ::[sizeof_ldr_data_wblock] "r" (__section_size("LDR_DATA_WBLOCK")) : "memory");
+        ::[sizeof_ldr_data_wblock] "r" (__section_size("LDR_DATA_WBLOCK")) : "r2");
 
     __asm volatile (
-        "    mov  r0, %[sfb_ldr_data_rblock]                \n"
-        ::[sfb_ldr_data_rblock] "r" (__section_begin("LDR_DATA_RBLOCK")) : "memory");
+        "    mov  r3, %[sfb_ldr_data_rblock]                \n"
+        ::[sfb_ldr_data_rblock] "r" (__section_begin("LDR_DATA_RBLOCK")) : "r3");
 
     __asm volatile (
         "    cmp  r2, #0                                    \n"
         "    beq  loader_data_init_end                      \n"
 
         "copy_to_LDR_DATA:                                  \n"
-        "    ldrb  r3, [r0], #1                             \n"
-        "    strb  r3, [r1], #1                             \n"
+        "    ldrb  r0, [r3], #1                             \n"
+        "    strb  r0, [r1], #1                             \n"
         "    subs  r2, r2, #1                               \n"
         "    bne   copy_to_LDR_DATA                         \n"
         "    dsb                                            \n" /* Ensuring data-changing */
@@ -458,11 +455,11 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void stack_init (void)
 
         /* Clear the loader bss used by the loader */
         "    mov  r1, %[sfb_ldr_data_zblock]                \n"
-        ::[sfb_ldr_data_zblock] "r" (__section_begin("LDR_DATA_ZBLOCK")) : "memory");
+        ::[sfb_ldr_data_zblock] "r" (__section_begin("LDR_DATA_ZBLOCK")) : "r1");
 
     __asm volatile (
         "    mov  r2, %[sfe_ldr_data_zblock]                \n"
-        ::[sfe_ldr_data_zblock] "r" (__section_end("LDR_DATA_ZBLOCK")) : "memory");
+        ::[sfe_ldr_data_zblock] "r" (__section_end("LDR_DATA_ZBLOCK")) : "r2");
 
     __asm volatile (
         "    cmp  r2, r1                                    \n"
@@ -486,18 +483,16 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void stack_init (void)
      * Also need to change icf file. */
     __iar_data_init3();
 
-   #pragma section="SHARED_NONCACHE_BUFFER_ZBLOCK"
-   #pragma section="NONCACHE_BUFFER_ZBLOCK"
     __asm volatile (
         "shared_noncache_buffer_init:                       \n"
 
         /* Clear the shared-non cache buffer */
         "    mov  r1, %[sfb_shared_noncache_buffer_zblock]  \n"
-        ::[sfb_shared_noncache_buffer_zblock] "r" (__section_begin("SHARED_NONCACHE_BUFFER_ZBLOCK")) : "memory");
+        ::[sfb_shared_noncache_buffer_zblock] "r" (__section_begin("SHARED_NONCACHE_BUFFER_ZBLOCK")) : "r1");
 
     __asm volatile (
         "    mov  r2, %[sfb_shared_noncache_buffer_zblock]  \n"
-        ::[sfb_shared_noncache_buffer_zblock] "r" (__section_end("SHARED_NONCACHE_BUFFER_ZBLOCK")) : "memory");
+        ::[sfb_shared_noncache_buffer_zblock] "r" (__section_end("SHARED_NONCACHE_BUFFER_ZBLOCK")) : "r2");
 
     __asm volatile (
         "    cmp  r2, r1                                    \n"
@@ -519,11 +514,11 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void stack_init (void)
 
         /* Clear the shared-non cache buffer */
         "    mov  r1, %[sfb_noncache_buffer_zblock]        \n"
-        ::[sfb_noncache_buffer_zblock] "r" (__section_begin("NONCACHE_BUFFER_ZBLOCK")) : "memory");
+        ::[sfb_noncache_buffer_zblock] "r" (__section_begin("NONCACHE_BUFFER_ZBLOCK")) : "r1");
 
     __asm volatile (
         "    mov  r2, %[sfb_noncache_buffer_zblock]        \n"
-        ::[sfb_noncache_buffer_zblock] "r" (__section_end("NONCACHE_BUFFER_ZBLOCK")) : "memory");
+        ::[sfb_noncache_buffer_zblock] "r" (__section_end("NONCACHE_BUFFER_ZBLOCK")) : "r2");
 
     __asm volatile (
         "    cmp  r2, r1                                    \n"
@@ -542,6 +537,24 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void stack_init (void)
   #endif
  #elif defined(__GNUC__)
     __asm volatile (
+  #if !(BSP_CFG_RAM_EXECUTION)
+        "loader_data_init:                                   \n"
+
+        /* Initialize loader_data. */
+        "    ldr r1, = __loader_data_start                   \n"
+        "    ldr r2, = __loader_data_end                     \n"
+        "    ldr r3, = _mloader_data                         \n"
+        "    cmp r2, r1                                      \n"
+        "    beq loader_data_init_end                        \n"
+
+        "set_loader_data:                                    \n"
+        "    ldrb r0, [r3], #1                               \n"
+        "    strb r0, [r1], #1                               \n"
+        "    cmp r2, r1                                      \n"
+        "    bne set_loader_data                             \n"
+        "    loader_data_init_end:                           \n"
+        "    dsb                                             \n" /* Ensuring data-changing */
+  #endif
         "loader_bss_init:                                    \n"
 
         /* Clear loader_bss. */
@@ -793,29 +806,15 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void mpu_cache_init (void)
         );
 
     __asm volatile (
-        "    mov  r0, #10                                          \n" /* region No.10 */
-        "    movw r2, %[el1_mpu_region10_base_l]                   \n"
-        "    movt r2, %[el1_mpu_region10_base_h]                   \n"
-        "    movw r3, %[el1_mpu_region10_limit_l]                  \n"
-        "    movt r3, %[el1_mpu_region10_limit_h]                  \n"
-        ::[el1_mpu_region10_base_l] "i" (EL1_MPU_REGION10_BASE_L),
-        [el1_mpu_region10_base_h] "i" (EL1_MPU_REGION10_BASE_H),
-        [el1_mpu_region10_limit_l] "i" (EL1_MPU_REGION10_LIMIT_L),
-        [el1_mpu_region10_limit_h] "i" (EL1_MPU_REGION10_LIMIT_H) : "memory");
-    __asm volatile (
-        "bl bsp_mpu_init                                           \n"
-        );
-
-    __asm volatile (
-        "    mov  r0, #12                                          \n" /* region No.12 */
-        "    movw r2, %[el1_mpu_region12_base_l]                   \n"
-        "    movt r2, %[el1_mpu_region12_base_h]                   \n"
-        "    movw r3, %[el1_mpu_region12_limit_l]                  \n"
-        "    movt r3, %[el1_mpu_region12_limit_h]                  \n"
-        ::[el1_mpu_region12_base_l] "i" (EL1_MPU_REGION12_BASE_L),
-        [el1_mpu_region12_base_h] "i" (EL1_MPU_REGION12_BASE_H),
-        [el1_mpu_region12_limit_l] "i" (EL1_MPU_REGION12_LIMIT_L),
-        [el1_mpu_region12_limit_h] "i" (EL1_MPU_REGION12_LIMIT_H) : "memory");
+        "    mov  r0, #11                                          \n" /* region No.11 */
+        "    movw r2, %[el1_mpu_region11_base_l]                   \n"
+        "    movt r2, %[el1_mpu_region11_base_h]                   \n"
+        "    movw r3, %[el1_mpu_region11_limit_l]                  \n"
+        "    movt r3, %[el1_mpu_region11_limit_h]                  \n"
+        ::[el1_mpu_region11_base_l] "i" (EL1_MPU_REGION11_BASE_L),
+        [el1_mpu_region11_base_h] "i" (EL1_MPU_REGION11_BASE_H),
+        [el1_mpu_region11_limit_l] "i" (EL1_MPU_REGION11_LIMIT_L),
+        [el1_mpu_region11_limit_h] "i" (EL1_MPU_REGION11_LIMIT_H) : "memory");
     __asm volatile (
         "bl bsp_mpu_init                                           \n"
         );
@@ -975,17 +974,11 @@ BSP_TARGET_ARM BSP_ATTRIBUTE_STACKLESS void mpu_cache_init (void)
         );
 #endif
 
-#if defined(__ICCARM__)
-
-    /* Jump to main */
-    main();
-#elif defined(__GNUC__)
-
     /* Jump to main */
     __asm volatile (
-        "blx main                                      \n"
+        "    ldr r0, =main                             \n"
+        "    blx r0                                    \n"
         );
-#endif
 }
 
 /*******************************************************************************************************************//**

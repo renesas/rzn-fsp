@@ -169,6 +169,9 @@ const transfer_api_t g_transfer_on_dmac =
 /*******************************************************************************************************************//**
  * Configure a DMAC channel.
  *
+ * Example:
+ * @snippet r_dmac_example.c R_DMAC_Open
+ *
  * @retval FSP_SUCCESS                    Successful open.
  * @retval FSP_ERR_ASSERTION              An input parameter is invalid.
  * @retval FSP_ERR_IP_CHANNEL_NOT_PRESENT The configured channel is invalid.
@@ -200,6 +203,9 @@ fsp_err_t R_DMAC_Open (transfer_ctrl_t * const p_api_ctrl, transfer_cfg_t const 
 
 /*******************************************************************************************************************//**
  * Reconfigure the transfer with new transfer info.
+ *
+ * Example:
+ * @snippet r_dmac_example.c R_DMAC_Reconfigure
  *
  * @retval FSP_SUCCESS              Transfer is configured and will start when trigger occurs.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
@@ -256,6 +262,9 @@ fsp_err_t R_DMAC_Reset (transfer_ctrl_t * const p_api_ctrl,
 /*******************************************************************************************************************//**
  * Set a transfer request by software.
  *
+ * Example:
+ * @snippet r_dmac_example.c R_DMAC_SoftwareStart
+ *
  * @retval FSP_SUCCESS              Transfer started written successfully.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
  * @retval FSP_ERR_NOT_OPEN         Handle is not initialized.  Call R_DMAC_Open to initialize the control block.
@@ -298,6 +307,9 @@ fsp_err_t R_DMAC_SoftwareStop (transfer_ctrl_t * const p_api_ctrl)
 
 /*******************************************************************************************************************//**
  * Enable transfers for the configured activation source.
+ *
+ * Example:
+ * @snippet r_dmac_example.c R_DMAC_Enable
  *
  * @retval FSP_SUCCESS              Counter value written successfully.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
@@ -602,9 +614,9 @@ static void r_dmac_config_transfer_info (dmac_instance_ctrl_t * p_ctrl, transfer
         (true == r_dmac_address_tcm_check((uint32_t) p_info->p_dest)) ?
         ((uint32_t) p_info->p_dest + DMAC_PRV_CPUTCM_BASE_ADDRESS) : ((uint32_t) p_info->p_dest);
 
-    p_ctrl->p_reg->GRP[group].CH[channel].N[0].TB      = p_info->length;
-    p_ctrl->p_reg->GRP[group].CH[channel].CHCFG        = chcfg;
-    p_ctrl->p_reg->GRP[group].CH[channel].CHTVL_b.ITVL = p_extend->transfer_interval;
+    p_ctrl->p_reg->GRP[group].CH[channel].N[0].TB       = p_info->length;
+    p_ctrl->p_reg->GRP[group].CH[channel].CHCFG         = chcfg;
+    p_ctrl->p_reg->GRP[group].CH[channel].CHITVL_b.ITVL = p_extend->transfer_interval;
 
     uint32_t src_address  = (uint32_t) p_info->p_src;
     uint32_t dest_address = (uint32_t) p_info->p_dest;

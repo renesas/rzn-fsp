@@ -212,6 +212,9 @@ i2c_master_api_t const g_i2c_master_on_iic =
 /*******************************************************************************************************************//**
  * Opens the I2C device.
  *
+ * Example:
+ * @snippet r_iic_master_example.c R_IIC_MASTER_Open
+ *
  * @retval  FSP_SUCCESS                       Requested clock rate was set exactly.
  * @retval  FSP_ERR_ALREADY_OPEN              Module is already open.
  * @retval  FSP_ERR_IP_CHANNEL_NOT_PRESENT    Channel is not available on this MCU.
@@ -312,6 +315,9 @@ fsp_err_t R_IIC_MASTER_Open (i2c_master_ctrl_t * const p_api_ctrl, i2c_master_cf
  * The caller will be notified when the operation has completed (successfully) by an
  * I2C_MASTER_EVENT_RX_COMPLETE in the callback.
  *
+ * Example:
+ * @snippet r_iic_master_example.c R_IIC_MASTER_Read
+ *
  * @retval  FSP_SUCCESS             Function executed without issue.
  * @retval  FSP_ERR_ASSERTION       p_api_ctrl, p_dest or bytes is NULL.
  * @retval  FSP_ERR_IN_USE          Bus busy condition. Another transfer was in progress.
@@ -342,6 +348,9 @@ fsp_err_t R_IIC_MASTER_Read (i2c_master_ctrl_t * const p_api_ctrl,
  * Performs a write to the I2C device.
  * The caller will be notified when the operation has completed (successfully) by an
  * I2C_MASTER_EVENT_TX_COMPLETE in the callback.
+ *
+ * Example:
+ * @snippet r_iic_master_example.c R_IIC_MASTER_Write
  *
  * @retval  FSP_SUCCESS           Function executed without issue.
  * @retval  FSP_ERR_ASSERTION     p_api_ctrl or p_src is NULL.
@@ -397,6 +406,9 @@ fsp_err_t R_IIC_MASTER_Abort (i2c_master_ctrl_t * const p_api_ctrl)
  * Sets address and addressing mode of the slave device.
  * This function is used to set the device address and addressing mode of the slave
  * without reconfiguring the entire bus.
+ *
+ * Example:
+ * @snippet r_iic_master_example.c R_IIC_MASTER_SlaveAddressSet
  *
  * @retval  FSP_SUCCESS             Address of the slave is set correctly.
  * @retval  FSP_ERR_ASSERTION       Pointer to control structure is NULL.

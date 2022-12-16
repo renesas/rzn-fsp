@@ -143,6 +143,9 @@ const timer_api_t g_timer_on_cmtw =
  *
  * The CMTW implementation of the general timer can accept an optional cmtw_extended_cfg_t extension parameter.
  *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_Open
+ *
  * @retval FSP_SUCCESS                 Initialization was successful and timer has started.
  * @retval FSP_ERR_ASSERTION           A required input pointer is NULL or the period is not in the valid range of
  *                                     1 to 0xFFFF in 16bit counter or 1 to 0xFFFFFFFF in 32bit counter.
@@ -184,6 +187,9 @@ fsp_err_t R_CMTW_Open (timer_ctrl_t * const p_ctrl, timer_cfg_t const * const p_
 
 /*******************************************************************************************************************//**
  * Starts timer. Implements @ref timer_api_t::start.
+ *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_Start
  *
  * @retval FSP_SUCCESS                 Timer started.
  * @retval FSP_ERR_ASSERTION           p_ctrl is null.
@@ -243,6 +249,9 @@ fsp_err_t R_CMTW_Start (timer_ctrl_t * const p_ctrl)
 /*******************************************************************************************************************//**
  * Stops the timer.  Implements @ref timer_api_t::stop.
  *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_Stop
+ *
  * @retval FSP_SUCCESS                 Timer stopped.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance control structure is not opened.
@@ -287,6 +296,9 @@ fsp_err_t R_CMTW_Reset (timer_ctrl_t * const p_ctrl)
 /*******************************************************************************************************************//**
  * Enables external event triggers that start, stop, clear, or capture the counter. Implements @ref timer_api_t::enable.
  *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_Enable
+ *
  * @retval FSP_SUCCESS                 External events successfully enabled.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -317,6 +329,9 @@ fsp_err_t R_CMTW_Enable (timer_ctrl_t * const p_ctrl)
 /*******************************************************************************************************************//**
  * Disables external event triggers that start, stop, clear, or capture the counter. Implements @ref timer_api_t::disable.
  *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_Disable
+ *
  * @retval FSP_SUCCESS                 External events successfully disabled.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -345,6 +360,9 @@ fsp_err_t R_CMTW_Disable (timer_ctrl_t * const p_ctrl)
  * @ref timer_api_t::periodSet.
  *
  * @warning Stop the timer before calling this function if one-shot output is used.
+ *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_PeriodSet
  *
  * @retval FSP_SUCCESS                 Period value updated.
  * @retval FSP_ERR_ASSERTION           A required pointer was NULL, or the period was not in the valid range of
@@ -392,6 +410,9 @@ fsp_err_t R_CMTW_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_
 /*******************************************************************************************************************//**
  * Gets timer information and store it in provided pointer p_info. Implements @ref timer_api_t::infoGet.
  *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_InfoGet
+ *
  * @retval FSP_SUCCESS                 Period, count direction, and frequency stored in p_info.
  * @retval FSP_ERR_ASSERTION           A required pointer is NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance control structure is not opened.
@@ -420,6 +441,9 @@ fsp_err_t R_CMTW_InfoGet (timer_ctrl_t * const p_ctrl, timer_info_t * const p_in
 
 /*******************************************************************************************************************//**
  * Retrieves the current state and counter value stores them in p_status. Implements @ref timer_api_t::statusGet.
+ *
+ * Example:
+ * @snippet r_cmtw_example.c R_CMTW_StatusGet
  *
  * @retval FSP_SUCCESS                 Current status and counter value provided in p_status.
  * @retval FSP_ERR_ASSERTION           A required pointer is NULL.

@@ -171,8 +171,11 @@ const spi_api_t g_spi_on_spi =
  *
  * This function performs the following tasks:
  * - Performs parameter checking and processes error conditions.
- * - Configures the pperipheral registers acording to the configuration.
+ * - Configures the peripheral registers according to the configuration.
  * - Initialize the control structure for use in other @ref SPI_API functions.
+ *
+ * Example:
+ * @snippet r_spi_example.c R_SPI_Open
  *
  * @retval     FSP_SUCCESS                     Channel initialized successfully.
  * @retval     FSP_ERR_ALREADY_OPEN            Instance was already initialized.
@@ -331,6 +334,9 @@ fsp_err_t R_SPI_Write (spi_ctrl_t * const    p_api_ctrl,
  * - Performs parameter checking and processes error conditions.
  * - Sets up the instance to complete a SPI writeRead operation.
  *
+ * Example:
+ * @snippet r_spi_example.c R_SPI_WriteRead
+ *
  * @retval  FSP_SUCCESS                   Write operation successfully completed.
  * @retval  FSP_ERR_ASSERTION             NULL pointer to control, source or destination parameters or
  *                                        transfer length is zero.
@@ -451,6 +457,9 @@ fsp_err_t R_SPI_VersionGet (fsp_version_t * p_version)
  *
  * @param[in] bitrate             Desired bitrate
  * @param[out] spck_div           Memory location to store bitrate register settings.
+ *
+ * Example:
+ * @snippet r_spi_example.c R_SPI_CalculateBitrate
  *
  * @retval FSP_SUCCESS            Valid spbr and brdv values were calculated
  * @retval FSP_ERR_UNSUPPORTED    Bitrate is not achievable

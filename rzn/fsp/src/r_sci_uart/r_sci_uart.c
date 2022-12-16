@@ -341,6 +341,9 @@ const uart_api_t g_uart_on_sci =
  * Configures the UART driver based on the input configurations.  If reception is enabled at compile time, reception is
  * enabled at the end of this function. Implements @ref uart_api_t::open
  *
+ * Example:
+ * @snippet r_sci_uart_example.c R_SCI_UART_Open
+ *
  * @retval  FSP_SUCCESS                    Channel opened successfully.
  * @retval  FSP_ERR_ASSERTION              Pointer to UART control block or configuration structure is NULL.
  * @retval  FSP_ERR_IP_CHANNEL_NOT_PRESENT The requested channel does not exist on this MCU.
@@ -584,6 +587,9 @@ fsp_err_t R_SCI_UART_Close (uart_ctrl_t * const p_api_ctrl)
 /*******************************************************************************************************************//**
  * Receives user specified number of bytes into destination buffer pointer. Implements @ref uart_api_t::read
  *
+ * Example:
+ * @snippet r_sci_uart_example.c R_SCI_UART_Read
+ *
  * @retval  FSP_SUCCESS                  Data reception successfully ends.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL.
  * @retval  FSP_ERR_INVALID_ARGUMENT     Destination address or data size is not valid for 9-bit mode.
@@ -642,6 +648,9 @@ fsp_err_t R_SCI_UART_Read (uart_ctrl_t * const p_api_ctrl, uint8_t * const p_des
 
 /*******************************************************************************************************************//**
  * Transmits user specified number of bytes from the source buffer pointer. Implements @ref uart_api_t::write
+ *
+ * Example:
+ * @snippet r_sci_uart_example.c R_SCI_UART_Write
  *
  * @retval  FSP_SUCCESS                  Data transmission finished successfully.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL.
@@ -764,6 +773,9 @@ fsp_err_t R_SCI_UART_CallbackSet (uart_ctrl_t * const          p_api_ctrl,
  * Implements @ref uart_api_t::baudSet
  *
  * @warning This terminates any in-progress transmission.
+ *
+ * Example:
+ * @snippet r_sci_uart_example.c R_SCI_UART_BaudSet
  *
  * @retval  FSP_SUCCESS                  Baud rate was successfully changed.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL or the UART is not configured to use the
@@ -964,6 +976,9 @@ fsp_err_t R_SCI_UART_Abort (uart_ctrl_t * const p_api_ctrl, uart_dir_t communica
 /*******************************************************************************************************************//**
  * Calculates baud rate register settings. Evaluates and determines the best possible settings set to the baud rate
  * related registers.
+ *
+ * Example:
+ * @snippet r_sci_uart_example.c R_SCI_UART_BaudCalculate
  *
  * @param[in]  baudrate                  Baud rate [bps]. For example, 19200, 57600, 115200, etc.
  * @param[in]  bitrate_modulation        Enable bitrate modulation

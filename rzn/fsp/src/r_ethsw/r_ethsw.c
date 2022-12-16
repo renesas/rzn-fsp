@@ -236,16 +236,16 @@ fsp_err_t R_ETHSW_Open (ethsw_ctrl_t * const p_ctrl, ethsw_cfg_t const * const p
         (ETHSW_ENABLE_PORT0 | ETHSW_ENABLE_PORT1 | ETHSW_ENABLE_PORT2 | ETHSW_ENABLE_PORT3);
 
     /* set port in authorized state(Port 0 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT0_b.AUTH = 1;
+    p_reg_switch->AUTH_PORT_b[0].AUTH = 1;
 
     /* set port in authorized state(Port 1 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT1_b.AUTH = 1;
+    p_reg_switch->AUTH_PORT_b[1].AUTH = 1;
 
     /* set port in authorized state(Port 2 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT2_b.AUTH = 1;
+    p_reg_switch->AUTH_PORT_b[2].AUTH = 1;
 
     /* set port in authorized state(Port 3 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT3_b.AUTH = 1;
+    p_reg_switch->AUTH_PORT_b[3].AUTH = 1;
 
     /* Initialize MGMT_TAG_CONFIG Reg */
     if (ETHSW_SPECIFIC_TAG_ENABLE == p_cfg->specific_tag)
@@ -307,16 +307,16 @@ fsp_err_t R_ETHSW_Close (ethsw_ctrl_t * const p_ctrl)
     p_reg_switch->INT_CONFIG_b.IRQ_EN = 0;
 
     /* set port in unauthorized state(Port 0 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT0_b.AUTH = 0;
+    p_reg_switch->AUTH_PORT_b[0].AUTH = 0;
 
     /* set port in unauthorized state(Port 1 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT1_b.AUTH = 0;
+    p_reg_switch->AUTH_PORT_b[1].AUTH = 0;
 
     /* set port in unauthorized state(Port 2 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT2_b.AUTH = 0;
+    p_reg_switch->AUTH_PORT_b[2].AUTH = 0;
 
     /* set port in unauthorized state(Port 3 authentication control and configuration Reg) */
-    p_reg_switch->AUTH_PORT3_b.AUTH = 0;
+    p_reg_switch->AUTH_PORT_b[3].AUTH = 0;
 
     /* clear Maximum Frame Length Value */
     p_reg_switch->FRM_LENGTH_P0_b.FRM_LENGTH = ETHSW_FRAME_SIZE;
