@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.0.0</span>
+   &#160;<span id="projectnumber">Release v1.1.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -322,9 +322,35 @@ Clock Configuration</h2>
 <h1><a class="anchor" id="r-bsc-usage_notes"></a>
 Usage Notes</h1>
 <h2>BSC Memory Mapped Access</h2>
-<p>After <a class="el" href="group___b_s_c.html#ga7c3d30081be56f6d48df4ec233d65560">R_BSC_Open()</a> completes successfully, the connected BSC device contents are mapped to address 0x70000000(External address space) or 0x50000000(Mirror area External address space) and can be read like internal memory.</p>
-<p>When not using the cache, access the memory via the mirror area.</p>
-<table class="memberdecls">
+<p>After <a class="el" href="group___b_s_c.html#ga7c3d30081be56f6d48df4ec233d65560">R_BSC_Open()</a> completes successfully, the connected BSC device contents are mapped to address 0x70000000(External address space) or 0x50000000(Mirror space of External address space) and can be read like internal memory.</p>
+<p>When not using the cache, access the memory via the mirror space.</p>
+<p>The address map for the external address space is as follows:</p>
+<table class="doxtable">
+<tr>
+<th>Address </th><th>Space  </th></tr>
+<tr>
+<td>0x50000000 to 0x53FFFFFF </td><td>CS0 mirror space </td></tr>
+<tr>
+<td>0x54000000 to 0x57FFFFFF </td><td>CS2 mirror space </td></tr>
+<tr>
+<td>0x58000000 to 0x5BFFFFFF </td><td>CS3 mirror space </td></tr>
+<tr>
+<td>0x5C000000 to 0x5FFFFFFF </td><td>CS5 mirror space </td></tr>
+<tr>
+<td>0x70000000 to 0x73FFFFFF </td><td>CS0 space </td></tr>
+<tr>
+<td>0x74000000 to 0x77FFFFFF </td><td>CS2 space </td></tr>
+<tr>
+<td>0x78000000 to 0x7BFFFFFF </td><td>CS3 space </td></tr>
+<tr>
+<td>0x7C000000 to 0x7FFFFFFF </td><td>CS5 space </td></tr>
+</table>
+<h1><a class="anchor" id="r-bsc-examples"></a>
+Examples</h1>
+<h2><a class="anchor" id="r-bsc-examples-basic"></a>
+Basic Example</h2>
+<p>This is a basic example of minimal use of the BSC module in an application.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#define CS0_BASE                   (0x50000000)</span></div><div class="line"><span class="preprocessor">#define BSC_EXAMPLE_DATA_LENGTH    (256)</span></div><div class="line">uint16_t write_data[BSC_EXAMPLE_DATA_LENGTH];</div><div class="line">uint16_t read_data[BSC_EXAMPLE_DATA_LENGTH];</div><div class="line"></div><div class="line"><span class="keywordtype">void</span> r_bsc_basic_example (<span class="keywordtype">void</span>)</div><div class="line">{</div><div class="line">    <span class="comment">/* Write some data to the write buffer */</span></div><div class="line">    <span class="keywordflow">for</span> (uint16_t i = 0; i &lt; BSC_EXAMPLE_DATA_LENGTH; i++)</div><div class="line">    {</div><div class="line">        write_data[i] = i;</div><div class="line">    }</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">/* Open the BSC instance */</span></div><div class="line">    <a class="code" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> err = <a class="code" href="group___b_s_c.html#ga7c3d30081be56f6d48df4ec233d65560">R_BSC_Open</a>(&amp;g_bsc0_ctrl, &amp;g_bsc0_cfg);</div><div class="line">    handle_error(err);</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">/* After R_BSC_Open() and any required device specific initialization, data can be write directly</span></div><div class="line"><span class="comment">     * to the SRAM connected to BSC. */</span></div><div class="line">    <span class="keywordflow">for</span> (uint16_t i = 0; i &lt; BSC_EXAMPLE_DATA_LENGTH; i++)</div><div class="line">    {</div><div class="line">        *((<span class="keyword">volatile</span> uint16_t *) CS0_BASE + 0x0000 + i) = write_data[i];</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="comment">/* After R_BSC_Open() and any required device specific initialization, data can be read directly</span></div><div class="line"><span class="comment">     * from the SRAM connected to BSC. */</span></div><div class="line">    <span class="keywordflow">for</span> (uint16_t i = 0; i &lt; BSC_EXAMPLE_DATA_LENGTH; i++)</div><div class="line">    {</div><div class="line">        read_data[i] = *((<span class="keyword">volatile</span> uint16_t *) CS0_BASE + 0x0000 + i);</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="comment">/* Verify the read_data. */</span></div><div class="line">    <span class="keywordflow">for</span> (uint16_t i = 0; i &lt; BSC_EXAMPLE_DATA_LENGTH; i++)</div><div class="line">    {</div><div class="line">        <span class="keywordflow">if</span> (read_data[i] != write_data[i])</div><div class="line">        {</div><div class="line">            <span class="comment">/* Verify error. */</span></div><div class="line">            __BKPT(0);</div><div class="line">        }</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="keywordflow">while</span> (1)</div><div class="line">    {</div><div class="line">        ;</div><div class="line">    }</div><div class="line">}</div><div class="line"></div></div><!-- fragment --><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:structbsc__extended__cfg__t"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___b_s_c.html#structbsc__extended__cfg__t">bsc_extended_cfg_t</a></td></tr>
@@ -593,7 +619,7 @@ Duration to assert CS line before RD#,WE# assert. </td></tr>
 </div><div class="memdoc">
 <p>Open the BSC driver module. After the driver is open, the BSC can be accessed like internal flash memory starting at address 0x70000000 or 0x50000000.</p>
 <p>Implements <a class="el" href="group___e_x_t_e_r_n_a_l___b_u_s___a_p_i.html#a275722341f5144e887a1e5c10ad67459">external_bus_api_t::open</a>.</p>
-<dl class="retval"><dt>Return values</dt><dd>
+<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Open the BSC instance */</span></div><div class="line">    <a class="code" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> err = <a class="code" href="group___b_s_c.html#ga7c3d30081be56f6d48df4ec233d65560">R_BSC_Open</a>(&amp;g_bsc0_ctrl, &amp;g_bsc0_cfg);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Configuration was successful. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>The parameter p_instance_ctrl or p_cfg is NULL. </td></tr>
@@ -639,7 +665,7 @@ Duration to assert CS line before RD#,WE# assert. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.0.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

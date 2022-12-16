@@ -26,13 +26,19 @@ var group___b_s_p___m_c_u =
       [ "BSP_RESET_CPU0", "group___b_s_p___m_c_u.html#gga6e8909ce807437506d18010fe094ef4ba9f3c4e620789753fd091ed137c8bdcc1", null ]
     ] ],
     [ "bsp_module_reset_t", "group___b_s_p___m_c_u.html#ga2ad788416478d6d6ea7398fd9ca84289", [
+      [ "BSP_MODULE_RESET_XSPI0", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a9b2d9d8115b8f528aa7d8c00a4e458a6", null ],
+      [ "BSP_MODULE_RESET_XSPI1", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289af74126804309271033ef11051c56eef7", null ],
       [ "BSP_MODULE_RESET_GMAC_ACLK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a603d2696f1d8b8d93a14dd5202533320", null ],
       [ "BSP_MODULE_RESET_GMAC_HCLK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a400f8e4bcd7f710d09e43126c36a0485", null ],
       [ "BSP_MODULE_RESET_ETHSW", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289abf4c0c302043418bdb15614e9b88aeb2", null ],
       [ "BSP_MODULE_RESET_ESC_HCLK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289ae8e282b030d2d0521ebd52a6d7afe2e3", null ],
       [ "BSP_MODULE_RESET_ESC_ESCCLK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a02a639107e057113e70920ba14625bb4", null ],
       [ "BSP_MODULE_RESET_ESC_ETH_ACCESSARY", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289ae68f8347fd81d384cd820cbdf8b05c7a", null ],
-      [ "BSP_MODULE_RESET_MII", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a770cd0a3d2aae6eaa5b83bb51b921464", null ]
+      [ "BSP_MODULE_RESET_MII", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a770cd0a3d2aae6eaa5b83bb51b921464", null ],
+      [ "BSP_MODULE_RESET_PHOSTIF", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289af8ef2d3b4cfd660ac843d01d3b7d2154", null ],
+      [ "BSP_MODULE_RESET_SHOSTIF_MASTER_BUS_CLOCK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a009f401f5644d6dc1b15548190080149", null ],
+      [ "BSP_MODULE_RESET_SHOSTIF_SLAVE_BUS_CLOCK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289a99b860eab0f01fc680d1a582a281cf54", null ],
+      [ "BSP_MODULE_RESET_SHOSTIF_IP_CLOCK", "group___b_s_p___m_c_u.html#gga2ad788416478d6d6ea7398fd9ca84289ac34c548c5c3310dee2a2e6f59e9cf220", null ]
     ] ],
     [ "bsp_reg_protect_t", "group___b_s_p___m_c_u.html#ga8f69caf459fd80173db15fdee8bc6fa3", [
       [ "BSP_REG_PROTECT_CGC", "group___b_s_p___m_c_u.html#gga8f69caf459fd80173db15fdee8bc6fa3a331f34f99c7a66ca791edd7271144b3c", null ],

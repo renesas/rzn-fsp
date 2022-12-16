@@ -2,6 +2,8 @@ var searchData=
 [
   ['sci_5fuart_5fextended_5fcfg_5ft',['sci_uart_extended_cfg_t',['../group___s_c_i___u_a_r_t.html#structsci__uart__extended__cfg__t',1,'']]],
   ['sci_5fuart_5finstance_5fctrl_5ft',['sci_uart_instance_ctrl_t',['../group___s_c_i___u_a_r_t.html#structsci__uart__instance__ctrl__t',1,'']]],
+  ['sdram_5fapi_5ft',['sdram_api_t',['../group___s_d_r_a_m___a_p_i.html#structsdram__api__t',1,'']]],
+  ['sdram_5fcfg_5ft',['sdram_cfg_t',['../group___s_d_r_a_m___a_p_i.html#structsdram__cfg__t',1,'']]],
   ['spi_5fapi_5ft',['spi_api_t',['../group___s_p_i___a_p_i.html#structspi__api__t',1,'']]],
   ['spi_5fcallback_5fargs_5ft',['spi_callback_args_t',['../group___s_p_i___a_p_i.html#structspi__callback__args__t',1,'']]],
   ['spi_5fcfg_5ft',['spi_cfg_t',['../group___s_p_i___a_p_i.html#structspi__cfg__t',1,'']]],

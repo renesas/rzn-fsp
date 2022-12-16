@@ -17,6 +17,7 @@ var group___r_e_n_e_s_a_s___i_n_t_e_r_f_a_c_e_s =
     [ "POEG Interface", "group___p_o_e_g___a_p_i.html", "group___p_o_e_g___a_p_i" ],
     [ "Phase count Interface", "group___g_p_t___p_h_a_s_e___c_o_u_n_t___a_p_i.html", "group___g_p_t___p_h_a_s_e___c_o_u_n_t___a_p_i" ],
     [ "Phase count Interface", "group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html", "group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i" ],
+    [ "SDRAM Interface", "group___s_d_r_a_m___a_p_i.html", "group___s_d_r_a_m___a_p_i" ],
     [ "SPI Flash Interface", "group___s_p_i___f_l_a_s_h___a_p_i.html", "group___s_p_i___f_l_a_s_h___a_p_i" ],
     [ "SPI Interface", "group___s_p_i___a_p_i.html", "group___s_p_i___a_p_i" ],
     [ "Three-Phase Interface", "group___t_h_r_e_e___p_h_a_s_e___a_p_i.html", "group___t_h_r_e_e___p_h_a_s_e___a_p_i" ],
