@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -127,9 +127,6 @@ const gpt_phase_count_api_t g_gpt_phase_count_on_gpt_phase_count =
 /*******************************************************************************************************************//**
  * Initializes the phase_count timer module (and associated timers) and applies configurations. Implements
  * @ref gpt_phase_count_api_t::open.
- *
- * Example:
- * @snippet r_gpt_phase_count_example.c R_GPT_PHASE_COUNT_Open
  *
  * @retval FSP_SUCCESS                    Initialization was successful.
  * @retval FSP_ERR_ASSERTION              A required input pointer is NULL.
@@ -296,9 +293,6 @@ fsp_err_t R_GPT_PHASE_COUNT_Stop (gpt_phase_count_ctrl_t * const p_ctrl)
 /*******************************************************************************************************************//**
  * Starts all timers synchronously. Implements @ref gpt_phase_count_api_t::start.
  *
- * Example:
- * @snippet r_gpt_phase_count_example.c R_GPT_PHASE_COUNT_Start
- *
  * @retval FSP_SUCCESS                 Timers successfully started.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -447,7 +441,7 @@ fsp_err_t R_GPT_PHASE_COUNT_Close (gpt_phase_count_ctrl_t * const p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Sets driver version based on compile time macros. Implements @ref gpt_phase_count_api_t::versionGet.
+ * DEPRECATED Sets driver version based on compile time macros. Implements @ref gpt_phase_count_api_t::versionGet.
  *
  * @retval FSP_SUCCESS                 Version stored in p_version.
  * @retval FSP_ERR_ASSERTION           p_version was NULL.

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -62,6 +62,9 @@
 #define BSP_FEATURE_ADC_UNIT_1_CHANNELS                (0x00FF) // 0 to 7 in unit 1
 #define BSP_FEATURE_ADC_VALID_UNIT_MASK                (3U)
 
+#define BSP_FEATURE_BSP_IRQ_PRIORITY_MASK              (0xF8U)
+#define BSP_FEATURE_BSP_IRQ_PRIORITY_POS_BIT           (3U)
+
 #define BSP_FEATURE_CAN_CHECK_PCLKB_RATIO              (0U)
 #define BSP_FEATURE_CAN_CLOCK                          (0U)
 #define BSP_FEATURE_CAN_MCLOCK_ONLY                    (0U)
@@ -106,6 +109,8 @@
 #define BSP_FEATURE_CMT_VALID_CHANNEL_MASK             (0x3FU)
 
 #define BSP_FEATURE_CMTW_VALID_CHANNEL_MASK            (0x3U)
+
+#define BSP_FEATURE_CRC_VALID_CHANNEL_MASK             (0x3U)
 
 #define BSP_FEATURE_DMAC_MAX_CHANNEL                   (16U)
 
@@ -152,6 +157,10 @@
 #define BSP_FEATURE_POEG_MAX_UNIT                      (2U)
 #define BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS          (0x400)
 
+#define BSP_FEATURE_ICU_ERROR_PERI_ERR_REG_NUM         (2U)
+#define BSP_FEATURE_ICU_ERROR_PERI_ERR0_REG_MASK       (0xFFFFFEFFU)
+#define BSP_FEATURE_ICU_ERROR_PERI_ERR1_REG_MASK       (0x19FFA3FFU)
+
 #define BSP_FEATURE_ICU_HAS_WUPEN1                     (0U)
 #define BSP_FEATURE_ICU_IRQ_CHANNELS_MASK              (0xFFFFU)
 #define BSP_FEATURE_ICU_WUPEN_MASK                     (0xFF4FFFFFU)
@@ -185,6 +194,27 @@
 #define BSP_FEATURE_OSPI_DEVICE_1_START_ADDRESS        (0x0U)
 
 #define BSP_FEATURE_POEG_CHANNEL_MASK                  (0xFU)
+
+#define BSP_FEATURE_SCI_ADDRESS_MATCH_CHANNELS         (BSP_FEATURE_SCI_CHANNELS)
+#define BSP_FEATURE_SCI_CHANNELS                       (0x3FU)
+#define BSP_FEATURE_SCI_UART_FIFO_CHANNELS             (0x3FFU)
+#define BSP_FEATURE_SCI_UART_FIFO_DEPTH                (16U)
+#define BSP_FEATURE_SCI_SAFETY_CHANNEL                 (5U)
+#define BSP_FEATURE_SCI_SAFETY_CHANNEL_BASE_ADDRESS    (R_SCI5_BASE)
+
+#define BSP_FEATURE_SPI_HAS_BYTE_SWAP                  (1U)
+#define BSP_FEATURE_SPI_HAS_SPCR3                      (0U)
+#define BSP_FEATURE_SPI_HAS_SSL_LEVEL_KEEP             (1U)
+#define BSP_FEATURE_SPI_MAX_CHANNEL                    (4U)
+#define BSP_FEATURE_SPI_SAFETY_CHANNEL                 (3U)
+#define BSP_FEATURE_SPI_SAFETY_CHANNEL_BASE_ADDRESS    (R_SPI3_BASE)
+
+#define BSP_FEATURE_OSPI_DEVICE_0_START_ADDRESS        (0x0U)
+#define BSP_FEATURE_OSPI_DEVICE_1_START_ADDRESS        (0x0U)
+
+#define BSP_FEATURE_POEG_CHANNEL_MASK                  (0xFU)
+
+#define BSP_FEATURE_SEM_SUPPORTED                      (0U)
 
 #define BSP_FEATURE_SCI_ADDRESS_MATCH_CHANNELS         (BSP_FEATURE_SCI_CHANNELS)
 #define BSP_FEATURE_SCI_CHANNELS                       (0x3FU)

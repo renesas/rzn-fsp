@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -509,9 +509,6 @@ const timer_api_t g_timer_on_mtu3 =
  *
  * The MTU3 implementation of the general timer can accept a mtu3_extended_cfg_t extension parameter.
  *
- * Example:
- * @snippet r_mtu3_example.c R_MTU3_Open
- *
  * @retval FSP_SUCCESS                    Initialization was successful and timer has started.
  * @retval FSP_ERR_ASSERTION              A required input pointer is NULL.
  * @retval FSP_ERR_ALREADY_OPEN           Module is already open.
@@ -551,9 +548,6 @@ fsp_err_t R_MTU3_Open (timer_ctrl_t * const p_ctrl, timer_cfg_t const * const p_
 /*******************************************************************************************************************//**
  * Stops timer.
  *
- * Example:
- * @snippet r_mtu3_example.c R_MTU3_Stop
- *
  * @retval FSP_SUCCESS                 Timer successfully stopped.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -574,9 +568,6 @@ fsp_err_t R_MTU3_Stop (timer_ctrl_t * const p_ctrl)
 
 /*******************************************************************************************************************//**
  * Starts timer.
- *
- * Example:
- * @snippet r_mtu3_example.c R_MTU3_Start
  *
  * @retval FSP_SUCCESS                 Timer successfully started.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
@@ -638,9 +629,6 @@ fsp_err_t R_MTU3_Reset (timer_ctrl_t * const p_ctrl)
  * Sets period value provided. If the timer is running, the period will be updated after the next compare match.
  * If the timer is stopped, this function resets the counter and updates the period.
  *
- * Example:
- * @snippet r_mtu3_example.c R_MTU3_PeriodSet
- *
  * @retval FSP_SUCCESS                 Period value written successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -673,17 +661,36 @@ fsp_err_t R_MTU3_PeriodSet (timer_ctrl_t * const p_ctrl, mtu3_counter_t * const 
     uint32_t new_tgra_counts = p_counter->tgra_counts - 1U;
     uint32_t new_tgrb_counts = p_counter->tgrb_counts - 1U;
 
-    /* If the counter is not counting, update period register and reset counter. */
-    if (0U == mtu3_get_tstr(p_instance_ctrl))
+    /* Update period register and reset counter. */
+    if (MTU3_CHANNEL_8 == p_instance_ctrl->p_cfg->channel)
     {
-        if (MTU3_CHANNEL_8 == p_instance_ctrl->p_cfg->channel)
+        /* If the counter is not counting, TGRA and TGRB update */
+        if (0U == mtu3_get_tstr(p_instance_ctrl))
         {
             *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg +
                            tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = new_tgra_counts;
             *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
                            MTU3_TGRB_D_OFFSET_LONG) = new_tgrb_counts;
         }
-        else
+
+        *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                       tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = new_tgra_counts;
+        *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                       MTU3_TGRB_D_OFFSET_LONG) = new_tgrb_counts;
+    }
+    else if ((MTU3_CHANNEL_1 == p_instance_ctrl->p_cfg->channel) ||
+             (MTU3_CHANNEL_2 == p_instance_ctrl->p_cfg->channel))
+    {
+        /* MTU1 and 2 without TGRC and TGRD should write TGRA and TGRB */
+        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                       tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
+        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                       MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
+    }
+    else
+    {
+        /* If the counter is not counting, TGRA and TGRB update */
+        if (0U == mtu3_get_tstr(p_instance_ctrl))
         {
             *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
                            tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
@@ -691,34 +698,10 @@ fsp_err_t R_MTU3_PeriodSet (timer_ctrl_t * const p_ctrl, mtu3_counter_t * const 
                            MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
         }
 
-        mtu3_set_count(p_instance_ctrl, 0U);
-    }
-    /* If the counter is counting, update buffer register counter. */
-    else
-    {
-        if (MTU3_CHANNEL_8 == p_instance_ctrl->p_cfg->channel)
-        {
-            *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                           tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = new_tgra_counts;
-            *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_LONG) = new_tgrb_counts;
-        }
-        else if ((MTU3_CHANNEL_1 == p_instance_ctrl->p_cfg->channel) ||
-                 (MTU3_CHANNEL_2 == p_instance_ctrl->p_cfg->channel))
-        {
-            /* MTU1 and 2 without TGRC and TGRD should write TGRA and TGRB */
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                           tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
-        }
-        else
-        {
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                           tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
-        }
+        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                       tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
+        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                       MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
     }
 
     return FSP_SUCCESS;
@@ -793,9 +776,6 @@ fsp_err_t R_MTU3_InfoGet (timer_ctrl_t * const p_ctrl, mtu3_info_t * const p_inf
 
 /*******************************************************************************************************************//**
  * Get current timer status and store it in provided pointer p_status.
- *
- * Example:
- * @snippet r_mtu3_example.c R_MTU3_StatusGet
  *
  * @retval FSP_SUCCESS                 Current timer state and counter value set successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl or p_status was NULL.
@@ -1038,7 +1018,7 @@ fsp_err_t R_MTU3_Close (timer_ctrl_t * const p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Sets driver version based on compile time macros.
+ * DEPRECATED Sets driver version based on compile time macros.
  *
  * @retval FSP_SUCCESS                 Version stored in p_version.
  * @retval FSP_ERR_ASSERTION           p_version was NULL.
@@ -1520,23 +1500,13 @@ static void mtu3_disable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl
     if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         mtu3_extended_uvw_cfg_t const * p_uvw_cfg = p_extend->p_uvw_cfg;
-        if (p_uvw_cfg->capture_u_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5U_Msk;
-        }
 
-        if (p_uvw_cfg->capture_v_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5V_Msk;
-        }
-
-        if (p_uvw_cfg->capture_w_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5W_Msk;
-        }
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5U_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5V_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5W_Msk;
 
         r_mtu3_disable_irq(p_uvw_cfg->capture_u_irq);
         r_mtu3_disable_irq(p_uvw_cfg->capture_v_irq);
@@ -1545,23 +1515,12 @@ static void mtu3_disable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl
     else
 #endif
     {
-        if (p_instance_ctrl->p_cfg->cycle_end_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TCIEV_Msk;
-        }
-
-        if (p_extend->capture_a_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TGIEA_Msk;
-        }
-
-        if (p_extend->capture_b_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TGIEB_Msk;
-        }
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TCIEV_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TGIEA_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU0_TIER_TGIEB_Msk;
 
         r_mtu3_disable_irq(p_instance_ctrl->p_cfg->cycle_end_irq);
         r_mtu3_disable_irq(p_extend->capture_a_irq);
@@ -1586,24 +1545,12 @@ static void mtu3_enable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl)
     if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         mtu3_extended_uvw_cfg_t const * p_uvw_cfg = p_extend->p_uvw_cfg;
-        if (p_uvw_cfg->capture_u_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5U_Msk;
-        }
-
-        if (p_uvw_cfg->capture_v_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5V_Msk;
-        }
-
-        if (p_uvw_cfg->capture_w_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5W_Msk;
-        }
-
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5U_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5V_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5W_Msk;
         r_mtu3_enable_irq(p_uvw_cfg->capture_u_irq, p_uvw_cfg->capture_u_ipl, p_instance_ctrl);
         r_mtu3_enable_irq(p_uvw_cfg->capture_v_irq, p_uvw_cfg->capture_v_ipl, p_instance_ctrl);
         r_mtu3_enable_irq(p_uvw_cfg->capture_w_irq, p_uvw_cfg->capture_w_ipl, p_instance_ctrl);
@@ -1612,24 +1559,13 @@ static void mtu3_enable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl)
 #endif
     {
         /* Enable CPU interrupts if callback is not null. */
-        if (p_instance_ctrl->p_cfg->cycle_end_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TCIEV_Msk;
-        }
 
-        if (p_extend->capture_a_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEA_Msk;
-        }
-
-        if (p_extend->capture_b_irq > FSP_INVALID_VECTOR)
-        {
-            *((uint8_t *) p_instance_ctrl->p_reg +
-              tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEB_Msk;
-        }
-
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TCIEV_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEA_Msk;
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEB_Msk;
         r_mtu3_enable_irq(p_instance_ctrl->p_cfg->cycle_end_irq, p_instance_ctrl->p_cfg->cycle_end_ipl,
                           p_instance_ctrl);
         r_mtu3_enable_irq(p_extend->capture_a_irq, p_extend->capture_a_ipl, p_instance_ctrl);

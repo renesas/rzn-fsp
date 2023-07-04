@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -56,10 +56,10 @@ FSP_HEADER
 #define BSP_VECTOR_NUM_OFFSET                  (32U)
 
 /* Version of this module's code and API. */
-#define BSP_CODE_VERSION_MAJOR                 (1U)
-#define BSP_CODE_VERSION_MINOR                 (1U)
-#define BSP_API_VERSION_MAJOR                  (1U)
-#define BSP_API_VERSION_MINOR                  (1U)
+#define BSP_CODE_VERSION_MAJOR                 (1U) // DEPRECATED
+#define BSP_CODE_VERSION_MINOR                 (2U) // DEPRECATED
+#define BSP_API_VERSION_MAJOR                  (1U) // DEPRECATED
+#define BSP_API_VERSION_MINOR                  (2U) // DEPRECATED
 
 #define FSP_CONTEXT_SAVE
 #define FSP_CONTEXT_RESTORE
@@ -197,7 +197,8 @@ extern const fsp_version_t g_bsp_version;
 /* These macros abstract methods to save and restore the interrupt state. */
 #define FSP_CRITICAL_SECTION_GET_CURRENT_STATE    __get_ICC_PMR
 #define FSP_CRITICAL_SECTION_SET_STATE            __set_ICC_PMR
-#define FSP_CRITICAL_SECTION_IRQ_MASK_SET         ((uint8_t) (BSP_CFG_IRQ_MASK_LEVEL_FOR_CRITICAL_SECTION << 3U))
+#define FSP_CRITICAL_SECTION_IRQ_MASK_SET         ((uint8_t) (BSP_CFG_IRQ_MASK_LEVEL_FOR_CRITICAL_SECTION << \
+                                                              BSP_FEATURE_BSP_IRQ_PRIORITY_POS_BIT))
 
 /** This macro temporarily saves the current interrupt state and disables interrupts. */
 #ifndef FSP_CRITICAL_SECTION_ENTER

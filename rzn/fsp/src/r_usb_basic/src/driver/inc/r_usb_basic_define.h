@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -621,7 +621,11 @@
 #define USB_NOPORT                             (0xFFFFU) /* Not connect */
 
 /* Condition compilation by the difference of IP */
-#define USB_MAXDEVADDR                         (5U)
+#if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+ #define USB_MAXDEVADDR                        (1U)
+#else
+ #define USB_MAXDEVADDR                        (10U)
+#endif
 
 #define USB_DEVICE_0                           (0x0000U) /* Device address 0 */
 #define USB_DEVICE_1                           (0x1000U) /* Device address 1 */

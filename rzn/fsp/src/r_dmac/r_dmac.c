@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -102,6 +102,8 @@
 /* DMA Control Register Bit Field Definitions */
 #define DMAC_PRV_DCTRL_PR_OFFSET                 (0U)
 #define DMAC_PRV_DCTRL_PR_VALUE_MASK             (0x01U)
+#define DMAC_PRV_DCTRL_LVINT_OFFSET              (1U)
+#define DMAC_PRV_DCTRL_LVINT_VALUE_MASK          (0x01U)
 
 /* DMAC Resource Select Register Bit Field Definitions */
 #define DMAC_PRV_RSSEL_REQ_SEL_OFFSET            (10U)
@@ -169,9 +171,6 @@ const transfer_api_t g_transfer_on_dmac =
 /*******************************************************************************************************************//**
  * Configure a DMAC channel.
  *
- * Example:
- * @snippet r_dmac_example.c R_DMAC_Open
- *
  * @retval FSP_SUCCESS                    Successful open.
  * @retval FSP_ERR_ASSERTION              An input parameter is invalid.
  * @retval FSP_ERR_IP_CHANNEL_NOT_PRESENT The configured channel is invalid.
@@ -204,9 +203,6 @@ fsp_err_t R_DMAC_Open (transfer_ctrl_t * const p_api_ctrl, transfer_cfg_t const 
 /*******************************************************************************************************************//**
  * Reconfigure the transfer with new transfer info.
  *
- * Example:
- * @snippet r_dmac_example.c R_DMAC_Reconfigure
- *
  * @retval FSP_SUCCESS              Transfer is configured and will start when trigger occurs.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
  * @retval FSP_ERR_NOT_ENABLED      DMAC is not enabled. The current configuration must not be valid.
@@ -226,7 +222,7 @@ fsp_err_t R_DMAC_Reconfigure (transfer_ctrl_t * const p_api_ctrl, transfer_info_
     FSP_ASSERT(p_info->p_extend != NULL);
     dmac_extended_info_t * p_extend_info = (dmac_extended_info_t *) p_info->p_extend;
     dmac_extended_cfg_t  * p_extend      = (dmac_extended_cfg_t *) p_ctrl->p_cfg->p_extend;
-    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operaion)
+    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operation)
     {
         FSP_ASSERT(NULL != p_extend_info->p_next1_register_setting);
     }
@@ -261,9 +257,6 @@ fsp_err_t R_DMAC_Reset (transfer_ctrl_t * const p_api_ctrl,
 
 /*******************************************************************************************************************//**
  * Set a transfer request by software.
- *
- * Example:
- * @snippet r_dmac_example.c R_DMAC_SoftwareStart
  *
  * @retval FSP_SUCCESS              Transfer started written successfully.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
@@ -307,9 +300,6 @@ fsp_err_t R_DMAC_SoftwareStop (transfer_ctrl_t * const p_api_ctrl)
 
 /*******************************************************************************************************************//**
  * Enable transfers for the configured activation source.
- *
- * Example:
- * @snippet r_dmac_example.c R_DMAC_Enable
  *
  * @retval FSP_SUCCESS              Counter value written successfully.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
@@ -433,7 +423,7 @@ fsp_err_t R_DMAC_Close (transfer_ctrl_t * const p_api_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Set driver version based on compile time macros.
+ * DEPRECATED Set driver version based on compile time macros.
  *
  * @retval FSP_SUCCESS              Successful close.
  * @retval FSP_ERR_ASSERTION        An input parameter is invalid.
@@ -555,6 +545,9 @@ static void r_dmac_config_transfer_info (dmac_instance_ctrl_t * p_ctrl, transfer
         /* Enable transfer end interrupt requests. */
         chcfg &= ~((uint32_t) DMAC_PRV_CHCFG_DEM_MASK);
 
+        /* Set Level Output when the DMA interrupt is enabled. */
+        dctrl |= (1U & DMAC_PRV_DCTRL_LVINT_VALUE_MASK) << DMAC_PRV_DCTRL_LVINT_OFFSET;
+
         /* Enable the IRQ in the GIC. */
         R_BSP_IrqDetectTypeSet(p_extend->dmac_int_irq, p_extend->dmac_int_irq_detect_type);
         R_BSP_IrqCfgEnable(p_extend->dmac_int_irq, p_extend->dmac_int_ipl, p_ctrl);
@@ -565,13 +558,13 @@ static void r_dmac_config_transfer_info (dmac_instance_ctrl_t * p_ctrl, transfer
         chcfg |= DMAC_PRV_CHCFG_DEM_MASK;
     }
 
-    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operaion)
+    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operation)
     {
         /* Set DMA transfer end interrupt mask */
         chcfg |= DMAC_PRV_CHCFG_DEM_MASK;
 
         /* Configure Register Set Reverse Select */
-        chcfg |= ((p_extend->next_register_operaion & DMAC_PRV_NEXT_REG_VALUE_MASK) << DMAC_PRV_CHCFG_RSW_OFFSET);
+        chcfg |= ((p_extend->next_register_operation & DMAC_PRV_NEXT_REG_VALUE_MASK) << DMAC_PRV_CHCFG_RSW_OFFSET);
     }
 
     uint32_t rssel_register_num = p_extend->channel / 3;
@@ -622,7 +615,7 @@ static void r_dmac_config_transfer_info (dmac_instance_ctrl_t * p_ctrl, transfer
     uint32_t dest_address = (uint32_t) p_info->p_dest;
     uint32_t chext        = r_dmac_config_chext(src_address, dest_address);
 
-    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operaion)
+    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operation)
     {
         dmac_register_set_setting_t * p_next1_register = p_extend_info->p_next1_register_setting;
 
@@ -716,7 +709,7 @@ static fsp_err_t r_dma_open_parameter_checking (dmac_instance_ctrl_t * const p_c
     FSP_ASSERT(NULL != p_cfg->p_extend);
     FSP_ERROR_RETURN(p_extend->channel < BSP_FEATURE_DMAC_MAX_CHANNEL, FSP_ERR_IP_CHANNEL_NOT_PRESENT);
 
-    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operaion)
+    if (DMAC_REGISTER_SELECT_REVERSE_DISABLE != p_extend->next_register_operation)
     {
         transfer_info_t * p_info = p_cfg->p_info;
         FSP_ASSERT(NULL != ((dmac_extended_info_t *) p_info->p_extend)->p_next1_register_setting);

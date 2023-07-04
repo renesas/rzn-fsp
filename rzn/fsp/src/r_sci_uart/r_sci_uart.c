@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -179,15 +179,6 @@ typedef struct st_baud_setting_const_t
     uint8_t cks   : 2;                 /**< CKS  value to get divisor (CKS = N) */
 } baud_setting_const_t;
 
-/** Noise filter setting definition */
-typedef enum e_noise_cancel_lvl
-{
-    NOISE_CANCEL_LVL1,                 /**< Noise filter level 1(weak) */
-    NOISE_CANCEL_LVL2,                 /**< Noise filter level 2 */
-    NOISE_CANCEL_LVL3,                 /**< Noise filter level 3 */
-    NOISE_CANCEL_LVL4                  /**< Noise filter level 4(strong) */
-} noise_cancel_lvl_t;
-
 /***********************************************************************************************************************
  * Private function prototypes
  **********************************************************************************************************************/
@@ -214,6 +205,7 @@ static void r_sci_uart_transfer_close(sci_uart_instance_ctrl_t * p_ctrl);
 #endif
 
 static void r_sci_uart_baud_set(R_SCI0_Type * p_sci_reg, baud_setting_t const * const p_baud_setting);
+static void r_sci_uart_call_callback(sci_uart_instance_ctrl_t * p_ctrl, uint32_t data, uart_event_t event);
 
 #if SCI_UART_CFG_FIFO_SUPPORT
 static void r_sci_uart_fifo_cfg(sci_uart_instance_ctrl_t * const p_ctrl);
@@ -340,9 +332,6 @@ const uart_api_t g_uart_on_sci =
 /*******************************************************************************************************************//**
  * Configures the UART driver based on the input configurations.  If reception is enabled at compile time, reception is
  * enabled at the end of this function. Implements @ref uart_api_t::open
- *
- * Example:
- * @snippet r_sci_uart_example.c R_SCI_UART_Open
  *
  * @retval  FSP_SUCCESS                    Channel opened successfully.
  * @retval  FSP_ERR_ASSERTION              Pointer to UART control block or configuration structure is NULL.
@@ -587,9 +576,6 @@ fsp_err_t R_SCI_UART_Close (uart_ctrl_t * const p_api_ctrl)
 /*******************************************************************************************************************//**
  * Receives user specified number of bytes into destination buffer pointer. Implements @ref uart_api_t::read
  *
- * Example:
- * @snippet r_sci_uart_example.c R_SCI_UART_Read
- *
  * @retval  FSP_SUCCESS                  Data reception successfully ends.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL.
  * @retval  FSP_ERR_INVALID_ARGUMENT     Destination address or data size is not valid for 9-bit mode.
@@ -648,9 +634,6 @@ fsp_err_t R_SCI_UART_Read (uart_ctrl_t * const p_api_ctrl, uint8_t * const p_des
 
 /*******************************************************************************************************************//**
  * Transmits user specified number of bytes from the source buffer pointer. Implements @ref uart_api_t::write
- *
- * Example:
- * @snippet r_sci_uart_example.c R_SCI_UART_Write
  *
  * @retval  FSP_SUCCESS                  Data transmission finished successfully.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL.
@@ -753,19 +736,29 @@ fsp_err_t R_SCI_UART_Write (uart_ctrl_t * const p_api_ctrl, uint8_t const * cons
  * Updates the user callback and has option of providing memory for callback structure.
  * Implements uart_api_t::callbackSet
  *
- * @retval  FSP_ERR_UNSUPPORTED              API not supported.
+ * @retval  FSP_SUCCESS                  Callback updated successfully.
+ * @retval  FSP_ERR_ASSERTION            A required pointer is NULL.
+ * @retval  FSP_ERR_NOT_OPEN             The control block has not been opened.
  **********************************************************************************************************************/
 fsp_err_t R_SCI_UART_CallbackSet (uart_ctrl_t * const          p_api_ctrl,
                                   void (                     * p_callback)(uart_callback_args_t *),
                                   void const * const           p_context,
                                   uart_callback_args_t * const p_callback_memory)
 {
-    FSP_PARAMETER_NOT_USED(p_api_ctrl);
-    FSP_PARAMETER_NOT_USED(p_callback);
-    FSP_PARAMETER_NOT_USED(p_context);
-    FSP_PARAMETER_NOT_USED(p_callback_memory);
+    sci_uart_instance_ctrl_t * p_ctrl = (sci_uart_instance_ctrl_t *) p_api_ctrl;
 
-    return FSP_ERR_UNSUPPORTED;
+#if (SCI_UART_CFG_PARAM_CHECKING_ENABLE)
+    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_callback);
+    FSP_ERROR_RETURN(SCI_UART_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Store callback and context */
+    p_ctrl->p_callback        = p_callback;
+    p_ctrl->p_context         = p_context;
+    p_ctrl->p_callback_memory = p_callback_memory;
+
+    return FSP_SUCCESS;
 }
 
 /*******************************************************************************************************************//**
@@ -773,9 +766,6 @@ fsp_err_t R_SCI_UART_CallbackSet (uart_ctrl_t * const          p_api_ctrl,
  * Implements @ref uart_api_t::baudSet
  *
  * @warning This terminates any in-progress transmission.
- *
- * Example:
- * @snippet r_sci_uart_example.c R_SCI_UART_BaudSet
  *
  * @retval  FSP_SUCCESS                  Baud rate was successfully changed.
  * @retval  FSP_ERR_ASSERTION            Pointer to UART control block is NULL or the UART is not configured to use the
@@ -977,9 +967,6 @@ fsp_err_t R_SCI_UART_Abort (uart_ctrl_t * const p_api_ctrl, uart_dir_t communica
  * Calculates baud rate register settings. Evaluates and determines the best possible settings set to the baud rate
  * related registers.
  *
- * Example:
- * @snippet r_sci_uart_example.c R_SCI_UART_BaudCalculate
- *
  * @param[in]  baudrate                  Baud rate [bps]. For example, 19200, 57600, 115200, etc.
  * @param[in]  bitrate_modulation        Enable bitrate modulation
  * @param[in]  baud_rate_error_x_1000    &lt;baud_rate_percent_error&gt; x 1000 required for module to function.
@@ -1130,7 +1117,7 @@ fsp_err_t R_SCI_UART_BaudCalculate (uint32_t               baudrate,
 }
 
 /*******************************************************************************************************************//**
- * Provides API and code version in the user provided pointer. Implements @ref uart_api_t::versionGet
+ * DEPRECATED Provides API and code version in the user provided pointer. Implements @ref uart_api_t::versionGet
  *
  * @param[in] p_version   Version number set here
  *
@@ -1532,6 +1519,44 @@ static void r_sci_uart_baud_set (R_SCI0_Type * p_sci_reg, baud_setting_t const *
                                   (p_baud_setting->ccr2_baudrate_bits & SCI_UART_CCR2_BAUD_SETTING_MASK));
 }
 
+/*******************************************************************************************************************//**
+ * Calls user callback.
+ *
+ * @param[in]     p_ctrl     Pointer to UART instance control block
+ * @param[in]     data       See uart_callback_args_t in r_uart_api.h
+ * @param[in]     event      Event code
+ **********************************************************************************************************************/
+static void r_sci_uart_call_callback (sci_uart_instance_ctrl_t * p_ctrl, uint32_t data, uart_event_t event)
+{
+    uart_callback_args_t args;
+
+    /* Store callback arguments in memory provided by user if available. */
+    uart_callback_args_t * p_args = p_ctrl->p_callback_memory;
+    if (NULL == p_args)
+    {
+        /* Store on stack */
+        p_args = &args;
+    }
+    else
+    {
+        /* Save current arguments on the stack in case this is a nested interrupt. */
+        args = *p_args;
+    }
+
+    p_args->channel   = p_ctrl->p_cfg->channel;
+    p_args->data      = data;
+    p_args->event     = event;
+    p_args->p_context = p_ctrl->p_context;
+
+    p_ctrl->p_callback(p_args);
+
+    if (NULL != p_ctrl->p_callback_memory)
+    {
+        /* Restore callback memory in case this is a nested interrupt. */
+        *p_ctrl->p_callback_memory = args;
+    }
+}
+
 #if (SCI_UART_CFG_TX_ENABLE)
 
 /*******************************************************************************************************************//**
@@ -1591,13 +1616,7 @@ static void sci_uart_txi_common (sci_uart_instance_ctrl_t * p_ctrl)
         p_ctrl->p_reg->CCR0 = ccr0_temp;
 
         p_ctrl->p_tx_src = NULL;
-        uart_callback_args_t args;
-
-        args.channel   = p_ctrl->p_cfg->channel;
-        args.data      = 0U;
-        args.event     = UART_EVENT_TX_DATA_EMPTY;
-        args.p_context = p_ctrl->p_cfg->p_context;
-        p_ctrl->p_cfg->p_callback(&args);
+        r_sci_uart_call_callback(p_ctrl, 0U, UART_EVENT_TX_DATA_EMPTY);
     }
 }
 
@@ -1672,10 +1691,7 @@ static void sci_uart_rxi_common (sci_uart_instance_ctrl_t * p_ctrl)
         }
  #endif
 
-        uint32_t             data;
-        uart_callback_args_t args;
-        args.channel   = p_ctrl->p_cfg->channel;
-        args.p_context = p_ctrl->p_cfg->p_context;
+        uint32_t data;
  #if SCI_UART_CFG_FIFO_SUPPORT
         do
         {
@@ -1702,9 +1718,7 @@ static void sci_uart_rxi_common (sci_uart_instance_ctrl_t * p_ctrl)
             if (0 == p_ctrl->rx_dest_bytes)
             {
                 /* Call user callback with the data. */
-                args.event = UART_EVENT_RX_CHAR;
-                args.data  = data;
-                p_ctrl->p_cfg->p_callback(&args);
+                r_sci_uart_call_callback(p_ctrl, data, UART_EVENT_RX_CHAR);
             }
             else
             {
@@ -1714,9 +1728,7 @@ static void sci_uart_rxi_common (sci_uart_instance_ctrl_t * p_ctrl)
 
                 if (0 == p_ctrl->rx_dest_bytes)
                 {
-                    args.data  = 0U;
-                    args.event = UART_EVENT_RX_COMPLETE;
-                    p_ctrl->p_cfg->p_callback(&args);
+                    r_sci_uart_call_callback(p_ctrl, 0U, UART_EVENT_RX_COMPLETE);
                 }
             }
 
@@ -1748,12 +1760,7 @@ static void sci_uart_rxi_common (sci_uart_instance_ctrl_t * p_ctrl)
         p_ctrl->p_rx_dest     = NULL;
 
         /* Call callback */
-        uart_callback_args_t args;
-        args.channel   = p_ctrl->p_cfg->channel;
-        args.data      = 0U;
-        args.p_context = p_ctrl->p_cfg->p_context;
-        args.event     = UART_EVENT_RX_COMPLETE;
-        p_ctrl->p_cfg->p_callback(&args);
+        r_sci_uart_call_callback(p_ctrl, 0U, UART_EVENT_RX_COMPLETE);
     }
  #endif
 }
@@ -1816,9 +1823,6 @@ void sci_uart_tei_isr (void)
     /* Recover ISR context saved in open. */
     sci_uart_instance_ctrl_t * p_ctrl = (sci_uart_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
 
-    uint8_t              channel = p_ctrl->p_cfg->channel;
-    uart_callback_args_t args;
-
     /* Receiving TEI(transmit end interrupt) means the completion of transmission, so call callback function here. */
     p_ctrl->p_reg->CCR0 &= (uint32_t) ~(SCI_UART_CCR0_TIE_MASK | SCI_UART_CCR0_TEIE_MASK);
 
@@ -1826,11 +1830,7 @@ void sci_uart_tei_isr (void)
     volatile uint32_t dummy = p_ctrl->p_reg->CCR0;
     FSP_PARAMETER_NOT_USED(dummy);
 
-    args.channel   = channel;
-    args.data      = 0U;
-    args.event     = UART_EVENT_TX_COMPLETE;
-    args.p_context = p_ctrl->p_cfg->p_context;
-    p_ctrl->p_cfg->p_callback(&args);
+    r_sci_uart_call_callback(p_ctrl, 0U, UART_EVENT_TX_COMPLETE);
 
  #if SCI_UART_CFG_FLOW_CONTROL_SUPPORT
     if ((((sci_uart_extended_cfg_t *) p_ctrl->p_cfg->p_extend)->uart_mode == UART_MODE_RS485_HD) &&
@@ -1864,10 +1864,8 @@ void sci_uart_eri_isr (void)
     /* Recover ISR context saved in open. */
     sci_uart_instance_ctrl_t * p_ctrl = (sci_uart_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
 
-    uint8_t              channel = p_ctrl->p_cfg->channel;
-    uint32_t             data    = 0U;
-    uart_event_t         event   = (uart_event_t) 0U;
-    uart_callback_args_t args    = {0};
+    uint32_t     data  = 0U;
+    uart_event_t event = (uart_event_t) 0U;
 
     /* Read data. */
     data = p_ctrl->p_reg->RDR_b.RDAT;
@@ -1904,11 +1902,7 @@ void sci_uart_eri_isr (void)
     FSP_PARAMETER_NOT_USED(dummy);
 
     /* Call callback. */
-    args.event     = event;
-    args.channel   = channel;
-    args.data      = data;
-    args.p_context = p_ctrl->p_cfg->p_context;
-    p_ctrl->p_cfg->p_callback(&args);
+    r_sci_uart_call_callback(p_ctrl, data, event);
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE;

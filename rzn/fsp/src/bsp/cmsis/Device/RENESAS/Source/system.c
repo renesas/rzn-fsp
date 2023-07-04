@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -16,11 +16,6 @@
  * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
  * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
  * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
-
-/*******************************************************************************************************************//**
- * @addtogroup BSP_MCU
- * @{
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -125,8 +120,15 @@
  * Exported global variables (to be accessed by other files)
  **********************************************************************************************************************/
 
+/*******************************************************************************************************************//**
+ * @addtogroup BSP_MCU
+ * @{
+ **********************************************************************************************************************/
+
 /** System Clock Frequency (Core Clock) */
 uint32_t SystemCoreClock = 0U;
+
+/** @} (end addtogroup BSP_MCU) */
 
 #if defined(__ICCARM__)
 
@@ -392,6 +394,11 @@ void bsp_global_system_counter_init (void)
 }
 
 /*******************************************************************************************************************//**
+ * @addtogroup BSP_MCU
+ * @{
+ **********************************************************************************************************************/
+
+/*******************************************************************************************************************//**
  * This function is called at various points during the startup process.
  * This function is declared as a weak symbol higher up in this file because it is meant to be overridden by a user
  * implemented version. One of the main uses for this function is to call functional safety code during the startup
@@ -419,6 +426,8 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
         /* Do nothing */
     }
 }
+
+/** @} (end addtogroup BSP_MCU) */
 
 #if !(BSP_CFG_RAM_EXECUTION)
 
@@ -721,5 +730,3 @@ BSP_DONT_REMOVE fsp_vector_t g_sgi_ppi_vector_table[BSP_CORTEX_VECTOR_TABLE_ENTR
     NULL,                              /* INTID30   : NON-SECURE_PHYSICAL_TIMER_INT            */
     NULL,                              /* INTID31   : RESERVED                                 */
 };
-
-/** @} (end addtogroup BSP_MCU) */

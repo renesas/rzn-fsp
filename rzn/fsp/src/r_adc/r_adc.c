@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -613,7 +613,7 @@ fsp_err_t R_ADC_Close (adc_ctrl_t * p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Retrieve the API version number.
+ * DEPRECATED Retrieve the API version number.
  *
  * @retval FSP_SUCCESS                 Version stored in the provided p_version.
  * @retval FSP_ERR_ASSERTION           An input argument is invalid.
@@ -725,8 +725,8 @@ static fsp_err_t r_adc_open_cfg_check (adc_cfg_t const * const p_cfg)
     uint32_t freq_hz = R_FSP_SystemClockHzGet(BSP_FEATURE_ADC_CLOCK_SOURCE);
     FSP_ERROR_RETURN(freq_hz >= ADC_PRV_MIN_ADCLK_HZ, FSP_ERR_INVALID_HW_CONDITION);
 
-    /* Check for valid argument values for addition/averaging. Reference section 47.2.10 "A/D-Converted Value
-     * Addition/Average Count Select Register (ADADC)" in the RZT2M manual R01UH0916EJ0063. */
+    /* Check for valid argument values for addition/averaging. Reference section "A/D-Converted Value
+     * Addition/Average Count Select Register (ADADC)" in the RZ microprocessor User's Manual for details. */
     adc_extended_cfg_t const * p_cfg_extend = (adc_extended_cfg_t const *) p_cfg->p_extend;
     if (ADC_ADD_OFF != p_cfg_extend->add_average_count)
     {
@@ -738,8 +738,8 @@ static fsp_err_t r_adc_open_cfg_check (adc_cfg_t const * const p_cfg)
  #endif
     }
 
-    /* Only synchronous triggers (ELC) allowed in group scan mode (reference TRSA documentation in section 40.3.4.2
-     * A/D conversion in Double Trigger Mode)" in the RZT2M manual R01UH0916EJ0063.  */
+    /* Only synchronous triggers (ELC) allowed in group scan mode (reference TRSA documentation in section
+     * A/D conversion in Double Trigger Mode)" in the RZ microprocessor User's Manual for details. */
     if ((ADC_MODE_GROUP_SCAN == p_cfg->mode) || (ADC_DOUBLE_TRIGGER_DISABLED != p_cfg_extend->double_trigger_mode))
     {
         FSP_ASSERT(ADC_TRIGGER_SYNC_ELC == p_cfg->trigger);
@@ -797,7 +797,7 @@ static fsp_err_t r_adc_scan_cfg_check_sample_hold (adc_instance_ctrl_t * const  
     if (0U != p_channel_cfg->sample_hold_mask)
     {
         /* Sample and Hold channels can only be 0, 1, 2(unit 0 only) and must have at least minimum state count specified (reference
-         * section 40.2.10 "A/D Sample and Hold Circuit Control Register (ADSHCR)" in the RZT2M manual R01UH0916EJ0063. */
+         * section "A/D Sample and Hold Circuit Control Register (ADSHCR)" in the RZ microprocessor User's Manual for details. */
         FSP_ASSERT(0U == p_instance_ctrl->p_cfg->unit);
         FSP_ASSERT(p_channel_cfg->sample_hold_mask <= ADC_SAMPLE_HOLD_CHANNELS);
         FSP_ASSERT(p_channel_cfg->sample_hold_states >= ADC_SAMPLE_STATE_HOLD_COUNT_MIN);

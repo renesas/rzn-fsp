@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -48,8 +48,8 @@ FSP_HEADER
 /**********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#define IOPORT_API_VERSION_MAJOR    (1U)
-#define IOPORT_API_VERSION_MINOR    (0U)
+#define IOPORT_API_VERSION_MAJOR    (1U) // DEPRECATED
+#define IOPORT_API_VERSION_MINOR    (2U) // DEPRECATED
 
 /* Private definition to set enumeration values. */
 #define IOPORT_P_OFFSET             (0U)
@@ -1037,7 +1037,7 @@ typedef struct st_ioport_api
      */
     fsp_err_t (* portWrite)(ioport_ctrl_t * const p_ctrl, bsp_io_port_t port, ioport_size_t value, ioport_size_t mask);
 
-    /** Return the version of the IOPort driver.
+    /** DEPRECATED Return the version of the IOPort driver.
      * @par Implemented as
      * - @ref R_IOPORT_VersionGet()
      * @param[out]  p_data              Memory address to return version information to.

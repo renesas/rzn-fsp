@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -94,9 +94,6 @@ const poeg_api_t g_poeg_on_poeg =
  *
  * @note The @ref poeg_cfg_t::trigger setting can only be configured once after reset. Reopening with a different trigger
  * configuration is not possible.
- *
- * Example:
- * @snippet r_poeg_example.c R_POEG_Open
  *
  * @retval FSP_SUCCESS                    Initialization was successful.
  * @retval FSP_ERR_ASSERTION              A required input pointer is NULL.
@@ -194,9 +191,6 @@ fsp_err_t R_POEG_OutputDisable (poeg_ctrl_t * const p_ctrl)
  * @note Status flags are only reset if the original POEG trigger is resolved. Check the status using
  * @ref R_POEG_StatusGet after calling this function to verify the status is cleared.
  *
- * Example:
- * @snippet r_poeg_example.c R_POEG_Reset
- *
  * @retval FSP_SUCCESS                 Function attempted to clear status flags.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -217,9 +211,6 @@ fsp_err_t R_POEG_Reset (poeg_ctrl_t * const p_ctrl)
 
 /*******************************************************************************************************************//**
  * Get current POEG status and store it in provided pointer p_status. Implements @ref poeg_api_t::statusGet.
- *
- * Example:
- * @snippet r_poeg_example.c R_POEG_StatusGet
  *
  * @retval FSP_SUCCESS                 Current POEG state stored successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl or p_status was NULL.
@@ -301,7 +292,7 @@ fsp_err_t R_POEG_Close (poeg_ctrl_t * const p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Sets driver version based on compile time macros. Implements @ref poeg_api_t::versionGet.
+ * DEPRECATED Sets driver version based on compile time macros. Implements @ref poeg_api_t::versionGet.
  *
  * @retval FSP_SUCCESS                 Version stored in p_version.
  * @retval FSP_ERR_ASSERTION           p_version was NULL.

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -46,8 +46,8 @@ FSP_HEADER
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#define ADC_CODE_VERSION_MAJOR                 (1U)
-#define ADC_CODE_VERSION_MINOR                 (0U)
+#define ADC_CODE_VERSION_MAJOR                 (1U) // DEPRECATED
+#define ADC_CODE_VERSION_MINOR                 (2U) // DEPRECATED
 
 /* Typical values that can be used to modify the sample states.
  * The minimum sample state count value is either 6 or 7 depending on the clock ratios.

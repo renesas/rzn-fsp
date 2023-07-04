@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -64,7 +64,9 @@
 #endif                                 /* defined(USB_CFG_PMSC_USE) */
 
 #if (USB_CFG_DMA == USB_CFG_ENABLE)
- #include "r_dmac.h"
+ #if !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L)
+  #include "r_dmac.h"
+ #endif                                /* !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
 #endif
 
 /******************************************************************************
@@ -92,7 +94,7 @@ usb_utr_t g_usb_hdata[USB_NUM_USBIP][USB_MAXPIPE_NUM + 1] USB_BUFFER_PLACE_IN_SE
 #endif                                 /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-usb_utr_t g_usb_pdata[USB_MAXPIPE_NUM + 1];
+usb_utr_t g_usb_pdata[USB_MAXPIPE_NUM + 1] USB_BUFFER_PLACE_IN_SECTION;
 
 #endif                                 /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
@@ -523,10 +525,12 @@ fsp_err_t R_USB_Open (usb_ctrl_t * const p_api_ctrl, usb_cfg_t const * const p_c
  #endif /* USB_IP_EHCI_OHCI == 0 */
 
  #if defined(USB_CFG_HHID_USE)
+  #if USB_IP_EHCI_OHCI == 0
             if (USB_CLASS_INTERNAL_HHID == (usb_class_internal_t) p_ctrl->type)
             {
                 hw_usb_hset_trnensel(&utr);
             }
+  #endif                               /* USB_IP_EHCI_OHCI == 0 */
  #endif                                /* defined(USB_CFG_HHID_USE) */
 
  #if USB_IP_EHCI_OHCI == 0

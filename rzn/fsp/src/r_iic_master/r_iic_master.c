@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -212,9 +212,6 @@ i2c_master_api_t const g_i2c_master_on_iic =
 /*******************************************************************************************************************//**
  * Opens the I2C device.
  *
- * Example:
- * @snippet r_iic_master_example.c R_IIC_MASTER_Open
- *
  * @retval  FSP_SUCCESS                       Requested clock rate was set exactly.
  * @retval  FSP_ERR_ALREADY_OPEN              Module is already open.
  * @retval  FSP_ERR_IP_CHANNEL_NOT_PRESENT    Channel is not available on this MCU.
@@ -315,9 +312,6 @@ fsp_err_t R_IIC_MASTER_Open (i2c_master_ctrl_t * const p_api_ctrl, i2c_master_cf
  * The caller will be notified when the operation has completed (successfully) by an
  * I2C_MASTER_EVENT_RX_COMPLETE in the callback.
  *
- * Example:
- * @snippet r_iic_master_example.c R_IIC_MASTER_Read
- *
  * @retval  FSP_SUCCESS             Function executed without issue.
  * @retval  FSP_ERR_ASSERTION       p_api_ctrl, p_dest or bytes is NULL.
  * @retval  FSP_ERR_IN_USE          Bus busy condition. Another transfer was in progress.
@@ -349,9 +343,6 @@ fsp_err_t R_IIC_MASTER_Read (i2c_master_ctrl_t * const p_api_ctrl,
  * The caller will be notified when the operation has completed (successfully) by an
  * I2C_MASTER_EVENT_TX_COMPLETE in the callback.
  *
- * Example:
- * @snippet r_iic_master_example.c R_IIC_MASTER_Write
- *
  * @retval  FSP_SUCCESS           Function executed without issue.
  * @retval  FSP_ERR_ASSERTION     p_api_ctrl or p_src is NULL.
  * @retval  FSP_ERR_IN_USE        Bus busy condition. Another transfer was in progress.
@@ -380,7 +371,6 @@ fsp_err_t R_IIC_MASTER_Write (i2c_master_ctrl_t * const p_api_ctrl,
 /*******************************************************************************************************************//**
  * Safely aborts any in-progress transfer and forces the IIC peripheral into ready state.
  *
- *
  * @retval  FSP_SUCCESS             Channel was reset successfully.
  * @retval  FSP_ERR_ASSERTION       p_api_ctrl is NULL.
  * @retval  FSP_ERR_NOT_OPEN        Handle is not initialized.  Call R_IIC_MASTER_Open to initialize the control block.
@@ -406,9 +396,6 @@ fsp_err_t R_IIC_MASTER_Abort (i2c_master_ctrl_t * const p_api_ctrl)
  * Sets address and addressing mode of the slave device.
  * This function is used to set the device address and addressing mode of the slave
  * without reconfiguring the entire bus.
- *
- * Example:
- * @snippet r_iic_master_example.c R_IIC_MASTER_SlaveAddressSet
  *
  * @retval  FSP_SUCCESS             Address of the slave is set correctly.
  * @retval  FSP_ERR_ASSERTION       Pointer to control structure is NULL.
@@ -444,19 +431,29 @@ fsp_err_t R_IIC_MASTER_SlaveAddressSet (i2c_master_ctrl_t * const    p_api_ctrl,
  * Updates the user callback and has option of providing memory for callback structure.
  * Implements i2c_master_api_t::callbackSet
  *
- * @retval  FSP_ERR_UNSUPPORTED              API not supported.
+ * @retval  FSP_SUCCESS                  Callback updated successfully.
+ * @retval  FSP_ERR_ASSERTION            A required pointer is NULL.
+ * @retval  FSP_ERR_NOT_OPEN             The control block has not been opened.
  **********************************************************************************************************************/
 fsp_err_t R_IIC_MASTER_CallbackSet (i2c_master_ctrl_t * const          p_api_ctrl,
                                     void (                           * p_callback)(i2c_master_callback_args_t *),
                                     void const * const                 p_context,
                                     i2c_master_callback_args_t * const p_callback_memory)
 {
-    FSP_PARAMETER_NOT_USED(p_api_ctrl);
-    FSP_PARAMETER_NOT_USED(p_callback);
-    FSP_PARAMETER_NOT_USED(p_context);
-    FSP_PARAMETER_NOT_USED(p_callback_memory);
+    iic_master_instance_ctrl_t * p_ctrl = (iic_master_instance_ctrl_t *) p_api_ctrl;
 
-    return FSP_ERR_UNSUPPORTED;
+#if (IIC_MASTER_CFG_PARAM_CHECKING_ENABLE)
+    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_callback);
+    FSP_ERROR_RETURN(IIC_MASTER_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Store callback and context */
+    p_ctrl->p_callback        = p_callback;
+    p_ctrl->p_context         = p_context;
+    p_ctrl->p_callback_memory = p_callback_memory;
+
+    return FSP_SUCCESS;
 }
 
 /*******************************************************************************************************************//**
@@ -516,7 +513,7 @@ fsp_err_t R_IIC_MASTER_Close (i2c_master_ctrl_t * const p_api_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Gets version information and stores it in the provided version structure.
+ * DEPRECATED Gets version information and stores it in the provided version structure.
  *
  * @retval  FSP_SUCCESS                 Successful version get.
  * @retval  FSP_ERR_ASSERTION           p_version is NULL.
@@ -612,11 +609,23 @@ static fsp_err_t iic_master_read_write (i2c_master_ctrl_t * const p_api_ctrl,
  **********************************************************************************************************************/
 static void iic_master_notify (iic_master_instance_ctrl_t * const p_ctrl, i2c_master_event_t const event)
 {
-    i2c_master_callback_args_t args =
+    i2c_master_callback_args_t args;
+
+    /* Store callback arguments in memory provided by user if available. */
+    i2c_master_callback_args_t * p_args = p_ctrl->p_callback_memory;
+    if (NULL == p_args)
     {
-        .p_context = p_ctrl->p_cfg->p_context,
-        .event     = event
-    };
+        /* Store on stack */
+        p_args = &args;
+    }
+    else
+    {
+        /* Save current arguments on the stack in case this is a nested interrupt. */
+        args = *p_args;
+    }
+
+    p_args->p_context = p_ctrl->p_context;
+    p_args->event     = event;
 
 #if IIC_MASTER_CFG_DMAC_ENABLE
 
@@ -636,7 +645,13 @@ static void iic_master_notify (iic_master_instance_ctrl_t * const p_ctrl, i2c_ma
 #endif
 
     /* Now do the callback here */
-    p_ctrl->p_callback(&args);
+    p_ctrl->p_callback(p_args);
+
+    if (NULL != p_ctrl->p_callback_memory)
+    {
+        /* Restore callback memory in case this is a nested interrupt. */
+        *p_ctrl->p_callback_memory = args;
+    }
 
     /* Clear the err flags */
     p_ctrl->err = false;

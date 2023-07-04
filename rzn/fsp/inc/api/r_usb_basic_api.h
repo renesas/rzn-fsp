@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -58,8 +58,8 @@ FSP_HEADER
  ******************************************************************************/
 
 /* USB Version Info */
-#define USB_API_VERSION_MAJOR      (1U)      ///< Minor version of the API.
-#define USB_API_VERSION_MINOR      (0U)      ///< Major version of the API.
+#define USB_API_VERSION_MAJOR      (1U)      // DEPRECATED
+#define USB_API_VERSION_MINOR      (2U)      // DEPRECATED
 
 /* USB Request Type Register */
 #define USB_BREQUEST               (0xFF00U) ///< b15-8

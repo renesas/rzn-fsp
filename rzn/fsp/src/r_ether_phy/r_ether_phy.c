@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -527,7 +527,7 @@ fsp_err_t R_ETHER_PHY_LinkStatusGet (ether_phy_ctrl_t * const p_ctrl)
 }                                      /* End of function R_ETHER_PHY_LinkStatusGet() */
 
 /********************************************************************************************************************//**
- * Provides API and code version in the user provided pointer. Implements @ref ether_phy_api_t::versionGet.
+ * DEPRECATED Provides API and code version in the user provided pointer. Implements @ref ether_phy_api_t::versionGet.
  *
  * @param[in] p_version   Version number set here
  *
@@ -1690,7 +1690,8 @@ void ether_phy_targets_initialize_vsc8541 (ether_phy_instance_ctrl_t * p_instanc
  #define ETHER_PHY_LEDMODE_100M_LINK_ACTIVITY          (0x2)
  #define ETHER_PHY_LEDMODE_10M_LINK_ACTIVITY           (0x3)
  #define ETHER_PHY_LEDMODE_100M_1000M_LINK_ACTIVITY    (0x4)
- #define ETHER_PHY_LEDMODE_10M_100M_LINK_ACTIVITY      (0x5)
+ #define ETHER_PHY_LEDMODE_10M_1000M_LINK_ACTIVITY     (0x5)
+ #define ETHER_PHY_LEDMODE_10M_100M_LINK_ACTIVITY      (0x6)
  #define ETHER_PHY_LEDMODE_BIT_MASK                    (0xF)
 
     /* Vendor Specific PHY Registers: Extended Page 2 */

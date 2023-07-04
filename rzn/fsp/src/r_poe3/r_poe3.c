@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -92,9 +92,6 @@ const poe3_api_t g_poe30_on_poe3 =
  *
  * @note POE0, POE4 and POE8 Mode Select setting can only be configured once after reset.
  * Reopening with a different mode configuration is not possible.
- *
- * Example:
- * @snippet r_poe3_example.c R_POE3_Open
  *
  * @retval FSP_SUCCESS                    Initialization was successful.
  * @retval FSP_ERR_ASSERTION              A required input pointer is NULL.
@@ -225,9 +222,6 @@ fsp_err_t R_POE3_OutputDisable (poe3_ctrl_t * const p_ctrl)
  * @note Status flags are only reset if the original POE3 trigger is resolved. Check the status using
  * @ref R_POE3_StatusGet after calling this function to verify the status is cleared.
  *
- * Example:
- * @snippet r_poe3_example.c R_POE3_Reset
- *
  * @retval FSP_SUCCESS                 Function attempted to clear status flags.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -256,9 +250,6 @@ fsp_err_t R_POE3_Reset (poe3_ctrl_t * const p_ctrl)
 
 /*******************************************************************************************************************//**
  * Get current POE3 status and store it in provided pointer p_status. Implements @ref poe3_api_t::statusGet.
- *
- * Example:
- * @snippet r_poe3_example.c R_POE3_StatusGet
  *
  * @retval FSP_SUCCESS                 Current POE3 state stored successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl or p_status was NULL.
@@ -332,7 +323,7 @@ fsp_err_t R_POE3_Close (poe3_ctrl_t * const p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Sets driver version based on compile time macros. Implements @ref poe3_api_t::versionGet.
+ * DEPRECATED Sets driver version based on compile time macros. Implements @ref poe3_api_t::versionGet.
  *
  * @retval FSP_SUCCESS                 Version stored in p_version.
  * @retval FSP_ERR_ASSERTION           p_version was NULL.

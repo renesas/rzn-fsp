@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -126,9 +126,6 @@ const ioport_api_t g_ioport_on_ioport =
 /*******************************************************************************************************************//**
  * Initializes internal driver data, then calls pin configuration function to configure pins.
  *
- * Example:
- * @snippet r_ioport_example.c R_IOPORT_Open
- *
  * @retval FSP_SUCCESS                  Pin configuration data written to the multiple registers
  * @retval FSP_ERR_ASSERTION            NULL pointer
  * @retval FSP_ERR_ALREADY_OPEN         Module is already open.
@@ -189,9 +186,6 @@ fsp_err_t R_IOPORT_Close (ioport_ctrl_t * const p_ctrl)
  * by the Pins tab of the RZ Configuration editor or manually by the developer. Different pin configurations can be
  * loaded for different situations such as low power modes and testing.
  *
- * Example:
- * @snippet r_ioport_example.c R_IOPORT_PinsCfg
- *
  * @retval FSP_SUCCESS             Pin configuration data written to the multiple registers
  * @retval FSP_ERR_NOT_OPEN        The module has not been opened
  * @retval FSP_ERR_ASSERTION       NULL pointer
@@ -215,9 +209,6 @@ fsp_err_t R_IOPORT_PinsCfg (ioport_ctrl_t * const p_ctrl, const ioport_cfg_t * p
 
 /*******************************************************************************************************************//**
  * Configures the settings of a pin. Implements @ref ioport_api_t::pinCfg.
- *
- * Example:
- * @snippet r_ioport_example.c R_IOPORT_PinCfg
  *
  * @retval FSP_SUCCESS             Pin configured
  * @retval FSP_ERR_NOT_OPEN        The module has not been opened
@@ -251,9 +242,6 @@ fsp_err_t R_IOPORT_PinCfg (ioport_ctrl_t * const p_ctrl, bsp_io_port_pin_t pin, 
  * Reads the level on a pin. Implements @ref ioport_api_t::pinRead.
  *
  * The level for the specifed pin will be reterned by PINm register.
- *
- * Example:
- * @snippet r_ioport_example.c R_IOPORT_PinRead
  *
  * @retval FSP_SUCCESS             Pin read
  * @retval FSP_ERR_ASSERTION       NULL pointer
@@ -404,9 +392,6 @@ fsp_err_t R_IOPORT_PortWrite (ioport_ctrl_t * const p_ctrl, bsp_io_port_t port, 
 
 /*******************************************************************************************************************//**
  * Sets a pin's output either high or low. Implements @ref ioport_api_t::pinWrite.
- *
- * Example:
- * @snippet r_ioport_example.c R_IOPORT_PinWrite
  *
  * @retval FSP_SUCCESS                  Pin written to
  * @retval FSP_ERR_INVALID_ARGUMENT     The pin and/or level not valid
@@ -750,7 +735,7 @@ fsp_err_t R_IOPORT_PinEventOutputWrite (ioport_ctrl_t * const p_ctrl, bsp_io_por
 }
 
 /*******************************************************************************************************************//**
- *  Returns IOPort HAL driver version. Implements @ref ioport_api_t::versionGet.
+ * DEPRECATED Returns IOPort HAL driver version. Implements @ref ioport_api_t::versionGet.
  *
  * @retval FSP_SUCCESS        Version information read
  * @retval FSP_ERR_ASSERTION  The parameter p_data is NULL

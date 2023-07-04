@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -94,7 +94,7 @@
  #endif                                /* defined(USB_CFG_HCDC_USE || USB_CFG_HHID_USE || USB_CFG_HMSC_USE || USB_CFG_HVNDR_USE) */
 #endif                                 /* USB_CFG_MODE == USB_MODE_PERI */
 
-#if !defined(BSP_MCU_GROUP_RA6M3) && !defined(BSP_MCU_GROUP_RZT2M)
+#if !defined(BSP_MCU_GROUP_RA6M3) && !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L)
  #if USB_CFG_ELECTRICAL == USB_CFG_ENABLE
   #error  Can not set USB_CFG_ENABLE to USB_CFG_ELECTRICAL when using other than Hi-speed module in r_usb_basic_cfg.h.
  #endif                                /* USB_CFG_ELECTRICAL == USB_CFG_ENABLE */
@@ -200,7 +200,7 @@ fsp_err_t usb_module_start (uint8_t ip_type)
    #endif /* (BSP_CFG_BOARD == BSP_CFG_BOARD_RZA2_EVB) */
   #else /* !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
     FSP_PARAMETER_NOT_USED(dummy_buf);
-  #endif /* !defined(BSP_MCU_GROUP_RZT2M) */
+  #endif /* !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
     for (dummy = 0; dummy < (USB_VAL_450 * USB_VAL_500); dummy++)
     {
         ;                              /* Wait 500us */
@@ -684,7 +684,9 @@ void usbfs_usbi_isr (void)
     if (USB_MODE_HOST == g_usb_usbmode[USB_IP0])
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+ #if  USB_IP_EHCI_OHCI == 0
         usb_hstd_usb_handler();        /* Call interrupt routine */
+ #endif /* USB_IP_EHCI_OHCI == 0 */
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     }
     else

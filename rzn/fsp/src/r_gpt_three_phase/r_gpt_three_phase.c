@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -106,9 +106,6 @@ const three_phase_api_t g_gpt_three_phase_on_gpt_three_phase =
  * Initializes the 3-phase timer module (and associated timers) and applies configurations. Implements
  * @ref three_phase_api_t::open.
  *
- * Example:
- * @snippet r_gpt_three_phase_example.c R_GPT_THREE_PHASE_Open
- *
  * @retval FSP_SUCCESS                    Initialization was successful.
  * @retval FSP_ERR_ASSERTION              A required input pointer is NULL.
  * @retval FSP_ERR_ALREADY_OPEN           Module is already open.
@@ -202,9 +199,6 @@ fsp_err_t R_GPT_THREE_PHASE_Stop (three_phase_ctrl_t * const p_ctrl)
 /*******************************************************************************************************************//**
  * Starts all timers synchronously. Implements @ref three_phase_api_t::start.
  *
- * Example:
- * @snippet r_gpt_three_phase_example.c R_GPT_THREE_PHASE_Start
- *
  * @retval FSP_SUCCESS                 Timers successfully started.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL.
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -259,9 +253,6 @@ fsp_err_t R_GPT_THREE_PHASE_Reset (three_phase_ctrl_t * const p_ctrl)
  * @note It is recommended to call this function in a high-priority callback to ensure that it is not interrupted and
  * that no GPT events occur during setting that would result in a duty cycle buffer load operation.
  *
- * Example:
- * @snippet r_gpt_three_phase_example.c R_GPT_THREE_PHASE_DutyCycleSet
- *
  * @retval FSP_SUCCESS                 Duty cycle updated successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL
  * @retval FSP_ERR_NOT_OPEN            The instance is not opened.
@@ -296,15 +287,15 @@ fsp_err_t R_GPT_THREE_PHASE_DutyCycleSet (three_phase_ctrl_t * const       p_ctr
     /* Set all duty cycle registers */
     for (three_phase_channel_t ch = THREE_PHASE_CHANNEL_U; ch <= THREE_PHASE_CHANNEL_W; ch++)
     {
-        p_instance_ctrl->p_reg[ch]->GTCCR[2] = p_duty_cycle->duty[ch];
-        p_instance_ctrl->p_reg[ch]->GTCCR[3] = p_duty_cycle->duty[ch];
+        p_instance_ctrl->p_reg[ch]->GTCCR[GPT_THREE_PHASE_PRV_GTCCRC] = p_duty_cycle->duty[ch];
+        p_instance_ctrl->p_reg[ch]->GTCCR[GPT_THREE_PHASE_PRV_GTCCRE] = p_duty_cycle->duty[ch];
 
         /* Set double-buffer registers (if applicable) */
         if ((THREE_PHASE_BUFFER_MODE_DOUBLE == p_instance_ctrl->buffer_mode) ||
             (TIMER_MODE_TRIANGLE_WAVE_ASYMMETRIC_PWM_MODE3 == p_instance_ctrl->p_cfg->p_timer_instance[0]->p_cfg->mode))
         {
-            p_instance_ctrl->p_reg[ch]->GTCCR[4] = p_duty_cycle->duty_buffer[ch];
-            p_instance_ctrl->p_reg[ch]->GTCCR[5] = p_duty_cycle->duty_buffer[ch];
+            p_instance_ctrl->p_reg[ch]->GTCCR[GPT_THREE_PHASE_PRV_GTCCRD] = p_duty_cycle->duty_buffer[ch];
+            p_instance_ctrl->p_reg[ch]->GTCCR[GPT_THREE_PHASE_PRV_GTCCRF] = p_duty_cycle->duty_buffer[ch];
         }
     }
 
@@ -377,7 +368,7 @@ fsp_err_t R_GPT_THREE_PHASE_Close (three_phase_ctrl_t * const p_ctrl)
 }
 
 /*******************************************************************************************************************//**
- * Sets driver version based on compile time macros. Implements @ref three_phase_api_t::versionGet.
+ * DEPRECATED Sets driver version based on compile time macros. Implements @ref three_phase_api_t::versionGet.
  *
  * @retval FSP_SUCCESS                 Version stored in p_version.
  * @retval FSP_ERR_ASSERTION           p_version was NULL.
