@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
-<title>RZ/N Flexible Software Package Documentation: Delta-sigma interface (r_dsmif)</title>
+<title>RZ/N Flexible Software Package Documentation: Delta-Sigma Interface (r_dsmif)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -95,7 +95,7 @@ $(document).ready(function(){initNavTree('group___d_s_m_i_f.html','');});
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
-<div class="title">Delta-sigma interface (r_dsmif)<div class="ingroups"><a class="el" href="group___r_e_n_e_s_a_s___m_o_d_u_l_e_s.html">Modules</a></div></div>  </div>
+<div class="title">Delta-Sigma Interface (r_dsmif)<div class="ingroups"><a class="el" href="group___r_e_n_e_s_a_s___m_o_d_u_l_e_s.html">Modules</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
@@ -115,6 +115,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga4ed64820dfdcecfd65e2571b2888f210"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0291812ebf08c4fba5cb2a96b9bb4736"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_s_m_i_f.html#ga0291812ebf08c4fba5cb2a96b9bb4736">R_DSMIF_Close</a> (<a class="el" href="group___a_d_c___a_p_i.html#gaff9488cd90102a90e5c5cbd45394d426">adc_ctrl_t</a> *p_ctrl)</td></tr>
 <tr class="separator:ga0291812ebf08c4fba5cb2a96b9bb4736"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0b5b7ca2a69f5f56099d5c68b7e03396"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_s_m_i_f.html#ga0b5b7ca2a69f5f56099d5c68b7e03396">R_DSMIF_CallbackSet</a> (<a class="el" href="group___a_d_c___a_p_i.html#gaff9488cd90102a90e5c5cbd45394d426">adc_ctrl_t</a> *const p_api_ctrl, void(*p_callback)(<a class="el" href="group___a_d_c___a_p_i.html#structadc__callback__args__t">adc_callback_args_t</a> *), void const *const p_context, <a class="el" href="group___a_d_c___a_p_i.html#structadc__callback__args__t">adc_callback_args_t</a> *const p_callback_memory)</td></tr>
+<tr class="separator:ga0b5b7ca2a69f5f56099d5c68b7e03396"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3b6d34539762e02aacb1032d61890240"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___d_s_m_i_f.html#ga3b6d34539762e02aacb1032d61890240">R_DSMIF_VersionGet</a> (<a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#unionfsp__version__t">fsp_version_t</a> *const p_version)</td></tr>
 <tr class="separator:ga3b6d34539762e02aacb1032d61890240"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -302,13 +304,13 @@ Master</li>
 <tr>
 <td>A/D Convert(Current Measurement) &gt; Sinc Filter &gt; Filter Order</td><td><ul style="margin-top:0;margin-bottom:0;">
 <li>
-Filter Oeder 3rd</li>
+Filter Order 3rd</li>
 <li>
-Filter Oeder 1st</li>
+Filter Order 1st</li>
 <li>
-Filter Oeder 2nd</li>
+Filter Order 2nd</li>
 </ul>
-</td><td>Filter Oeder 3rd </td><td>Current measurement filter order setting. </td></tr>
+</td><td>Filter Order 3rd </td><td>Current measurement filter order setting. </td></tr>
 <tr>
 <td>A/D Convert(Current Measurement) &gt; Sinc Filter &gt; Decimation Ratio</td><td>MCU Specific Options</td><td></td><td>Decimation ratio selection for current measurement. </td></tr>
 <tr>
@@ -330,13 +332,13 @@ Positive Edge</li>
 <tr>
 <td>Extra &gt; Overcurrent &gt; Sinc Filter &gt; Filter Order</td><td><ul style="margin-top:0;margin-bottom:0;">
 <li>
-Filter Oeder 3rd</li>
+Filter Order 3rd</li>
 <li>
-Filter Oeder 1st</li>
+Filter Order 1st</li>
 <li>
-Filter Oeder 2nd</li>
+Filter Order 2nd</li>
 </ul>
-</td><td>Filter Oeder 3rd </td><td>Overcurrent detection filter order setting. </td></tr>
+</td><td>Filter Order 3rd </td><td>Overcurrent detection filter order setting. </td></tr>
 <tr>
 <td>Extra &gt; Overcurrent &gt; Sinc Filter &gt; Decimation Ratio</td><td>MCU Specific Options</td><td></td><td>Decimation ratio selection for overcurrent detectiont. </td></tr>
 <tr>
@@ -1129,6 +1131,55 @@ Channel bitmask. </td></tr>
 
 </div>
 </div>
+<a id="ga0b5b7ca2a69f5f56099d5c68b7e03396"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0b5b7ca2a69f5f56099d5c68b7e03396">&#9670;&nbsp;</a></span>R_DSMIF_CallbackSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> R_DSMIF_CallbackSet </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group___a_d_c___a_p_i.html#gaff9488cd90102a90e5c5cbd45394d426">adc_ctrl_t</a> *const&#160;</td>
+          <td class="paramname"><em>p_api_ctrl</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(<a class="el" href="group___a_d_c___a_p_i.html#structadc__callback__args__t">adc_callback_args_t</a> *)&#160;</td>
+          <td class="paramname"><em>p_callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void const *const&#160;</td>
+          <td class="paramname"><em>p_context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group___a_d_c___a_p_i.html#structadc__callback__args__t">adc_callback_args_t</a> *const&#160;</td>
+          <td class="paramname"><em>p_callback_memory</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Updates the user callback with the option to provide memory for the callback argument structure.</p>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">FSP_SUCCESS</td><td>Callback updated successfully. </td></tr>
+    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required pointer is NULL. </td></tr>
+    <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>The control block has not been opened. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga3b6d34539762e02aacb1032d61890240"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga3b6d34539762e02aacb1032d61890240">&#9670;&nbsp;</a></span>R_DSMIF_VersionGet()</h2>
 
@@ -1144,7 +1195,7 @@ Channel bitmask. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets driver version based on compile time macros.</p>
+<p>DEPRECATED Sets driver version based on compile time macros.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Version stored in p_version. </td></tr>
@@ -1161,7 +1212,7 @@ Channel bitmask. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

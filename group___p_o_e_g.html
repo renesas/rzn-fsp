@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -272,7 +272,7 @@ Data Structures</h2></td></tr>
 </div><div class="memdoc">
 <p>Initializes the POEG module and applies configurations. Implements <a class="el" href="group___p_o_e_g___a_p_i.html#a41c511a6b1b828d54f180b729ae4fe55">poeg_api_t::open</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>The <a class="el" href="group___p_o_e_g___a_p_i.html#ace17b160cb26724e59f6aa82e39ed80b">poeg_cfg_t::trigger</a> setting can only be configured once after reset. Reopening with a different trigger configuration is not possible.</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Initializes the POEG. */</span></div><div class="line">    err = <a class="code" href="group___p_o_e_g.html#ga84d0272a9da17941d62d264ff3a7b678">R_POEG_Open</a>(&amp;g_poeg0_ctrl, &amp;g_poeg0_cfg);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Initialization was successful. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required input pointer is NULL. </td></tr>
@@ -330,7 +330,7 @@ Data Structures</h2></td></tr>
 </div><div class="memdoc">
 <p>Resets status flags. Implements <a class="el" href="group___p_o_e_g___a_p_i.html#a5765dcf518892b71b73b5ae38942bd7f">poeg_api_t::reset</a>.</p>
 <dl class="section note"><dt>Note</dt><dd>Status flags are only reset if the original POEG trigger is resolved. Check the status using <a class="el" href="group___p_o_e_g.html#gacc13125edbed3049ff434195ed6dc66e">R_POEG_StatusGet</a> after calling this function to verify the status is cleared.</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Correct the cause of the POEG event before resetting POEG. */</span></div><div class="line"></div><div class="line">    <span class="comment">/* Reset the POEG before exiting the callback. */</span></div><div class="line">    (void) <a class="code" href="group___p_o_e_g.html#ga6713a1b99790d8e56d475bb377b5cb0c">R_POEG_Reset</a>(&amp;g_poeg0_ctrl);</div><div class="line"></div><div class="line">    <span class="comment">/* Wait for the status to clear after reset before exiting the callback to ensure the interrupt does not fire</span></div><div class="line"><span class="comment">     * again. */</span></div><div class="line">    <span class="keywordflow">do</span></div><div class="line">    {</div><div class="line">        (void) <a class="code" href="group___p_o_e_g.html#gacc13125edbed3049ff434195ed6dc66e">R_POEG_StatusGet</a>(&amp;g_poeg0_ctrl, &amp;status);</div><div class="line">    } <span class="keywordflow">while</span> (<a class="code" href="group___p_o_e_g___a_p_i.html#gga6964e3b0b8b2d32d2428d86b32dfeef2a929680a05ecd96bb24dd053fb6dcc8b5">POEG_STATE_NO_DISABLE_REQUEST</a> != status.<a class="code" href="group___p_o_e_g___a_p_i.html#aeae55874b243b6034a81711e3494bc6d">state</a>);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Function attempted to clear status flags. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL. </td></tr>
@@ -367,7 +367,7 @@ Data Structures</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get current POEG status and store it in provided pointer p_status. Implements <a class="el" href="group___p_o_e_g___a_p_i.html#ab377a80211d85f8c90b578e93dfd7964">poeg_api_t::statusGet</a>.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* (Optional) Determine the cause of the POEG event. */</span></div><div class="line">    <a class="code" href="group___p_o_e_g___a_p_i.html#structpoeg__status__t">poeg_status_t</a> status;</div><div class="line">    (void) <a class="code" href="group___p_o_e_g.html#gacc13125edbed3049ff434195ed6dc66e">R_POEG_StatusGet</a>(&amp;g_poeg0_ctrl, &amp;status);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Current POEG state stored successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl or p_status was NULL. </td></tr>
@@ -470,7 +470,7 @@ Data Structures</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets driver version based on compile time macros. Implements <a class="el" href="group___p_o_e_g___a_p_i.html#aecb9edd3331b69522f5b519f56f20448">poeg_api_t::versionGet</a>.</p>
+<p>DEPRECATED Sets driver version based on compile time macros. Implements <a class="el" href="group___p_o_e_g___a_p_i.html#aecb9edd3331b69522f5b519f56f20448">poeg_api_t::versionGet</a>.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Version stored in p_version. </td></tr>
@@ -487,7 +487,7 @@ Data Structures</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

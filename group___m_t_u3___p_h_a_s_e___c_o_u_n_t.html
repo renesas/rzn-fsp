@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -127,7 +127,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga30a64f1bd65934d08b63c7e433633f62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Driver for phase count using the MTU3 peripheral on RZ MCUs. This module implements the <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html">Phase count Interface</a>. </p>
+<p>Driver for phase count using the MTU3 peripheral on RZ microprocessors. This module implements the <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html">Phase count Interface</a>. </p>
 <h1><a class="anchor" id="r-mtu3-phase-count-overview"></a>
 Overview</h1>
 <p>Multi-Function Timer Pulse Unit 3 (MTU3) Phase Count Driver provides the basic functionality of the PWM channel used in phase counting applications. The ability to set the count value of the channel and the function to obtain the count value are possible.</p>
@@ -415,7 +415,7 @@ Select whether measure speed by using MTU0. (16bit Mode only) </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Initializes the phase_count timer module (and associated timers) and applies configurations. Implements <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html#a73251f5b19c7d515c688f35e4e2694fe">mtu3_phase_count_api_t::open</a>.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Initializes the module. */</span></div><div class="line">    err = <a class="code" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t.html#gabc953e5e10e550abc8a996527c83dca9">R_MTU3_PHASE_COUNT_Open</a>(&amp;g_mtu3_phase_count_ctrl, &amp;g_mtu3_phase_count_cfg);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Initialization was successful. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required input pointer is NULL. </td></tr>
@@ -470,7 +470,7 @@ Select whether measure speed by using MTU0. (16bit Mode only) </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Starts all timers synchronously. Implements <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html#a1c1b87af24c268c2e9ecad1754cbca6c">mtu3_phase_count_api_t::start</a>.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Start the timer. */</span></div><div class="line">    (void) <a class="code" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t.html#ga51e6883c885046d507604c29b3d4dedd">R_MTU3_PHASE_COUNT_Start</a>(&amp;g_mtu3_phase_count_ctrl);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Timers successfully started. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL. </td></tr>
@@ -789,7 +789,7 @@ Select whether measure speed by using MTU0. (16bit Mode only) </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets driver version based on compile time macros. Implements <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html#ad6392f0a462bb4b0f5cdac43dd0516dc">mtu3_phase_count_api_t::versionGet</a>.</p>
+<p>DEPRECATED Sets driver version based on compile time macros. Implements <a class="el" href="group___m_t_u3___p_h_a_s_e___c_o_u_n_t___a_p_i.html#ad6392f0a462bb4b0f5cdac43dd0516dc">mtu3_phase_count_api_t::versionGet</a>.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Version stored in p_version. </td></tr>
@@ -806,7 +806,7 @@ Select whether measure speed by using MTU0. (16bit Mode only) </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

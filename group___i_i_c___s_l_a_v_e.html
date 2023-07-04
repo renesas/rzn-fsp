@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -387,7 +387,7 @@ I2C Clock settings. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Opens the I2C slave device.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Initialize the IIC Slave module */</span></div><div class="line">    err = <a class="code" href="group___i_i_c___s_l_a_v_e.html#ga2781d08100bc6a53034347927422e206">R_IIC_SLAVE_Open</a>(&amp;g_i2c_slave_ctrl, &amp;g_i2c_slave_cfg);</div><div class="line"></div><div class="line">    <span class="comment">/* Handle any errors. This function should be defined by the user. */</span></div><div class="line">    handle_error(err);</div><div class="line"></div><div class="line">    __asm <span class="keyword">volatile</span> (<span class="stringliteral">&quot;cpsie i&quot;</span>);</div><div class="line">    __asm <span class="keyword">volatile</span> (<span class="stringliteral">&quot;isb&quot;</span>);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>I2C slave device opened successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ALREADY_OPEN</td><td>Module is already open. </td></tr>
@@ -439,7 +439,7 @@ I2C Clock settings. </td></tr>
 </div><div class="memdoc">
 <p>Performs a read from the I2C Master device.</p>
 <p>This function will fail if there is already an in-progress I2C transfer on the associated channel. Otherwise, the I2C slave read operation will begin. The caller will be notified when the operation has finished by an I2C_SLAVE_EVENT_RX_COMPLETE in the callback. In case the master continues to write more data, an I2C_SLAVE_EVENT_RX_MORE_REQUEST will be issued via callback. In case of errors, an I2C_SLAVE_EVENT_ABORTED will be issued via callback.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">        <span class="comment">/* Read from Master */</span></div><div class="line">        err = <a class="code" href="group___i_i_c___s_l_a_v_e.html#ga62cdf56c786ad26cb09811e27d225d06">R_IIC_SLAVE_Read</a>(&amp;g_i2c_slave_ctrl, g_i2c_slave_buffer, g_slave_transfer_length);</div><div class="line">        handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Function executed without issue </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_api_ctrl, bytes or p_dest is NULL. </td></tr>
@@ -484,7 +484,7 @@ I2C Clock settings. </td></tr>
 </div><div class="memdoc">
 <p>Performs a write to the I2C Master device.</p>
 <p>This function will fail if there is already an in-progress I2C transfer on the associated channel. Otherwise, the I2C slave write operation will begin. The caller will be notified when the operation has finished by an I2C_SLAVE_EVENT_TX_COMPLETE in the callback. In case the master continues to read more data, an I2C_SLAVE_EVENT_TX_MORE_REQUEST will be issued via callback. In case of errors, an I2C_SLAVE_EVENT_ABORTED will be issued via callback.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">        <span class="comment">/* Write to master */</span></div><div class="line">        err = <a class="code" href="group___i_i_c___s_l_a_v_e.html#ga26692591d226125907ecd208a6d8d0fd">R_IIC_SLAVE_Write</a>(&amp;g_i2c_slave_ctrl, g_i2c_slave_buffer, g_slave_transfer_length);</div><div class="line">        handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Function executed without issue. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_api_ctrl or p_src is NULL. </td></tr>
@@ -536,7 +536,9 @@ I2C Clock settings. </td></tr>
 <p>Updates the user callback and has option of providing memory for callback structure. Implements <a class="el" href="group___i2_c___s_l_a_v_e___a_p_i.html#a527fc26638e91d2daf652c2b30b5ab5a">i2c_slave_api_t::callbackSet</a></p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
-    <tr><td class="paramname">FSP_ERR_UNSUPPORTED</td><td>API not supported. </td></tr>
+    <tr><td class="paramname">FSP_SUCCESS</td><td>Callback updated successfully. </td></tr>
+    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required pointer is NULL. </td></tr>
+    <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>The control block has not been opened. </td></tr>
   </table>
   </dd>
 </dl>
@@ -585,7 +587,7 @@ I2C Clock settings. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets version information and stores it in the provided version structure.</p>
+<p>DEPRECATED Gets version information and stores it in the provided version structure.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Successful version get. </td></tr>
@@ -602,7 +604,7 @@ I2C Clock settings. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

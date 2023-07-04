@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -1632,7 +1632,7 @@ Advanced PWM features, optional. </td></tr>
 </div><div class="memdoc">
 <p>Initializes the timer module and applies configurations.</p>
 <p>The MTU3 implementation of the general timer can accept a <a class="el" href="group___m_t_u3.html#structmtu3__extended__cfg__t">mtu3_extended_cfg_t</a> extension parameter.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Initializes the module. */</span></div><div class="line">    err = <a class="code" href="group___m_t_u3.html#ga0ee0beb7bd1f1773916b0c633454fe0b">R_MTU3_Open</a>(&amp;g_timer0_ctrl, &amp;g_timer0_cfg);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Initialization was successful and timer has started. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required input pointer is NULL. </td></tr>
@@ -1661,7 +1661,7 @@ Advanced PWM features, optional. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Stops timer.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* (Optional) Stop the timer. */</span></div><div class="line">    (void) <a class="code" href="group___m_t_u3.html#ga396b95f942eed8fd222c67e5bfd22800">R_MTU3_Stop</a>(&amp;g_timer0_ctrl);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Timer successfully stopped. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL. </td></tr>
@@ -1688,7 +1688,7 @@ Advanced PWM features, optional. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Starts timer.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Start the timer. */</span></div><div class="line">    (void) <a class="code" href="group___m_t_u3.html#ga57aa8e231848fe1eb00775bd722418ee">R_MTU3_Start</a>(&amp;g_timer0_ctrl);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Timer successfully started. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL. </td></tr>
@@ -1753,7 +1753,7 @@ Advanced PWM features, optional. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Sets period value provided. If the timer is running, the period will be updated after the next compare match. If the timer is stopped, this function resets the counter and updates the period.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Get the source clock frequency (in Hz). There are 3 ways to do this in FSP:</span></div><div class="line"><span class="comment">     *  - If the PCLKH  frequency has not changed since reset, the source clock frequency is</span></div><div class="line"><span class="comment">     *    BSP_PRV_PCLKH_FREQ_200_MHZ &gt;&gt; mtu3_extended_cfg_t::mtu3_clk_div</span></div><div class="line"><span class="comment">     *  - Use the R_MTU3_InfoGet function (it accounts for the divider).</span></div><div class="line"><span class="comment">     *  - Calculate the current PCLKH frequency using R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_PCLKH) and right shift</span></div><div class="line"><span class="comment">     *    by mtu3_extended_cfg_t::mtu3_clk_div.</span></div><div class="line"><span class="comment">     *</span></div><div class="line"><span class="comment">     * This example uses the 3rd option (R_FSP_SystemClockHzGet).</span></div><div class="line"><span class="comment">     */</span></div><div class="line">    uint32_t pclkd_freq_hz = <a class="code" href="group___b_s_p___m_c_u.html#gaac289335b731d0bdb5cb8e6d243898ef">R_FSP_SystemClockHzGet</a>(FSP_PRIV_CLOCK_PCLKH) &gt;&gt; g_timer0_cfg.source_div;</div><div class="line"></div><div class="line">    <span class="comment">/* Calculate the desired period based on the current clock. Note that this calculation could overflow if the</span></div><div class="line"><span class="comment">     * desired period is larger than UINT16_MAX / pclkd_freq_hz. A cast to uint64_t is used to prevent this. */</span></div><div class="line">    mtu3_count.<a class="code" href="group___m_t_u3.html#a41c0ee62e85cef78f597e2b69b438759">tgra_counts</a> =</div><div class="line">        (uint16_t) (((uint64_t) pclkd_freq_hz * MTU3_EXAMPLE_DESIRED_PERIOD_MICROSEC) / MTU3_EXAMPLE_MICROSEC_PER_SEC);</div><div class="line">    mtu3_count.<a class="code" href="group___m_t_u3.html#afa615516be9ef30e71d041c115effd3d">tgrb_counts</a> = (mtu3_count.<a class="code" href="group___m_t_u3.html#a41c0ee62e85cef78f597e2b69b438759">tgra_counts</a> / 2U);</div><div class="line"></div><div class="line">    <span class="comment">/* Set the calculated period. */</span></div><div class="line">    err = <a class="code" href="group___m_t_u3.html#ga681253550336ba3656aa76117da8a3d2">R_MTU3_PeriodSet</a>(&amp;g_timer0_ctrl, &amp;mtu3_count);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Period value written successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL. </td></tr>
@@ -1827,7 +1827,7 @@ Advanced PWM features, optional. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get current timer status and store it in provided pointer p_status.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Read the current counter value. Counter value is in status.counter. */</span></div><div class="line">    <a class="code" href="group___m_t_u3.html#structmtu3__status__t">mtu3_status_t</a> status;</div><div class="line">    (void) <a class="code" href="group___m_t_u3.html#ga2e03849cab601963cc6334c6b9b008db">R_MTU3_StatusGet</a>(&amp;g_timer0_ctrl, &amp;status);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Current timer state and counter value set successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl or p_status was NULL. </td></tr>
@@ -2086,7 +2086,7 @@ Advanced PWM features, optional. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets driver version based on compile time macros.</p>
+<p>DEPRECATED Sets driver version based on compile time macros.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Version stored in p_version. </td></tr>
@@ -2103,7 +2103,7 @@ Advanced PWM features, optional. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

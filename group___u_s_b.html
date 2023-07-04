@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -192,7 +192,7 @@ Functions</h2></td></tr>
 <tr class="separator:ga628af921919f90a9232c8c1713cc6c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Driver for the USB peripheral on RZ MCUs. This module implements the <a class="el" href="group___u_s_b___a_p_i.html">USB Interface</a>. </p>
+<p>Driver for the USB peripheral on RZ microprocessors. This module implements the <a class="el" href="group___u_s_b___a_p_i.html">USB Interface</a>. </p>
 <h1><a class="anchor" id="r-usb_basic-overview"></a>
 Overview</h1>
 <p>The USB module operates in combination with the device class drivers provided by Renesas to form a complete USB stack.</p>
@@ -270,7 +270,13 @@ Enabled</li>
 </ul>
 </td><td>Disabled </td><td>Enable or disable continuous transfer mode. </td></tr>
 <tr>
-<td>DMA Support</td><td>Disable</td><td>Disable </td><td>Enable or disable DMA support for the USB module. </td></tr>
+<td>DMA Support</td><td><ul style="margin-top:0;margin-bottom:0;">
+<li>
+Enable</li>
+<li>
+Disable</li>
+</ul>
+</td><td>Disable </td><td>Enable or disable DMA support for the USB module. </td></tr>
 </table>
 </p>
 <h2>Peripheral module</h2>
@@ -289,7 +295,13 @@ Peri mode</li>
 </ul>
 </td><td>Host mode </td><td>Select the usb mode. </td></tr>
 <tr>
-<td>USB Speed</td><td>Hi Speed</td><td>Hi Speed </td><td>Select the USB speed. </td></tr>
+<td>USB Speed</td><td><ul style="margin-top:0;margin-bottom:0;">
+<li>
+Hi Speed</li>
+<li>
+Full Speed</li>
+</ul>
+</td><td>Hi Speed </td><td>Select the USB speed. </td></tr>
 <tr>
 <td>USB Device Class</td><td><ul style="margin-top:0;margin-bottom:0;">
 <li>
@@ -1767,7 +1779,7 @@ Do not call this API in the following function. </dd>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

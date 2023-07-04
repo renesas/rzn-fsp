@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -106,7 +106,7 @@ Functions</h2></td></tr>
 <tr class="separator:gac5e6b998138cc28bcbd8b17a5eb26674"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa8735a16325cfeff3c47a50345d11d82"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___e_l_c.html#gaa8735a16325cfeff3c47a50345d11d82">R_ELC_SoftwareEventGenerate</a> (<a class="el" href="group___e_l_c___a_p_i.html#ga71d9612a7e093ba6bbef8ff708266596">elc_ctrl_t</a> *const p_ctrl, <a class="el" href="group___e_l_c___a_p_i.html#ga5fed76c06664ddad69c5a7ccb0330f0e">elc_software_event_t</a> event_number)</td></tr>
 <tr class="separator:gaa8735a16325cfeff3c47a50345d11d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4b40a4cb59194b6315cf608cd5e36bd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___e_l_c.html#ga4b40a4cb59194b6315cf608cd5e36bd9">R_ELC_LinkSet</a> (<a class="el" href="group___e_l_c___a_p_i.html#ga71d9612a7e093ba6bbef8ff708266596">elc_ctrl_t</a> *const p_ctrl, <a class="el" href="group___e_l_c___a_p_i.html#gaa5bf5e18ceb8cf51ac6dce985f9230a7">elc_peripheral_t</a> peripheral, elc_event_t signal)</td></tr>
+<tr class="memitem:ga4b40a4cb59194b6315cf608cd5e36bd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___e_l_c.html#ga4b40a4cb59194b6315cf608cd5e36bd9">R_ELC_LinkSet</a> (<a class="el" href="group___e_l_c___a_p_i.html#ga71d9612a7e093ba6bbef8ff708266596">elc_ctrl_t</a> *const p_ctrl, <a class="el" href="group___e_l_c___a_p_i.html#gaa5bf5e18ceb8cf51ac6dce985f9230a7">elc_peripheral_t</a> peripheral, <a class="el" href="group___b_s_p___m_c_u___r_z_n2_l.html#gaebe723200f2a7f181f08324128b9d7b5">elc_event_t</a> signal)</td></tr>
 <tr class="separator:ga4b40a4cb59194b6315cf608cd5e36bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2b2ed9cb9e86bf6c75d85977c4c135ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___e_l_c.html#ga2b2ed9cb9e86bf6c75d85977c4c135ff">R_ELC_LinkBreak</a> (<a class="el" href="group___e_l_c___a_p_i.html#ga71d9612a7e093ba6bbef8ff708266596">elc_ctrl_t</a> *const p_ctrl, <a class="el" href="group___e_l_c___a_p_i.html#gaa5bf5e18ceb8cf51ac6dce985f9230a7">elc_peripheral_t</a> peripheral)</td></tr>
 <tr class="separator:ga2b2ed9cb9e86bf6c75d85977c4c135ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -253,7 +253,7 @@ Data Structures</h2></td></tr>
 </div><div class="memdoc">
 <p>Initialize all the links in the Event Link Controller. Implements <a class="el" href="group___e_l_c___a_p_i.html#ac4f753f3fcae95e036d24e3d6a84d1f5">elc_api_t::open</a></p>
 <p>The configuration structure passed in to this function includes links for every event source included in the ELC and sets them all at once. To set or clear an individual link use R_ELC_LinkSet and R_ELC_LinkBreak respectively.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Initializes the software and sets the links defined in the control structure. */</span></div><div class="line">    err = <a class="code" href="group___e_l_c.html#ga35864de459d2ef45a03da4343729712f">R_ELC_Open</a>(&amp;g_elc_ctrl, &amp;g_elc_cfg);</div><div class="line"></div><div class="line">    <span class="comment">/* Handle any errors. This function should be defined by the user. */</span></div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Initialization was successful </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl or p_cfg was NULL </td></tr>
@@ -347,7 +347,7 @@ Data Structures</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">elc_event_t&#160;</td>
+          <td class="paramtype"><a class="el" href="group___b_s_p___m_c_u___r_z_n2_l.html#gaebe723200f2a7f181f08324128b9d7b5">elc_event_t</a>&#160;</td>
           <td class="paramname"><em>signal</em>&#160;</td>
         </tr>
         <tr>
@@ -358,7 +358,7 @@ Data Structures</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Create a single event link. Implements <a class="el" href="group___e_l_c___a_p_i.html#a05af30d0ca7743f5a033b10d664ded59">elc_api_t::linkSet</a></p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Create or modify a link between a peripheral function and an event source. */</span></div><div class="line">    err = <a class="code" href="group___e_l_c.html#ga4b40a4cb59194b6315cf608cd5e36bd9">R_ELC_LinkSet</a>(&amp;g_elc_ctrl, ELC_PERIPHERAL_ADC0_A, ELC_EVENT_GPT0_OVF);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Initialization was successful </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl was NULL </td></tr>
@@ -471,7 +471,7 @@ Data Structures</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the driver version based on compile time macros. Implements <a class="el" href="group___e_l_c___a_p_i.html#a682f1515dbb329a8bfe3dd4f3b689192">elc_api_t::versionGet</a></p>
+<p>DEPRECATED Get the driver version based on compile time macros. Implements <a class="el" href="group___e_l_c___a_p_i.html#a682f1515dbb329a8bfe3dd4f3b689192">elc_api_t::versionGet</a></p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Successful close. </td></tr>
@@ -488,7 +488,7 @@ Data Structures</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

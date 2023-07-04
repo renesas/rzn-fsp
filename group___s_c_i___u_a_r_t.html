@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -676,7 +676,7 @@ Clock synchronizer selection. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Configures the UART driver based on the input configurations. If reception is enabled at compile time, reception is enabled at the end of this function. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#a962363eebf6d497894b5ca569ebb87bb">uart_api_t::open</a></p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Open the transfer instance with initial configuration. */</span></div><div class="line">    <a class="code" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> err = <a class="code" href="group___s_c_i___u_a_r_t.html#gaef2636b50df00f5e888e833f0e6bbf6c">R_SCI_UART_Open</a>(&amp;g_uart0_ctrl, &amp;g_uart0_cfg);</div><div class="line">    handle_error(err);</div><div class="line"></div><div class="line">    __asm <span class="keyword">volatile</span> (<span class="stringliteral">&quot;cpsie i&quot;</span>);</div><div class="line">    __asm <span class="keyword">volatile</span> (<span class="stringliteral">&quot;isb&quot;</span>);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Channel opened successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Pointer to UART control block or configuration structure is NULL. </td></tr>
@@ -752,7 +752,7 @@ Clock synchronizer selection. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Receives user specified number of bytes into destination buffer pointer. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#a75ba1611c4bba17f25f1957348991829">uart_api_t::read</a></p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Read data from UART. */</span></div><div class="line">    err = <a class="code" href="group___s_c_i___u_a_r_t.html#gac2be874dbe37956cf84532a6ca901165">R_SCI_UART_Read</a>(&amp;g_uart0_ctrl, g_dest, TRANSFER_LENGTH);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Data reception successfully ends. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Pointer to UART control block is NULL. </td></tr>
@@ -803,7 +803,7 @@ Clock synchronizer selection. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Transmits user specified number of bytes from the source buffer pointer. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#a9a87e8764518ac3268cf1c9df3b6aad3">uart_api_t::write</a></p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Write data to UART. */</span></div><div class="line">    err = <a class="code" href="group___s_c_i___u_a_r_t.html#ga8916449e6e6de86681c04d1931645e7c">R_SCI_UART_Write</a>(&amp;g_uart0_ctrl, g_src, TRANSFER_LENGTH);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Data transmission finished successfully. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Pointer to UART control block is NULL. </td></tr>
@@ -862,7 +862,9 @@ Clock synchronizer selection. </td></tr>
 <p>Updates the user callback and has option of providing memory for callback structure. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#a51b74df27fb26e85700d9524cdfc7c01">uart_api_t::callbackSet</a></p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
-    <tr><td class="paramname">FSP_ERR_UNSUPPORTED</td><td>API not supported. </td></tr>
+    <tr><td class="paramname">FSP_SUCCESS</td><td>Callback updated successfully. </td></tr>
+    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>A required pointer is NULL. </td></tr>
+    <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>The control block has not been opened. </td></tr>
   </table>
   </dd>
 </dl>
@@ -896,7 +898,7 @@ Clock synchronizer selection. </td></tr>
 </div><div class="memdoc">
 <p>Updates the baud rate using the clock selected in Open. p_baud_setting is a pointer to a <a class="el" href="group___s_c_i___u_a_r_t.html#structbaud__setting__t">baud_setting_t</a> structure. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#a8b0f901bcc26bd6836fe620235585f98">uart_api_t::baudSet</a></p>
 <dl class="section warning"><dt>Warning</dt><dd>This terminates any in-progress transmission.</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    err = <a class="code" href="group___s_c_i___u_a_r_t.html#ga3b3a6c761a66c6cbcca3c72a451b3371">R_SCI_UART_BaudSet</a>(&amp;g_uart0_ctrl, (<span class="keywordtype">void</span> *) &amp;baud_setting);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Baud rate was successfully changed. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Pointer to UART control block is NULL or the UART is not configured to use the internal clock. </td></tr>
@@ -1024,7 +1026,7 @@ Clock synchronizer selection. </td></tr>
       </table>
 </div><div class="memdoc">
 <p>Calculates baud rate register settings. Evaluates and determines the best possible settings set to the baud rate related registers.</p>
-<p>Example: </p><div class="fragment"><div class="line">    <a class="code" href="group___s_c_i___u_a_r_t.html#structbaud__setting__t">baud_setting_t</a> baud_setting;</div><div class="line">    uint32_t       baud_rate                 = SCI_UART_BAUDRATE_19200;</div><div class="line">    <span class="keywordtype">bool</span>           enable_bitrate_modulation = <span class="keyword">false</span>;</div><div class="line">    uint32_t       error_rate_x_1000         = SCI_UART_ERROR_RATE_x1000;</div><div class="line"></div><div class="line">    <a class="code" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> err = <a class="code" href="group___s_c_i___u_a_r_t.html#ga864f43cde0ddc087748610357cbcd6c2">R_SCI_UART_BaudCalculate</a>(baud_rate, enable_bitrate_modulation, error_rate_x_1000, &amp;baud_setting);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="params"><dt>Parameters</dt><dd>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">baudrate</td><td>Baud rate [bps]. For example, 19200, 57600, 115200, etc. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bitrate_modulation</td><td>Enable bitrate modulation </td></tr>
@@ -1059,7 +1061,7 @@ Clock synchronizer selection. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Provides API and code version in the user provided pointer. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#afd111f21ce7f755b470b5e5d90249768">uart_api_t::versionGet</a></p>
+<p>DEPRECATED Provides API and code version in the user provided pointer. Implements <a class="el" href="group___u_a_r_t___a_p_i.html#afd111f21ce7f755b470b5e5d90249768">uart_api_t::versionGet</a></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">p_version</td><td>Version number set here</td></tr>
@@ -1082,7 +1084,7 @@ Clock synchronizer selection. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

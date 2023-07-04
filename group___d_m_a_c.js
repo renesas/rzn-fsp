@@ -20,7 +20,7 @@ var group___d_m_a_c =
       [ "ack_mode", "group___d_m_a_c.html#a955287924ce9f03af386b253441bfbfe", null ],
       [ "detection_mode", "group___d_m_a_c.html#a39a63419e2521a7554b2747b015f5ff8", null ],
       [ "activation_request_source_select", "group___d_m_a_c.html#a9dc1a5d5ec0b52edb051a63f4f41b8f7", null ],
-      [ "next_register_operaion", "group___d_m_a_c.html#a735c332eb28489bde5292847c15df8ef", null ],
+      [ "next_register_operation", "group___d_m_a_c.html#a268d7555146e0c93846793485cde22cf", null ],
       [ "transfer_interval", "group___d_m_a_c.html#a3047f4912871cf9eb100800c9f296d87", null ],
       [ "channel_scheduling", "group___d_m_a_c.html#adcec47da500a02cb015f31beab5f6ddb", null ],
       [ "p_callback", "group___d_m_a_c.html#a1aa5df5a650e272348c4bd6c71ad4392", null ],

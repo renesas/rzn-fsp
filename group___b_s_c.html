@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.1.0</span>
+   &#160;<span id="projectnumber">Release v1.2.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -161,7 +161,7 @@ Chip Select 5</li>
 <tr>
 <td>General &gt; Memory Type</td><td>Normal Space (SRAM)</td><td>Normal Space (SRAM) </td><td>Select memory type. </td></tr>
 <tr>
-<td>General &gt; Data Bus With</td><td><ul style="margin-top:0;margin-bottom:0;">
+<td>General &gt; Data Bus Width</td><td><ul style="margin-top:0;margin-bottom:0;">
 <li>
 8-bit</li>
 <li>
@@ -619,7 +619,7 @@ Duration to assert CS line before RD#,WE# assert. </td></tr>
 </div><div class="memdoc">
 <p>Open the BSC driver module. After the driver is open, the BSC can be accessed like internal flash memory starting at address 0x70000000 or 0x50000000.</p>
 <p>Implements <a class="el" href="group___e_x_t_e_r_n_a_l___b_u_s___a_p_i.html#a275722341f5144e887a1e5c10ad67459">external_bus_api_t::open</a>.</p>
-<p>Example: </p><div class="fragment"><div class="line"></div><div class="line">    <span class="comment">/* Open the BSC instance */</span></div><div class="line">    <a class="code" href="group___r_e_n_e_s_a_s___e_r_r_o_r___c_o_d_e_s.html#gadfb1288da0fcc7ae1dc88c58601374f8">fsp_err_t</a> err = <a class="code" href="group___b_s_c.html#ga7c3d30081be56f6d48df4ec233d65560">R_BSC_Open</a>(&amp;g_bsc0_ctrl, &amp;g_bsc0_cfg);</div><div class="line">    handle_error(err);</div><div class="line"></div></div><!-- fragment --> <dl class="retval"><dt>Return values</dt><dd>
+<dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Configuration was successful. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>The parameter p_instance_ctrl or p_cfg is NULL. </td></tr>
@@ -665,7 +665,7 @@ Duration to assert CS line before RD#,WE# assert. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.1.0 User's Manual Copyright © (2022) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>
