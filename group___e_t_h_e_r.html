@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.2.0</span>
+   &#160;<span id="projectnumber">Release v1.3.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -197,7 +197,7 @@ Enable</li>
 <tr>
 <td>Buffers &gt; Number of RX buffer</td><td>Must be an integer from 1 to 8</td><td>8 </td><td>Number of receive buffers </td></tr>
 <tr>
-<td>Buffers &gt; Buffer size</td><td>Must be lates the maximum Ethernet frame size of 1514+the management tag of 8 Bytes</td><td>2048 </td><td>Size of Ethernet buffer </td></tr>
+<td>Buffers &gt; Buffer size</td><td>Must be at least 1522 bytes (the maximum Ethernet frame size 1514 bytes + ethsw management tag size 8 bytes).</td><td>1524 </td><td>Size of Ethernet buffer </td></tr>
 <tr>
 <td>Interrupts &gt; SBD Interrupt priority</td><td>MCU Specific Options</td><td></td><td>Select the Ether GMAC SBD interrupt priority. </td></tr>
 <tr>
@@ -373,6 +373,12 @@ link status by callback from ethsw (bit0:port0, bit1:port1,..) </td></tr>
 previous_link_status</td>
 <td class="fielddoc">
 Previous link status (bit0:port0, bit1:port1,..) </td></tr>
+<tr><td class="fieldtype">
+<a id="ab1636cae0466fa6553034cbd5788e0b5"></a>uint32_t</td>
+<td class="fieldname">
+link_speed_duplex</td>
+<td class="fielddoc">
+Link speed &amp; duplex. </td></tr>
 <tr><td class="fieldtype">
 <a id="ac347e6f179a18f132207eb0ec76d8cb1"></a><a class="el" href="group___e_t_h_e_r.html#ga3a743e2bcb738ad6759a41747bdad1cf">gmac_magic_packet_t</a></td>
 <td class="fieldname">
@@ -857,7 +863,7 @@ Partner pause bits got from PHY. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Provides API and code version in the user provided pointer. Implements <a class="el" href="group___e_t_h_e_r___a_p_i.html#a2d7eb9db55c87bff39494408612fe766">ether_api_t::versionGet</a>.</p>
+<p>DEPRECATED Provides API and code version in the user provided pointer. Implements <a class="el" href="group___e_t_h_e_r___a_p_i.html#a2d7eb9db55c87bff39494408612fe766">ether_api_t::versionGet</a>.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Version information stored in provided p_version. </td></tr>
@@ -874,7 +880,7 @@ Partner pause bits got from PHY. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.3.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>

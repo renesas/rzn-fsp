@@ -33,7 +33,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZ/N Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v1.2.0</span>
+   &#160;<span id="projectnumber">Release v1.3.0</span>
    </div>
   </td>
    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -235,7 +235,9 @@ Data Structures</h2></td></tr>
 <td class="fieldname">
 channel</td>
 <td class="fielddoc">
-Channel number. </td></tr>
+<p>DEPRECATED - channel will be moved to CRC API in the major release</p>
+<p>Channel number. </p>
+</td></tr>
 </table>
 
 </div>
@@ -281,15 +283,15 @@ Channel number. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Open the CRC driver module</p>
+<p>Open the CRC driver module.</p>
 <p>Implements <a class="el" href="group___c_r_c___a_p_i.html#ad1c70317b3a73fc3cb102e6c673111be">crc_api_t::open</a></p>
 <p>Open the CRC driver module and initialize the driver control block according to the passed-in configuration structure.</p>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Configuration was successful. </td></tr>
-    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl or p_cfg is NULL. </td></tr>
+    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_ctrl, p_cfg, or p_cfg-&gt;p_extend is NULL. </td></tr>
     <tr><td class="paramname">FSP_ERR_ALREADY_OPEN</td><td>Module already open. </td></tr>
-    <tr><td class="paramname">FSP_ERR_IP_CHANNEL_NOT_PRESENT</td><td>The requested channel does not exist on this MCU </td></tr>
+    <tr><td class="paramname">FSP_ERR_IP_CHANNEL_NOT_PRESENT</td><td>The requested channel does not exist on this MCU. </td></tr>
   </table>
   </dd>
 </dl>
@@ -361,7 +363,7 @@ Channel number. </td></tr>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Calculation successful. </td></tr>
-    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Either p_ctrl, inputBuffer, or calculatedValue is NULL. </td></tr>
+    <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>Either p_ctrl, p_crc_input, inputBuffer, or calculatedValue is NULL. </td></tr>
     <tr><td class="paramname">FSP_ERR_INVALID_ARGUMENT</td><td>length value is NULL. </td></tr>
     <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>The driver is not opened. </td></tr>
   </table>
@@ -475,7 +477,7 @@ Channel number. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v1.2.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v1.3.0 User's Manual Copyright © (2023) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>
