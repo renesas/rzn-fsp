@@ -29,87 +29,234 @@
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#define BSP_PRV_M_MPU_REGION_NUM    (7)
+#define BSP_PRV_M_MPU_REGION_NUM                              (7)
 
 #if defined(BSP_M_MPU0_SUPPORT)
- #define BSP_PRV_M_MPU0_STADD0      (BSP_CFG_MPU0_STADD0 | (BSP_CFG_MPU0_WRITE0 << 1) | BSP_CFG_MPU0_READ0)
- #define BSP_PRV_M_MPU0_STADD1      (BSP_CFG_MPU0_STADD1 | (BSP_CFG_MPU0_WRITE1 << 1) | BSP_CFG_MPU0_READ1)
- #define BSP_PRV_M_MPU0_STADD2      (BSP_CFG_MPU0_STADD2 | (BSP_CFG_MPU0_WRITE2 << 1) | BSP_CFG_MPU0_READ2)
- #define BSP_PRV_M_MPU0_STADD3      (BSP_CFG_MPU0_STADD3 | (BSP_CFG_MPU0_WRITE3 << 1) | BSP_CFG_MPU0_READ3)
- #define BSP_PRV_M_MPU0_STADD4      (BSP_CFG_MPU0_STADD4 | (BSP_CFG_MPU0_WRITE4 << 1) | BSP_CFG_MPU0_READ4)
- #define BSP_PRV_M_MPU0_STADD5      (BSP_CFG_MPU0_STADD5 | (BSP_CFG_MPU0_WRITE5 << 1) | BSP_CFG_MPU0_READ5)
- #define BSP_PRV_M_MPU0_STADD6      (BSP_CFG_MPU0_STADD6 | (BSP_CFG_MPU0_WRITE6 << 1) | BSP_CFG_MPU0_READ6)
- #define BSP_PRV_M_MPU0_STADD7      (BSP_CFG_MPU0_STADD7 | (BSP_CFG_MPU0_WRITE7 << 1) | BSP_CFG_MPU0_READ7)
+ #define BSP_PRV_M_MPU0_STADD0                                (BSP_CFG_MPU0_STADD0 | (BSP_CFG_MPU0_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU0_READ0)
+ #define BSP_PRV_M_MPU0_STADD1                                (BSP_CFG_MPU0_STADD1 | (BSP_CFG_MPU0_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU0_READ1)
+ #define BSP_PRV_M_MPU0_STADD2                                (BSP_CFG_MPU0_STADD2 | (BSP_CFG_MPU0_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU0_READ2)
+ #define BSP_PRV_M_MPU0_STADD3                                (BSP_CFG_MPU0_STADD3 | (BSP_CFG_MPU0_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU0_READ3)
+ #define BSP_PRV_M_MPU0_STADD4                                (BSP_CFG_MPU0_STADD4 | (BSP_CFG_MPU0_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU0_READ4)
+ #define BSP_PRV_M_MPU0_STADD5                                (BSP_CFG_MPU0_STADD5 | (BSP_CFG_MPU0_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU0_READ5)
+ #define BSP_PRV_M_MPU0_STADD6                                (BSP_CFG_MPU0_STADD6 | (BSP_CFG_MPU0_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU0_READ6)
+ #define BSP_PRV_M_MPU0_STADD7                                (BSP_CFG_MPU0_STADD7 | (BSP_CFG_MPU0_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU0_READ7)
 #endif
 #if defined(BSP_M_MPU1_SUPPORT)
- #define BSP_PRV_M_MPU1_STADD0      (BSP_CFG_MPU1_STADD0 | (BSP_CFG_MPU1_WRITE0 << 1) | BSP_CFG_MPU1_READ0)
- #define BSP_PRV_M_MPU1_STADD1      (BSP_CFG_MPU1_STADD1 | (BSP_CFG_MPU1_WRITE1 << 1) | BSP_CFG_MPU1_READ1)
- #define BSP_PRV_M_MPU1_STADD2      (BSP_CFG_MPU1_STADD2 | (BSP_CFG_MPU1_WRITE2 << 1) | BSP_CFG_MPU1_READ2)
- #define BSP_PRV_M_MPU1_STADD3      (BSP_CFG_MPU1_STADD3 | (BSP_CFG_MPU1_WRITE3 << 1) | BSP_CFG_MPU1_READ3)
- #define BSP_PRV_M_MPU1_STADD4      (BSP_CFG_MPU1_STADD4 | (BSP_CFG_MPU1_WRITE4 << 1) | BSP_CFG_MPU1_READ4)
- #define BSP_PRV_M_MPU1_STADD5      (BSP_CFG_MPU1_STADD5 | (BSP_CFG_MPU1_WRITE5 << 1) | BSP_CFG_MPU1_READ5)
- #define BSP_PRV_M_MPU1_STADD6      (BSP_CFG_MPU1_STADD6 | (BSP_CFG_MPU1_WRITE6 << 1) | BSP_CFG_MPU1_READ6)
- #define BSP_PRV_M_MPU1_STADD7      (BSP_CFG_MPU1_STADD7 | (BSP_CFG_MPU1_WRITE7 << 1) | BSP_CFG_MPU1_READ7)
+ #define BSP_PRV_M_MPU1_STADD0                                (BSP_CFG_MPU1_STADD0 | (BSP_CFG_MPU1_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU1_READ0)
+ #define BSP_PRV_M_MPU1_STADD1                                (BSP_CFG_MPU1_STADD1 | (BSP_CFG_MPU1_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU1_READ1)
+ #define BSP_PRV_M_MPU1_STADD2                                (BSP_CFG_MPU1_STADD2 | (BSP_CFG_MPU1_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU1_READ2)
+ #define BSP_PRV_M_MPU1_STADD3                                (BSP_CFG_MPU1_STADD3 | (BSP_CFG_MPU1_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU1_READ3)
+ #define BSP_PRV_M_MPU1_STADD4                                (BSP_CFG_MPU1_STADD4 | (BSP_CFG_MPU1_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU1_READ4)
+ #define BSP_PRV_M_MPU1_STADD5                                (BSP_CFG_MPU1_STADD5 | (BSP_CFG_MPU1_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU1_READ5)
+ #define BSP_PRV_M_MPU1_STADD6                                (BSP_CFG_MPU1_STADD6 | (BSP_CFG_MPU1_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU1_READ6)
+ #define BSP_PRV_M_MPU1_STADD7                                (BSP_CFG_MPU1_STADD7 | (BSP_CFG_MPU1_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU1_READ7)
 #endif
 #if defined(BSP_M_MPU2_SUPPORT)
- #define BSP_PRV_M_MPU2_STADD0      (BSP_CFG_MPU2_STADD0 | (BSP_CFG_MPU2_WRITE0 << 1) | BSP_CFG_MPU2_READ0)
- #define BSP_PRV_M_MPU2_STADD1      (BSP_CFG_MPU2_STADD1 | (BSP_CFG_MPU2_WRITE1 << 1) | BSP_CFG_MPU2_READ1)
- #define BSP_PRV_M_MPU2_STADD2      (BSP_CFG_MPU2_STADD2 | (BSP_CFG_MPU2_WRITE2 << 1) | BSP_CFG_MPU2_READ2)
- #define BSP_PRV_M_MPU2_STADD3      (BSP_CFG_MPU2_STADD3 | (BSP_CFG_MPU2_WRITE3 << 1) | BSP_CFG_MPU2_READ3)
- #define BSP_PRV_M_MPU2_STADD4      (BSP_CFG_MPU2_STADD4 | (BSP_CFG_MPU2_WRITE4 << 1) | BSP_CFG_MPU2_READ4)
- #define BSP_PRV_M_MPU2_STADD5      (BSP_CFG_MPU2_STADD5 | (BSP_CFG_MPU2_WRITE5 << 1) | BSP_CFG_MPU2_READ5)
- #define BSP_PRV_M_MPU2_STADD6      (BSP_CFG_MPU2_STADD6 | (BSP_CFG_MPU2_WRITE6 << 1) | BSP_CFG_MPU2_READ6)
- #define BSP_PRV_M_MPU2_STADD7      (BSP_CFG_MPU2_STADD7 | (BSP_CFG_MPU2_WRITE7 << 1) | BSP_CFG_MPU2_READ7)
+ #define BSP_PRV_M_MPU2_STADD0                                (BSP_CFG_MPU2_STADD0 | (BSP_CFG_MPU2_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU2_READ0)
+ #define BSP_PRV_M_MPU2_STADD1                                (BSP_CFG_MPU2_STADD1 | (BSP_CFG_MPU2_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU2_READ1)
+ #define BSP_PRV_M_MPU2_STADD2                                (BSP_CFG_MPU2_STADD2 | (BSP_CFG_MPU2_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU2_READ2)
+ #define BSP_PRV_M_MPU2_STADD3                                (BSP_CFG_MPU2_STADD3 | (BSP_CFG_MPU2_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU2_READ3)
+ #define BSP_PRV_M_MPU2_STADD4                                (BSP_CFG_MPU2_STADD4 | (BSP_CFG_MPU2_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU2_READ4)
+ #define BSP_PRV_M_MPU2_STADD5                                (BSP_CFG_MPU2_STADD5 | (BSP_CFG_MPU2_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU2_READ5)
+ #define BSP_PRV_M_MPU2_STADD6                                (BSP_CFG_MPU2_STADD6 | (BSP_CFG_MPU2_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU2_READ6)
+ #define BSP_PRV_M_MPU2_STADD7                                (BSP_CFG_MPU2_STADD7 | (BSP_CFG_MPU2_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU2_READ7)
 #endif
 #if defined(BSP_M_MPU3_SUPPORT)
- #define BSP_PRV_M_MPU3_STADD0      (BSP_CFG_MPU3_STADD0 | (BSP_CFG_MPU3_WRITE0 << 1) | BSP_CFG_MPU3_READ0)
- #define BSP_PRV_M_MPU3_STADD1      (BSP_CFG_MPU3_STADD1 | (BSP_CFG_MPU3_WRITE1 << 1) | BSP_CFG_MPU3_READ1)
- #define BSP_PRV_M_MPU3_STADD2      (BSP_CFG_MPU3_STADD2 | (BSP_CFG_MPU3_WRITE2 << 1) | BSP_CFG_MPU3_READ2)
- #define BSP_PRV_M_MPU3_STADD3      (BSP_CFG_MPU3_STADD3 | (BSP_CFG_MPU3_WRITE3 << 1) | BSP_CFG_MPU3_READ3)
- #define BSP_PRV_M_MPU3_STADD4      (BSP_CFG_MPU3_STADD4 | (BSP_CFG_MPU3_WRITE4 << 1) | BSP_CFG_MPU3_READ4)
- #define BSP_PRV_M_MPU3_STADD5      (BSP_CFG_MPU3_STADD5 | (BSP_CFG_MPU3_WRITE5 << 1) | BSP_CFG_MPU3_READ5)
- #define BSP_PRV_M_MPU3_STADD6      (BSP_CFG_MPU3_STADD6 | (BSP_CFG_MPU3_WRITE6 << 1) | BSP_CFG_MPU3_READ6)
- #define BSP_PRV_M_MPU3_STADD7      (BSP_CFG_MPU3_STADD7 | (BSP_CFG_MPU3_WRITE7 << 1) | BSP_CFG_MPU3_READ7)
+ #define BSP_PRV_M_MPU3_STADD0                                (BSP_CFG_MPU3_STADD0 | (BSP_CFG_MPU3_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU3_READ0)
+ #define BSP_PRV_M_MPU3_STADD1                                (BSP_CFG_MPU3_STADD1 | (BSP_CFG_MPU3_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU3_READ1)
+ #define BSP_PRV_M_MPU3_STADD2                                (BSP_CFG_MPU3_STADD2 | (BSP_CFG_MPU3_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU3_READ2)
+ #define BSP_PRV_M_MPU3_STADD3                                (BSP_CFG_MPU3_STADD3 | (BSP_CFG_MPU3_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU3_READ3)
+ #define BSP_PRV_M_MPU3_STADD4                                (BSP_CFG_MPU3_STADD4 | (BSP_CFG_MPU3_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU3_READ4)
+ #define BSP_PRV_M_MPU3_STADD5                                (BSP_CFG_MPU3_STADD5 | (BSP_CFG_MPU3_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU3_READ5)
+ #define BSP_PRV_M_MPU3_STADD6                                (BSP_CFG_MPU3_STADD6 | (BSP_CFG_MPU3_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU3_READ6)
+ #define BSP_PRV_M_MPU3_STADD7                                (BSP_CFG_MPU3_STADD7 | (BSP_CFG_MPU3_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU3_READ7)
 #endif
 #if defined(BSP_M_MPU4_SUPPORT)
- #define BSP_PRV_M_MPU4_STADD0      (BSP_CFG_MPU4_STADD0 | (BSP_CFG_MPU4_WRITE0 << 1) | BSP_CFG_MPU4_READ0)
- #define BSP_PRV_M_MPU4_STADD1      (BSP_CFG_MPU4_STADD1 | (BSP_CFG_MPU4_WRITE1 << 1) | BSP_CFG_MPU4_READ1)
- #define BSP_PRV_M_MPU4_STADD2      (BSP_CFG_MPU4_STADD2 | (BSP_CFG_MPU4_WRITE2 << 1) | BSP_CFG_MPU4_READ2)
- #define BSP_PRV_M_MPU4_STADD3      (BSP_CFG_MPU4_STADD3 | (BSP_CFG_MPU4_WRITE3 << 1) | BSP_CFG_MPU4_READ3)
- #define BSP_PRV_M_MPU4_STADD4      (BSP_CFG_MPU4_STADD4 | (BSP_CFG_MPU4_WRITE4 << 1) | BSP_CFG_MPU4_READ4)
- #define BSP_PRV_M_MPU4_STADD5      (BSP_CFG_MPU4_STADD5 | (BSP_CFG_MPU4_WRITE5 << 1) | BSP_CFG_MPU4_READ5)
- #define BSP_PRV_M_MPU4_STADD6      (BSP_CFG_MPU4_STADD6 | (BSP_CFG_MPU4_WRITE6 << 1) | BSP_CFG_MPU4_READ6)
- #define BSP_PRV_M_MPU4_STADD7      (BSP_CFG_MPU4_STADD7 | (BSP_CFG_MPU4_WRITE7 << 1) | BSP_CFG_MPU4_READ7)
+ #define BSP_PRV_M_MPU4_STADD0                                (BSP_CFG_MPU4_STADD0 | (BSP_CFG_MPU4_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU4_READ0)
+ #define BSP_PRV_M_MPU4_STADD1                                (BSP_CFG_MPU4_STADD1 | (BSP_CFG_MPU4_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU4_READ1)
+ #define BSP_PRV_M_MPU4_STADD2                                (BSP_CFG_MPU4_STADD2 | (BSP_CFG_MPU4_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU4_READ2)
+ #define BSP_PRV_M_MPU4_STADD3                                (BSP_CFG_MPU4_STADD3 | (BSP_CFG_MPU4_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU4_READ3)
+ #define BSP_PRV_M_MPU4_STADD4                                (BSP_CFG_MPU4_STADD4 | (BSP_CFG_MPU4_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU4_READ4)
+ #define BSP_PRV_M_MPU4_STADD5                                (BSP_CFG_MPU4_STADD5 | (BSP_CFG_MPU4_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU4_READ5)
+ #define BSP_PRV_M_MPU4_STADD6                                (BSP_CFG_MPU4_STADD6 | (BSP_CFG_MPU4_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU4_READ6)
+ #define BSP_PRV_M_MPU4_STADD7                                (BSP_CFG_MPU4_STADD7 | (BSP_CFG_MPU4_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU4_READ7)
 #endif
 #if defined(BSP_M_MPU6_SUPPORT)
- #define BSP_PRV_M_MPU6_STADD0      (BSP_CFG_MPU6_STADD0 | (BSP_CFG_MPU6_WRITE0 << 1) | BSP_CFG_MPU6_READ0)
- #define BSP_PRV_M_MPU6_STADD1      (BSP_CFG_MPU6_STADD1 | (BSP_CFG_MPU6_WRITE1 << 1) | BSP_CFG_MPU6_READ1)
- #define BSP_PRV_M_MPU6_STADD2      (BSP_CFG_MPU6_STADD2 | (BSP_CFG_MPU6_WRITE2 << 1) | BSP_CFG_MPU6_READ2)
- #define BSP_PRV_M_MPU6_STADD3      (BSP_CFG_MPU6_STADD3 | (BSP_CFG_MPU6_WRITE3 << 1) | BSP_CFG_MPU6_READ3)
- #define BSP_PRV_M_MPU6_STADD4      (BSP_CFG_MPU6_STADD4 | (BSP_CFG_MPU6_WRITE4 << 1) | BSP_CFG_MPU6_READ4)
- #define BSP_PRV_M_MPU6_STADD5      (BSP_CFG_MPU6_STADD5 | (BSP_CFG_MPU6_WRITE5 << 1) | BSP_CFG_MPU6_READ5)
- #define BSP_PRV_M_MPU6_STADD6      (BSP_CFG_MPU6_STADD6 | (BSP_CFG_MPU6_WRITE6 << 1) | BSP_CFG_MPU6_READ6)
- #define BSP_PRV_M_MPU6_STADD7      (BSP_CFG_MPU6_STADD7 | (BSP_CFG_MPU6_WRITE7 << 1) | BSP_CFG_MPU6_READ7)
+ #define BSP_PRV_M_MPU6_STADD0                                (BSP_CFG_MPU6_STADD0 | (BSP_CFG_MPU6_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU6_READ0)
+ #define BSP_PRV_M_MPU6_STADD1                                (BSP_CFG_MPU6_STADD1 | (BSP_CFG_MPU6_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU6_READ1)
+ #define BSP_PRV_M_MPU6_STADD2                                (BSP_CFG_MPU6_STADD2 | (BSP_CFG_MPU6_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU6_READ2)
+ #define BSP_PRV_M_MPU6_STADD3                                (BSP_CFG_MPU6_STADD3 | (BSP_CFG_MPU6_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU6_READ3)
+ #define BSP_PRV_M_MPU6_STADD4                                (BSP_CFG_MPU6_STADD4 | (BSP_CFG_MPU6_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU6_READ4)
+ #define BSP_PRV_M_MPU6_STADD5                                (BSP_CFG_MPU6_STADD5 | (BSP_CFG_MPU6_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU6_READ5)
+ #define BSP_PRV_M_MPU6_STADD6                                (BSP_CFG_MPU6_STADD6 | (BSP_CFG_MPU6_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU6_READ6)
+ #define BSP_PRV_M_MPU6_STADD7                                (BSP_CFG_MPU6_STADD7 | (BSP_CFG_MPU6_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU6_READ7)
 #endif
 #if defined(BSP_M_MPU7_SUPPORT)
- #define BSP_PRV_M_MPU7_STADD0      (BSP_CFG_MPU7_STADD0 | (BSP_CFG_MPU7_WRITE0 << 1) | BSP_CFG_MPU7_READ0)
- #define BSP_PRV_M_MPU7_STADD1      (BSP_CFG_MPU7_STADD1 | (BSP_CFG_MPU7_WRITE1 << 1) | BSP_CFG_MPU7_READ1)
- #define BSP_PRV_M_MPU7_STADD2      (BSP_CFG_MPU7_STADD2 | (BSP_CFG_MPU7_WRITE2 << 1) | BSP_CFG_MPU7_READ2)
- #define BSP_PRV_M_MPU7_STADD3      (BSP_CFG_MPU7_STADD3 | (BSP_CFG_MPU7_WRITE3 << 1) | BSP_CFG_MPU7_READ3)
- #define BSP_PRV_M_MPU7_STADD4      (BSP_CFG_MPU7_STADD4 | (BSP_CFG_MPU7_WRITE4 << 1) | BSP_CFG_MPU7_READ4)
- #define BSP_PRV_M_MPU7_STADD5      (BSP_CFG_MPU7_STADD5 | (BSP_CFG_MPU7_WRITE5 << 1) | BSP_CFG_MPU7_READ5)
- #define BSP_PRV_M_MPU7_STADD6      (BSP_CFG_MPU7_STADD6 | (BSP_CFG_MPU7_WRITE6 << 1) | BSP_CFG_MPU7_READ6)
- #define BSP_PRV_M_MPU7_STADD7      (BSP_CFG_MPU7_STADD7 | (BSP_CFG_MPU7_WRITE7 << 1) | BSP_CFG_MPU7_READ7)
+ #define BSP_PRV_M_MPU7_STADD0                                (BSP_CFG_MPU7_STADD0 | (BSP_CFG_MPU7_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU7_READ0)
+ #define BSP_PRV_M_MPU7_STADD1                                (BSP_CFG_MPU7_STADD1 | (BSP_CFG_MPU7_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU7_READ1)
+ #define BSP_PRV_M_MPU7_STADD2                                (BSP_CFG_MPU7_STADD2 | (BSP_CFG_MPU7_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU7_READ2)
+ #define BSP_PRV_M_MPU7_STADD3                                (BSP_CFG_MPU7_STADD3 | (BSP_CFG_MPU7_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU7_READ3)
+ #define BSP_PRV_M_MPU7_STADD4                                (BSP_CFG_MPU7_STADD4 | (BSP_CFG_MPU7_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU7_READ4)
+ #define BSP_PRV_M_MPU7_STADD5                                (BSP_CFG_MPU7_STADD5 | (BSP_CFG_MPU7_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU7_READ5)
+ #define BSP_PRV_M_MPU7_STADD6                                (BSP_CFG_MPU7_STADD6 | (BSP_CFG_MPU7_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU7_READ6)
+ #define BSP_PRV_M_MPU7_STADD7                                (BSP_CFG_MPU7_STADD7 | (BSP_CFG_MPU7_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU7_READ7)
 #endif
 #if defined(BSP_M_MPU8_SUPPORT)
- #define BSP_PRV_M_MPU8_STADD0      (BSP_CFG_MPU8_STADD0 | (BSP_CFG_MPU8_WRITE0 << 1) | BSP_CFG_MPU8_READ0)
- #define BSP_PRV_M_MPU8_STADD1      (BSP_CFG_MPU8_STADD1 | (BSP_CFG_MPU8_WRITE1 << 1) | BSP_CFG_MPU8_READ1)
- #define BSP_PRV_M_MPU8_STADD2      (BSP_CFG_MPU8_STADD2 | (BSP_CFG_MPU8_WRITE2 << 1) | BSP_CFG_MPU8_READ2)
- #define BSP_PRV_M_MPU8_STADD3      (BSP_CFG_MPU8_STADD3 | (BSP_CFG_MPU8_WRITE3 << 1) | BSP_CFG_MPU8_READ3)
- #define BSP_PRV_M_MPU8_STADD4      (BSP_CFG_MPU8_STADD4 | (BSP_CFG_MPU8_WRITE4 << 1) | BSP_CFG_MPU8_READ4)
- #define BSP_PRV_M_MPU8_STADD5      (BSP_CFG_MPU8_STADD5 | (BSP_CFG_MPU8_WRITE5 << 1) | BSP_CFG_MPU8_READ5)
- #define BSP_PRV_M_MPU8_STADD6      (BSP_CFG_MPU8_STADD6 | (BSP_CFG_MPU8_WRITE6 << 1) | BSP_CFG_MPU8_READ6)
- #define BSP_PRV_M_MPU8_STADD7      (BSP_CFG_MPU8_STADD7 | (BSP_CFG_MPU8_WRITE7 << 1) | BSP_CFG_MPU8_READ7)
+ #define BSP_PRV_M_MPU8_STADD0                                (BSP_CFG_MPU8_STADD0 | (BSP_CFG_MPU8_WRITE0 << 1) | \
+                                                               BSP_CFG_MPU8_READ0)
+ #define BSP_PRV_M_MPU8_STADD1                                (BSP_CFG_MPU8_STADD1 | (BSP_CFG_MPU8_WRITE1 << 1) | \
+                                                               BSP_CFG_MPU8_READ1)
+ #define BSP_PRV_M_MPU8_STADD2                                (BSP_CFG_MPU8_STADD2 | (BSP_CFG_MPU8_WRITE2 << 1) | \
+                                                               BSP_CFG_MPU8_READ2)
+ #define BSP_PRV_M_MPU8_STADD3                                (BSP_CFG_MPU8_STADD3 | (BSP_CFG_MPU8_WRITE3 << 1) | \
+                                                               BSP_CFG_MPU8_READ3)
+ #define BSP_PRV_M_MPU8_STADD4                                (BSP_CFG_MPU8_STADD4 | (BSP_CFG_MPU8_WRITE4 << 1) | \
+                                                               BSP_CFG_MPU8_READ4)
+ #define BSP_PRV_M_MPU8_STADD5                                (BSP_CFG_MPU8_STADD5 | (BSP_CFG_MPU8_WRITE5 << 1) | \
+                                                               BSP_CFG_MPU8_READ5)
+ #define BSP_PRV_M_MPU8_STADD6                                (BSP_CFG_MPU8_STADD6 | (BSP_CFG_MPU8_WRITE6 << 1) | \
+                                                               BSP_CFG_MPU8_READ6)
+ #define BSP_PRV_M_MPU8_STADD7                                (BSP_CFG_MPU8_STADD7 | (BSP_CFG_MPU8_WRITE7 << 1) | \
+                                                               BSP_CFG_MPU8_READ7)
+#endif
+
+#if defined(__ICCARM__)
+ #if BSP_CFG_C_RUNTIME_INIT
+  #define BSP_PRV_SECTION_LDR_DATA_ROM_ADDRESS                __section_begin("LDR_DATA_RBLOCK")
+  #define BSP_PRV_SECTION_LDR_DATA_RAM_START                  __section_begin("LDR_DATA_WBLOCK")
+  #define BSP_PRV_SECTION_LDR_DATA_RAM_END                    __section_end("LDR_DATA_WBLOCK")
+
+  #define BSP_PRV_SECTION_LDR_DATA_BSS_START                  __section_begin("LDR_DATA_ZBLOCK")
+  #define BSP_PRV_SECTION_LDR_DATA_BSS_END                    __section_end("LDR_DATA_ZBLOCK")
+
+ #endif
+
+ #if !(BSP_CFG_RAM_EXECUTION)
+  #define BSP_PRV_SECTION_VECTOR_ROM_ADDRESS                  __section_begin("VECTOR_RBLOCK")
+  #define BSP_PRV_SECTION_VECTOR_RAM_START                    __section_begin("VECTOR_WBLOCK")
+  #define BSP_PRV_SECTION_VECTOR_RAM_END                      __section_end("VECTOR_WBLOCK")
+
+  #define BSP_PRV_SECTION_USER_PRG_ROM_ADDRESS                __section_begin("USER_PRG_RBLOCK")
+  #define BSP_PRV_SECTION_USER_PRG_RAM_START                  __section_begin("USER_PRG_WBLOCK")
+  #define BSP_PRV_SECTION_USER_PRG_RAM_END                    __section_end("USER_PRG_WBLOCK")
+
+  #define BSP_PRV_SECTION_USER_DATA_ROM_ADDRESS               __section_begin("USER_DATA_RBLOCK")
+  #define BSP_PRV_SECTION_USER_DATA_RAM_START                 __section_begin("USER_DATA_WBLOCK")
+  #define BSP_PRV_SECTION_USER_DATA_RAM_END                   __section_end("USER_DATA_WBLOCK")
+
+  #define BSP_PRV_SECTION_USER_DATA_BSS_START                 __section_begin("USER_DATA_ZBLOCK")
+  #define BSP_PRV_SECTION_USER_DATA_BSS_END                   __section_end("USER_DATA_ZBLOCK")
+
+ #endif
+
+ #if BSP_CFG_RAM_EXECUTION
+  #define BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_START           __section_begin("NONCACHE_BUFFER_ZBLOCK")
+  #define BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_END             __section_end("NONCACHE_BUFFER_ZBLOCK")
+
+  #define BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_START    __section_begin("SHARED_NONCACHE_BUFFER_ZBLOCK")
+  #define BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_END      __section_end("SHARED_NONCACHE_BUFFER_ZBLOCK")
+
+  #define BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_START            __section_begin("DMAC_LINK_MODE_ZBLOCK")
+  #define BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_END              __section_end("DMAC_LINK_MODE_ZBLOCK")
+ #endif
+
+#elif defined(__GNUC__)
+ #if BSP_CFG_C_RUNTIME_INIT
+  #define BSP_PRV_SECTION_LDR_DATA_ROM_ADDRESS                &_mloader_data
+  #define BSP_PRV_SECTION_LDR_DATA_RAM_START                  &__loader_data_start
+  #define BSP_PRV_SECTION_LDR_DATA_RAM_END                    &__loader_data_end
+
+  #define BSP_PRV_SECTION_LDR_DATA_BSS_START                  &__loader_bss_start
+  #define BSP_PRV_SECTION_LDR_DATA_BSS_END                    &__loader_bss_end
+
+ #endif
+
+ #if !(BSP_CFG_RAM_EXECUTION)
+  #define BSP_PRV_SECTION_VECTOR_ROM_ADDRESS                  &_mfvector
+  #define BSP_PRV_SECTION_VECTOR_RAM_START                    &_fvector_start
+  #define BSP_PRV_SECTION_VECTOR_RAM_END                      &_fvector_end
+
+  #define BSP_PRV_SECTION_USER_PRG_ROM_ADDRESS                &_mtext
+  #define BSP_PRV_SECTION_USER_PRG_RAM_START                  &_text_start
+  #define BSP_PRV_SECTION_USER_PRG_RAM_END                    &_text_end
+
+  #define BSP_PRV_SECTION_USER_DATA_ROM_ADDRESS               &_mdata
+  #define BSP_PRV_SECTION_USER_DATA_RAM_START                 &_data_start
+  #define BSP_PRV_SECTION_USER_DATA_RAM_END                   &_data_end
+
+ #endif
+
+ #define BSP_PRV_SECTION_USER_DATA_BSS_START                  &__bss_start__
+ #define BSP_PRV_SECTION_USER_DATA_BSS_END                    &__bss_end__
+
+ #if BSP_CFG_RAM_EXECUTION
+  #define BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_START           &_ncbuffer_start
+  #define BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_END             &_ncbuffer_end
+
+  #define BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_START    &_sncbuffer_start
+  #define BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_END      &_sncbuffer_end
+
+  #define BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_START            &_DmacLinkMode_start
+  #define BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_END              &_DmacLinkMode_end
+
+ #endif
+
 #endif
 
 /***********************************************************************************************************************
@@ -131,23 +278,79 @@ uint32_t SystemCoreClock = 0U;
 /** @} (end addtogroup BSP_MCU) */
 
 #if defined(__ICCARM__)
+ #if BSP_CFG_C_RUNTIME_INIT
+  #pragma section="LDR_DATA_RBLOCK"
+  #pragma section="LDR_DATA_WBLOCK"
+  #pragma section="LDR_DATA_ZBLOCK"
 
- #pragma section="VECTOR_RBLOCK"
- #pragma section="VECTOR_WBLOCK"
- #pragma section="USER_PRG_RBLOCK"
- #pragma section="USER_PRG_WBLOCK"
- #pragma section="USER_DATA_RBLOCK"
- #pragma section="USER_DATA_WBLOCK"
- #pragma section="USER_DATA_ZBLOCK"
- #pragma section="NONCACHE_BUFFER_ZBLOCK"
- #pragma section="SHARED_NONCACHE_BUFFER_ZBLOCK"
+ #endif
 
-#endif                                 // __ICCARM__
+ #if !(BSP_CFG_RAM_EXECUTION)
+  #pragma section="VECTOR_RBLOCK"
+  #pragma section="VECTOR_WBLOCK"
+
+  #pragma section="USER_PRG_RBLOCK"
+  #pragma section="USER_PRG_WBLOCK"
+
+  #pragma section="USER_DATA_RBLOCK"
+  #pragma section="USER_DATA_WBLOCK"
+  #pragma section="USER_DATA_ZBLOCK"
+
+ #endif
+
+ #if BSP_CFG_RAM_EXECUTION
+  #pragma section="NONCACHE_BUFFER_ZBLOCK"
+  #pragma section="SHARED_NONCACHE_BUFFER_ZBLOCK"
+  #pragma section="DMAC_LINK_MODE_ZBLOCK"
+
+ #endif
+
+#elif defined(__GNUC__)
+ #if BSP_CFG_C_RUNTIME_INIT
+extern void * _mloader_data;
+extern void * __loader_data_start;
+extern void * __loader_data_end;
+
+extern void * __loader_bss_start;
+extern void * __loader_bss_end;
+
+ #endif
+
+ #if !(BSP_CFG_RAM_EXECUTION)
+extern void * _mfvector;
+extern void * _fvector_start;
+extern void * _fvector_end;
+
+extern void * _mtext;
+extern void * _text_start;
+extern void * _text_end;
+
+extern void * _mdata;
+extern void * _data_start;
+extern void * _data_end;
+
+ #endif
+
+extern void * __bss_start__;
+extern void * __bss_end__;
+
+ #if BSP_CFG_RAM_EXECUTION
+extern void * _ncbuffer_start;
+extern void * _ncbuffer_end;
+
+extern void * _sncbuffer_start;
+extern void * _sncbuffer_end;
+
+extern void * _DmacLinkMode_start;
+extern void * _DmacLinkMode_end;
+
+ #endif
+
+#endif
 
 /***********************************************************************************************************************
  * Private global variables and functions
  **********************************************************************************************************************/
-
 #if defined(__ICCARM__)
 
 void R_BSP_WarmStart(bsp_warm_start_event_t event);
@@ -160,19 +363,22 @@ void R_BSP_WarmStart(bsp_warm_start_event_t event) __attribute__((weak));
 
 #endif
 
-void bsp_m_mpu_init(void);
+#if BSP_CFG_C_RUNTIME_INIT
+void bsp_loader_data_init(void);
+void bsp_loader_bss_init(void);
+
+#endif
+
+void bsp_copy_4byte(uint32_t * src, uint32_t * dst, uint32_t bytesize);
+void bsp_bss_init_4byte(uint32_t * src, uint32_t bytesize);
 
 #if !(BSP_CFG_RAM_EXECUTION)
-void bsp_copy_to_atcm(void);
-
- #if defined(__ICCARM__)
-void bsp_copy_4byte(uint32_t * src, uint32_t * dst, uint32_t bytesize);
-
- #endif
+void bsp_copy_to_ram(void);
 void bsp_application_bss_init(void);
 
 #endif
 
+void bsp_m_mpu_init(void);
 void bsp_global_system_counter_init(void);
 
 #if BSP_FEATURE_TFU_SUPPORTED
@@ -327,6 +533,12 @@ extern void (* __init_array_end[])(void);
  #elif defined(__ICCARM__)
 extern void __call_ctors(void const *, void const *);
 
+  #if BSP_CFG_RAM_EXECUTION
+
+extern void __iar_data_init3(void);
+
+  #endif
+
   #pragma section = "SHT$$PREINIT_ARRAY" const
   #pragma section = "SHT$$INIT_ARRAY" const
  #endif
@@ -405,6 +617,13 @@ void bsp_global_system_counter_init (void)
  * process. To use this function just copy this function into your own code and modify it to meet your needs.
  *
  * @param[in]  event    Where the code currently is in the start up process
+ *
+ *
+ * @note All programs to be executed when BSP_WARM_START_RESET or BSP_WARM_START_POST_CLOCK event occurs should be
+ *       placed in BTCM. These events occur before copying the application program in startup code is executed, and
+ *       therefore the application program is located on ROM and cannot be executed at that time.
+ *       Linker script for FSP specifies that .warm_start section is to be placed at BTCM. Adding the section
+ *       designation to function or variable definition makes it easy to place at BTCM.
  **********************************************************************************************************************/
 void R_BSP_WarmStart (bsp_warm_start_event_t event)
 {
@@ -429,15 +648,126 @@ void R_BSP_WarmStart (bsp_warm_start_event_t event)
 
 /** @} (end addtogroup BSP_MCU) */
 
+#if BSP_CFG_C_RUNTIME_INIT
+
+/*******************************************************************************************************************//**
+ * Copy the loader data block from external Flash to internal RAM.
+ **********************************************************************************************************************/
+void bsp_loader_data_init (void)
+{
+ #if (!defined(__GNUC__) || !(BSP_CFG_RAM_EXECUTION))
+
+    /* Define destination/source address pointer and block size */
+    uint32_t * src;
+    uint32_t * dst;
+    uint32_t   size;
+
+    /* Copy loader data block */
+    src  = (uint32_t *) BSP_PRV_SECTION_LDR_DATA_ROM_ADDRESS;
+    dst  = (uint32_t *) BSP_PRV_SECTION_LDR_DATA_RAM_START;
+    size = (uint32_t) BSP_PRV_SECTION_LDR_DATA_RAM_END - (uint32_t) BSP_PRV_SECTION_LDR_DATA_RAM_START;
+    bsp_copy_4byte(src, dst, size);
+ #endif
+}
+
+/*******************************************************************************************************************//**
+ * Clear the loader bss block in internal RAM.
+ **********************************************************************************************************************/
+void bsp_loader_bss_init (void)
+{
+    /* Define source address pointer and block size */
+    uint32_t * src;
+    uint32_t   size;
+
+    /* Clear loader bss block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_LDR_DATA_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_LDR_DATA_BSS_END - (uint32_t) BSP_PRV_SECTION_LDR_DATA_BSS_START;
+    bsp_bss_init_4byte(src, size);
+
+ #if BSP_CFG_RAM_EXECUTION
+  #if defined(__ICCARM__)
+
+    /* Initialize the application data and clear the application bss.
+     * This code is for RAM Execution. If you want to boot with ROM,
+     * enable app_copy and app_bss_init, and disable this code.
+     * Also need to change icf file. */
+    __iar_data_init3();
+  #elif defined(__GNUC__)
+
+    /* Clear application bss block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_USER_DATA_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_USER_DATA_BSS_END - (uint32_t) BSP_PRV_SECTION_USER_DATA_BSS_START;
+    bsp_bss_init_4byte(src, size);
+  #endif
+
+    /* Clear non-cache buffer block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_END - (uint32_t) BSP_PRV_SECTION_NONCACHE_BUFFER_BSS_START;
+    bsp_bss_init_4byte(src, size);
+
+    /* Clear shared non-cache buffer block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_END -
+           (uint32_t) BSP_PRV_SECTION_SHARED_NONCACHE_BUFFER_BSS_START;
+    bsp_bss_init_4byte(src, size);
+
+    /* Clear DMAC link mode data block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_END - (uint32_t) BSP_PRV_SECTION_DMAC_LINK_MODE_BSS_START;
+    bsp_bss_init_4byte(src, size);
+ #endif
+}
+
+#endif
+
+/*******************************************************************************************************************//**
+ * Copy the memory block from Source address to Destination address by the 4 byte unit.
+ **********************************************************************************************************************/
+void bsp_copy_4byte (uint32_t * src, uint32_t * dst, uint32_t bytesize)
+{
+    uint32_t i;
+    uint32_t cnt;
+
+    /* Copy Count in 4 byte unit */
+    cnt = (bytesize + 3) >> 2;
+
+    for (i = 0; i < cnt; i++)
+    {
+        *dst++ = *src++;
+    }
+
+    /* Ensuring data-changing */
+    __DSB();
+}
+
+/*******************************************************************************************************************//**
+ * Clear the bss block by the 4 byte unit.
+ **********************************************************************************************************************/
+void bsp_bss_init_4byte (uint32_t * src, uint32_t bytesize)
+{
+    uint32_t i;
+    uint32_t cnt;
+    uint32_t zero = 0;
+
+    /* Clear Count in 4 byte unit */
+    cnt = (bytesize + 3) >> 2;
+
+    for (i = 0; i < cnt; i++)
+    {
+        *src++ = zero;
+    }
+
+    /* Ensuring data-changing */
+    __DSB();
+}
+
 #if !(BSP_CFG_RAM_EXECUTION)
 
 /*******************************************************************************************************************//**
- * Copy the application program from external Flash to ATCM.
+ * Copy the application program block from external Flash to internal RAM.
  **********************************************************************************************************************/
-void bsp_copy_to_atcm (void)
+void bsp_copy_to_ram (void)
 {
- #if defined(__ICCARM__)
-
     /* Define destination/source address pointer and block size */
     uint32_t * src;
     uint32_t * dst;
@@ -447,198 +777,43 @@ void bsp_copy_to_atcm (void)
 
     /* Casting the pointer and address to a (uint32_t *) and (uint32_t) are valid
      * because these will reference 32 bit address and address size */
-    src  = (uint32_t *) __section_begin("VECTOR_RBLOCK");
-    dst  = (uint32_t *) __section_begin("VECTOR_WBLOCK");
-    size = (uint32_t) __section_size("VECTOR_WBLOCK");
+    src  = (uint32_t *) BSP_PRV_SECTION_VECTOR_ROM_ADDRESS;
+    dst  = (uint32_t *) BSP_PRV_SECTION_VECTOR_RAM_START;
+    size = (uint32_t) BSP_PRV_SECTION_VECTOR_RAM_END - (uint32_t) BSP_PRV_SECTION_VECTOR_RAM_START;
     bsp_copy_4byte(src, dst, size);
 
     /* Copy user program block */
 
     /* Casting the pointer and address to a (uint32_t *) and (uint32_t) are valid
      * because these will reference 32 bit address and address size */
-    src  = (uint32_t *) __section_begin("USER_PRG_RBLOCK");
-    dst  = (uint32_t *) __section_begin("USER_PRG_WBLOCK");
-    size = (uint32_t) __section_size("USER_PRG_WBLOCK");
+    src  = (uint32_t *) BSP_PRV_SECTION_USER_PRG_ROM_ADDRESS;
+    dst  = (uint32_t *) BSP_PRV_SECTION_USER_PRG_RAM_START;
+    size = (uint32_t) BSP_PRV_SECTION_USER_PRG_RAM_END - (uint32_t) BSP_PRV_SECTION_USER_PRG_RAM_START;
     bsp_copy_4byte(src, dst, size);
 
     /* Copy user data block */
 
     /* Casting the pointer and address to a (uint32_t *) and (uint32_t) are valid
      * because these will reference 32 bit address and address size */
-    src  = (uint32_t *) __section_begin("USER_DATA_RBLOCK");
-    dst  = (uint32_t *) __section_begin("USER_DATA_WBLOCK");
-    size = (uint32_t) __section_size("USER_DATA_WBLOCK");
+    src  = (uint32_t *) BSP_PRV_SECTION_USER_DATA_ROM_ADDRESS;
+    dst  = (uint32_t *) BSP_PRV_SECTION_USER_DATA_RAM_START;
+    size = (uint32_t) BSP_PRV_SECTION_USER_DATA_RAM_END - (uint32_t) BSP_PRV_SECTION_USER_DATA_RAM_START;
     bsp_copy_4byte(src, dst, size);
- #elif defined(__GNUC__)
-    __asm volatile (
-        "copy_to_atcm:                             \n"
-
-        /* Variables has no initialized value already be initialized to zero */
-        /* in boot sequence(Clear ATCM and BTCM). */
-        "    ldr  r0, =_mfvector                   \n"
-        "    ldr  r1, =_fvector_start              \n"
-        "    ldr  r2, =_fvector_end                \n"
-        "    cmp  r2, r1                           \n"
-        "    beq  copy_FVECTOR_end                 \n"
-
-        "copy_to_FVECTOR:                          \n"
-        "    ldrb  r3, [r0], #0                    \n"
-        "    strb  r3, [r1], #0                    \n"
-        "    add   r0, r0, #1                      \n"
-        "    add   r1, r1, #1                      \n"
-        "    cmp   r2, r1                          \n"
-        "    bne   copy_to_FVECTOR                 \n"
-        "copy_FVECTOR_end:                         \n"
-        "    dsb                                   \n" /* Ensuring data-changing */
-
-        "    ldr  r0, =_mtext                      \n"
-        "    ldr  r1, =_text_start                 \n"
-        "    ldr  r2, =_text_end                   \n"
-        "    cmp  r2, r1                           \n"
-        "    beq  copy_APP_TEXT_end                \n"
-
-        "copy_to_APP_TEXT:                         \n"
-        "    ldrb  r3, [r0], #0                    \n"
-        "    strb  r3, [r1], #0                    \n"
-        "    add   r0, r0, #1                      \n"
-        "    add   r1, r1, #1                      \n"
-        "    cmp   r2, r1                          \n"
-        "    bne   copy_to_APP_TEXT                \n"
-        "copy_APP_TEXT_end:                        \n"
-        "    dsb                                   \n" /* Ensuring data-changing */
-
-        "    ldr  r0, =_mdata                      \n"
-        "    ldr  r1, =_data_start                 \n"
-        "    ldr  r2, =_data_end                   \n"
-        "    cmp  r2, r1                           \n"
-        "    beq  copy_APP_DATA_end                \n"
-
-        "copy_to_APP_DATA:                         \n"
-        "    ldrb  r3, [r0], #0                    \n"
-        "    strb  r3, [r1], #0                    \n"
-        "    add   r0, r0, #1                      \n"
-        "    add   r1, r1, #1                      \n"
-        "    cmp   r2, r1                          \n"
-        "    bne   copy_to_APP_DATA                \n"
-        "copy_APP_DATA_end:                        \n"
-        "    dsb                                   \n" /* Ensuring data-changing */
-        );
- #endif
 }
 
- #if defined(__ICCARM__)
-
 /*******************************************************************************************************************//**
- * Copy the memory block from Source address to Destination address by the 4byte unit.
- **********************************************************************************************************************/
-void bsp_copy_4byte (uint32_t * src, uint32_t * dst, uint32_t bytesize)
-{
-    uint32_t i;
-    uint32_t cnt;
-
-    /* Copy Count in 4Byte unit */
-    cnt = (bytesize + 3) >> 2;
-
-    for (i = 0; i < cnt; i++)
-    {
-        *dst++ = *src++;
-    }
-
-    /* Ensuring data-changing */
-    asm volatile ("dsb");
-}
-
- #endif
-
-/*******************************************************************************************************************//**
- * Clear LDR_DATA_ZBLOCK section in ATCM.
+ * Clear the application bss block in internal RAM.
  **********************************************************************************************************************/
 void bsp_application_bss_init (void)
 {
- #if defined(__ICCARM__)
-    uint8_t   zero = 0;
-    uint8_t * src;
-    uint8_t * dst;
+    /* Define source address pointer and block size */
+    uint32_t * src;
+    uint32_t   size;
 
-    /* Clear BSS. */
-    dst = (uint8_t *) __section_end("USER_DATA_ZBLOCK");
-
-    for (src = (uint8_t *) __section_begin("USER_DATA_ZBLOCK"); src < dst; src++)
-    {
-        *src = zero;
-    }
-
-    /* Ensuring Context-changing */
-    asm volatile ("dsb");
-
-    /* Clear shared non-cache buffer. */
-    dst = (uint8_t *) __section_end("SHARED_NONCACHE_BUFFER_ZBLOCK");
-
-    for (src = (uint8_t *) __section_begin("SHARED_NONCACHE_BUFFER_ZBLOCK"); src < dst; src++)
-    {
-        *src = zero;
-    }
-
-    /* Ensuring Context-changing */
-    asm volatile ("dsb");
-
-    /* Clear non-cache buffer. */
-    dst = (uint8_t *) __section_end("NONCACHE_BUFFER_ZBLOCK");
-
-    for (src = (uint8_t *) __section_begin("NONCACHE_BUFFER_ZBLOCK"); src < dst; src++)
-    {
-        *src = zero;
-    }
-
-    /* Ensuring Context-changing */
-    asm volatile ("dsb");
- #elif defined(__GNUC__)
-    __asm volatile (
-
-        /* Clear BSS. */
-        "    ldr  r0, =0x00000000                            \n"
-        "    ldr  r1, =__bss_start__                         \n"
-        "    ldr  r2, =__bss_end__                           \n"
-        "    cmp  r2, r1                                     \n"
-        "    beq  bss_init_end                               \n"
-        "clear_bss:                                          \n"
-        "    strb  r0, [r1], #0                              \n"
-        "    add   r1, r1, #1                                \n"
-        "    cmp   r2, r1                                    \n"
-        "    bne   clear_bss                                 \n"
-        "    bss_init_end:                                   \n"
-        "    dsb                                             \n" /* Ensuring data-changing */
-
-        /* Clear shared non-cache buffer. */
-        "    ldr  r0, =0x00000000                            \n"
-        "    ldr  r1, =_sncbuffer_start                      \n"
-        "    ldr  r2, =_sncbuffer_end                        \n"
-        "    cmp  r2, r1                                     \n"
-        "    beq  shared_noncache_buffer_init_end            \n"
-        "clear_shared_noncache_buffer:                       \n"
-        "    strb  r0, [r1], #0                              \n"
-        "    add   r1, r1, #1                                \n"
-        "    cmp   r2, r1                                    \n"
-        "    bne   clear_shared_noncache_buffer              \n"
-        "    shared_noncache_buffer_init_end:                \n"
-        "    dsb                                             \n" /* Ensuring data-changing */
-
-        /* Clear non-cache buffer. */
-        "    ldr  r0, =0x00000000                            \n"
-        "    ldr  r1, =_ncbuffer_start                       \n"
-        "    ldr  r2, =_ncbuffer_end                         \n"
-        "    cmp  r2, r1                                     \n"
-        "    beq  noncache_buffer_init_end                   \n"
-        "clear_noncache_buffer:                              \n"
-        "    strb  r0, [r1], #0                              \n"
-        "    add   r1, r1, #1                                \n"
-        "    cmp   r2, r1                                    \n"
-        "    bne   clear_noncache_buffer                     \n"
-        "    noncache_buffer_init_end:                       \n"
-        "    dsb                                             \n" /* Ensuring data-changing */
-
-        );
- #endif
+    /* Clear application bss block. */
+    src  = (uint32_t *) BSP_PRV_SECTION_USER_DATA_BSS_START;
+    size = (uint32_t) BSP_PRV_SECTION_USER_DATA_BSS_END - (uint32_t) BSP_PRV_SECTION_USER_DATA_BSS_START;
+    bsp_bss_init_4byte(src, size);
 }
 
 #endif

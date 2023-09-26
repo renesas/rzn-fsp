@@ -697,17 +697,20 @@ static bool r_cgc_stabilization_check (cgc_clock_t clock, cgc_prv_clock_state_t 
 }
 
 /*******************************************************************************************************************//**
- * This function starts or stops the selected clock.  Do not call this subroutine with CGC_CLOCK_CHANGE_NONE.
+ * This function starts or stops the selected clock.
  *
  * @param[in]  clock   Clock to start or stop
  * @param[in]  state   1 to stop clock, 0 to start clock
  **********************************************************************************************************************/
 static void r_cgc_clock_change (cgc_clock_t clock, cgc_clock_change_t state)
 {
-    *gp_cgc_clock_stp_registers[clock] = (uint32_t) state;
+    /* Convert api defined value to register setting value. */
+    uint32_t state_set_value = ((uint32_t) (~state) & 0x00000001U);
+
+    *gp_cgc_clock_stp_registers[clock] = state_set_value;
 
     /* Wait setting to be reflected in hardware registers. */
-    FSP_HARDWARE_REGISTER_WAIT(*gp_cgc_clock_stp_registers[clock], (uint32_t) state);
+    FSP_HARDWARE_REGISTER_WAIT(*gp_cgc_clock_stp_registers[clock], state_set_value);
 }
 
 /*******************************************************************************************************************//**

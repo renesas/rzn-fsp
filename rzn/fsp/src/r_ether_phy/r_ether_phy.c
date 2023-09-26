@@ -28,8 +28,6 @@
 /***********************************************************************************************************************
  * Macro definitions
  ***********************************************************************************************************************/
-#define ether_phy_targets_initialize_default    ether_phy_targets_initialize_ksz9131
-
 #ifndef ETHER_PHY_ERROR_RETURN
 
 /*LDRA_INSPECTED 77 S This macro does not work when surrounded by parentheses. */
@@ -232,6 +230,11 @@ static void ether_phy_targets_initialize_ksz8081(ether_phy_instance_ctrl_t * p_i
 
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_KSZ8041) == ETHER_PHY_CHIP_KSZ8041)
 static void ether_phy_targets_initialize_ksz8041(ether_phy_instance_ctrl_t * p_instance_ctrl);
+
+#endif
+
+#if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_OTHER) == ETHER_PHY_CHIP_OTHER)
+void ether_phy_targets_initialize_other(ether_phy_instance_ctrl_t * p_instance_ctrl);
 
 #endif
 
@@ -1618,7 +1621,7 @@ void ether_phy_targets_initialize (ether_phy_instance_ctrl_t * p_instance_ctrl)
     switch (p_extend->phy_chip)
     {
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_VSC8541) == ETHER_PHY_CHIP_VSC8541)
-        case ETHER_PHY_CHIP_VSC8541:
+        case ETHER_PHY_CHIP_VSC8541_TYPE:
         {
             ether_phy_targets_initialize_vsc8541(p_instance_ctrl);
             break;
@@ -1626,7 +1629,7 @@ void ether_phy_targets_initialize (ether_phy_instance_ctrl_t * p_instance_ctrl)
 #endif
 
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_KSZ9131) == ETHER_PHY_CHIP_KSZ9131)
-        case ETHER_PHY_CHIP_KSZ9131:
+        case ETHER_PHY_CHIP_KSZ9131_TYPE:
         {
             ether_phy_targets_initialize_ksz9131(p_instance_ctrl);
             break;
@@ -1634,7 +1637,7 @@ void ether_phy_targets_initialize (ether_phy_instance_ctrl_t * p_instance_ctrl)
 #endif
 
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_KSZ9031) == ETHER_PHY_CHIP_KSZ9031)
-        case ETHER_PHY_CHIP_KSZ9031:
+        case ETHER_PHY_CHIP_KSZ9031_TYPE:
         {
             ether_phy_targets_initialize_ksz9031(p_instance_ctrl);
             break;
@@ -1642,7 +1645,7 @@ void ether_phy_targets_initialize (ether_phy_instance_ctrl_t * p_instance_ctrl)
 #endif
 
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_KSZ8081) == ETHER_PHY_CHIP_KSZ8081)
-        case ETHER_PHY_CHIP_KSZ8081:
+        case ETHER_PHY_CHIP_KSZ8081_TYPE:
         {
             ether_phy_targets_initialize_ksz8081(p_instance_ctrl);
             break;
@@ -1650,9 +1653,17 @@ void ether_phy_targets_initialize (ether_phy_instance_ctrl_t * p_instance_ctrl)
 #endif
 
 #if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_KSZ8041) == ETHER_PHY_CHIP_KSZ8041)
-        case ETHER_PHY_CHIP_KSZ8041:
+        case ETHER_PHY_CHIP_KSZ8041_TYPE:
         {
             ether_phy_targets_initialize_ksz8041(p_instance_ctrl);
+            break;
+        }
+#endif
+
+#if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_OTHER) == ETHER_PHY_CHIP_OTHER)
+        case ETHER_PHY_CHIP_OTHER_TYPE:
+        {
+            ether_phy_targets_initialize_other(p_instance_ctrl);
             break;
         }
 #endif

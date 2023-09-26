@@ -195,11 +195,11 @@ FSP_HEADER
                                                                                                              CTL0));
 
 #define BSP_MSTP_REG_FSP_IP_SHOSTIF(channel)       R_SYSC_S->MSTPCRI
-#define BSP_MSTP_BIT_FSP_IP_SHOSTIF(channel)       (1U << (0U));
+#define BSP_MSTP_BIT_FSP_IP_SHOSTIF(channel)       (1U << (1U));
 #define BSP_MSTP_DMY_FSP_IP_SHOSTIF(channel)       ;
 
 #define BSP_MSTP_REG_FSP_IP_PHOSTIF(channel)       R_SYSC_S->MSTPCRI
-#define BSP_MSTP_BIT_FSP_IP_PHOSTIF(channel)       (1U << (1U));
+#define BSP_MSTP_BIT_FSP_IP_PHOSTIF(channel)       (1U << (0U));
 #define BSP_MSTP_DMY_FSP_IP_PHOSTIF(channel)       ;
 
 /** Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */

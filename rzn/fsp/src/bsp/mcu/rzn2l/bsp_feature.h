@@ -112,7 +112,10 @@
 
 #define BSP_FEATURE_CRC_VALID_CHANNEL_MASK             (0x3U)
 
-#define BSP_FEATURE_DMAC_MAX_CHANNEL                   (16U)
+#define BSP_FEATURE_DMAC_MAX_CHANNEL                   (8U)
+#define BSP_FEATURE_DMAC_MAX_UNIT                      (2U)
+#define BSP_FEATURE_DMAC_UNIT0_ERROR_NUM               (5U)
+#define BSP_FEATURE_DMAC_UNIT1_ERROR_NUM               (6U)
 
 #define BSP_FEATURE_ELC_ELC_SSEL_NUM                   (19)
 #define BSP_FEATURE_ELC_EVENT_MASK_NUM                 (4U)
@@ -125,6 +128,7 @@
 #define BSP_FEATURE_GMAC_MAX_CHANNELS                  (1U)
 #define BSP_FEATURE_GMAC_MAX_PORTS                     (3U)
 
+#define BSP_FEATURE_ETHSW_SUPPORTED                    (1U)
 #define BSP_FEATURE_ETHSW_MAX_CHANNELS                 (1U)
 #define BSP_FEATURE_ETHER_PHY_MAX_CHANNELS             (3U)
 

@@ -55,17 +55,17 @@ void R_BSP_CacheInvalidate (void)
 
         "    push    {r4, r5, r7, r9, r11}      \n" // ARM calling convention saves these
 
-        /* Ensure memory operations are completed this does cache write back */
+        /* Ensure memory operations are completed this does cache write back. */
         "    dsb                                \n"
 
-        /* Invalidate instruction cache */
+        /* Invalidate instruction cache. */
         "    mov     r0, #0                     \n"
-        "    mcr     p15, 0, r0, c7, c5, 0      \n"
+        "    mcr     p15, 0, r0, c7, c5, 0      \n" // ICIALLU - Invalidate entire instruction cache
 
         /* Invalidate data cache. RZ microprocessor only has L1 cache. */
-        "    mcr     p15, 2, r0, c0, c0, 0      \n" // Select Data L1 in Cache Size selection register
-        "    isb                                \n" // ISB to sync the change to the CacheSizeID reg
-        "    mrc     p15, 1, r1, c0, c0, 0      \n" // Read current Cache Size ID register to r1
+        "    mcr     p15, 2, r0, c0, c0, 0      \n" // Select Data L1 in CSSELR
+        "    isb                                \n" // ISB to sync the change to CCSIDR
+        "    mrc     p15, 1, r1, c0, c0, 0      \n" // Read CCSIDR to r1
         "    and     r2, r1, #7                 \n" // Get the line length field in r2
         "    add     r2, r2, #4                 \n" // Add 4 for the line length bit offset (log2 16 bytes)
         "    ldr     r4, =0x3FF                 \n"

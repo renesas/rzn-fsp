@@ -676,7 +676,7 @@ void usb_dma_set_ch_no (uint16_t ip_no, uint16_t use_port, uint8_t dma_ch_no)
 /******************************************************************************
  * Function Name   : usb_dma_send_complete_event_set
  * Description     : Set event for DMA transfer complete of Buffer to DxFIFO.
- * Arguments       : uint16_t ip_no  : IP no.(USB_IP0/USB_IP1)
+ * Arguments       : uint8_t ip_no  : IP no.(USB_IP0/USB_IP1)
  *              : uint16_t useport: FIFO select(USB_D0USE/USB_D1USE)
  * Return value    : none
  ******************************************************************************/
@@ -721,18 +721,19 @@ void usb_dma_send_complete_event_set (uint8_t ip_no, uint16_t use_port)
 }
 
    #else
-void usb_dma_send_complete_event_set (uint16_t ip_no, uint16_t use_port)
+void usb_dma_send_complete_event_set (uint8_t ip_no, uint16_t use_port)
 {
     usb_utr_t * p;
-    hw_usb_clear_dreqe(USB_NULL, use_port); /* DMA Transfer request disable */
 
-    p          = (usb_utr_t *) get_usb_int_buf();
+    p          = get_usb_int_buf();
     p->ip      = ip_no;
     p->msginfo = USB_MSG_PCD_INT;
     p->keyword = USB_INT_DXFIFO;
     p->status  = use_port;
 
-    USB_ISND_MSG(USB_PCD_MBX, (p_os_msg_t *) p);
+    hw_usb_clear_dreqe(p, use_port);   /* DMA Transfer request disable */
+
+    USB_ISND_MSG(USB_PCD_MBX, p);
 }
 
 /******************************************************************************

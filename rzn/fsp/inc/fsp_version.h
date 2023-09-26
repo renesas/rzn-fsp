@@ -41,7 +41,7 @@
 #define FSP_VERSION_MAJOR           (1U)
 
 /** FSP pack minor version. */
-#define FSP_VERSION_MINOR           (2U)
+#define FSP_VERSION_MINOR           (3U)
 
 /** FSP pack patch version. */
 #define FSP_VERSION_PATCH           (0U)

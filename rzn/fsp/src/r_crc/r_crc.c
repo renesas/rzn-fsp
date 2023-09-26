@@ -72,7 +72,7 @@ const crc_api_t g_crc_on_crc =
  **********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
- * Open the CRC driver module
+ * Open the CRC driver module.
  *
  * Implements @ref crc_api_t::open
  *
@@ -80,21 +80,26 @@ const crc_api_t g_crc_on_crc =
  * configuration structure.
  *
  * @retval FSP_SUCCESS                       Configuration was successful.
- * @retval FSP_ERR_ASSERTION                 p_ctrl or p_cfg is NULL.
+ * @retval FSP_ERR_ASSERTION                 p_ctrl, p_cfg, or p_cfg->p_extend is NULL.
  * @retval FSP_ERR_ALREADY_OPEN              Module already open.
- * @retval FSP_ERR_IP_CHANNEL_NOT_PRESENT    The requested channel does not exist on this MCU
+ * @retval FSP_ERR_IP_CHANNEL_NOT_PRESENT    The requested channel does not exist on this MCU.
  **********************************************************************************************************************/
 fsp_err_t R_CRC_Open (crc_ctrl_t * const p_ctrl, crc_cfg_t const * const p_cfg)
 {
     crc_instance_ctrl_t * p_instance_ctrl = (crc_instance_ctrl_t *) p_ctrl;
-    crc_extended_cfg_t  * p_extend        = (crc_extended_cfg_t *) p_cfg->p_extend;
 
 #if CRC_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(p_ctrl);
     FSP_ASSERT(p_cfg);
+    FSP_ASSERT(p_cfg->p_extend);
 
     /* Verify the control block has not already been initialized. */
     FSP_ERROR_RETURN(CRC_OPEN != p_instance_ctrl->open, FSP_ERR_ALREADY_OPEN);
+#endif
+
+    crc_extended_cfg_t * p_extend = (crc_extended_cfg_t *) p_cfg->p_extend;
+
+#if CRC_CFG_PARAM_CHECKING_ENABLE
 
     /* Make sure this channel exists. */
     FSP_ERROR_RETURN(BSP_FEATURE_CRC_VALID_CHANNEL_MASK & (1U << p_extend->channel), FSP_ERR_IP_CHANNEL_NOT_PRESENT);
@@ -168,7 +173,7 @@ fsp_err_t R_CRC_Close (crc_ctrl_t * const p_ctrl)
  * returns an 8-bit/32-bit (for 32-bit polynomial) calculated value
  *
  * @retval FSP_SUCCESS              Calculation successful.
- * @retval FSP_ERR_ASSERTION        Either p_ctrl, inputBuffer, or calculatedValue is NULL.
+ * @retval FSP_ERR_ASSERTION        Either p_ctrl, p_crc_input, inputBuffer, or calculatedValue is NULL.
  * @retval FSP_ERR_INVALID_ARGUMENT length value is NULL.
  * @retval FSP_ERR_NOT_OPEN         The driver is not opened.
  **********************************************************************************************************************/
@@ -177,6 +182,7 @@ fsp_err_t R_CRC_Calculate (crc_ctrl_t * const p_ctrl, crc_input_t * const p_crc_
     crc_instance_ctrl_t * p_instance_ctrl = (crc_instance_ctrl_t *) p_ctrl;
 #if CRC_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_crc_input);
     FSP_ASSERT(p_crc_input->p_input_buffer);
     FSP_ASSERT(calculatedValue);
     FSP_ERROR_RETURN((0UL != p_crc_input->num_bytes), FSP_ERR_INVALID_ARGUMENT);
@@ -267,7 +273,7 @@ static void crc_seed_value_update (crc_instance_ctrl_t * const p_instance_ctrl, 
     {
         case CRC_POLYNOMIAL_CRC_8:
         {
-            /* CRC seed is masked to use only the lower 8 bits*/
+            /* CRC seed is masked to use only the lower 8 bits */
             /* Set the starting 8-bit CRC Calculated value */
             crcdor |= (uint32_t) (R_CRC0_CRCDOR_BY_CRCDOR_BY_Msk & crc_seed);
             p_instance_ctrl->p_reg->CRCDOR_BY = (uint8_t) crcdor;
@@ -277,7 +283,7 @@ static void crc_seed_value_update (crc_instance_ctrl_t * const p_instance_ctrl, 
         case CRC_POLYNOMIAL_CRC_16:
         case CRC_POLYNOMIAL_CRC_CCITT:
         {
-            /* CRC seed is masked to use only the lower 16 bits*/
+            /* CRC seed is masked to use only the lower 16 bits */
             /* Set the starting 16-bit CRC Calculated value. */
             crcdor |= (uint32_t) (R_CRC0_CRCDOR_HA_CRCDOR_HA_Msk & crc_seed);
             p_instance_ctrl->p_reg->CRCDOR_HA = (uint16_t) crcdor;
@@ -286,7 +292,7 @@ static void crc_seed_value_update (crc_instance_ctrl_t * const p_instance_ctrl, 
 
         default:
         {
-            /* CRC seed uses the 32 bits*/
+            /* CRC seed uses the 32 bits */
             p_instance_ctrl->p_reg->CRCDOR = crc_seed;
             break;
         }

@@ -53,7 +53,7 @@ FSP_HEADER
 
 /* Leading zeroes removed to avoid coding standard violation. */
 #define THREE_PHASE_API_VERSION_MAJOR    (1U) // DEPRECATED
-#define THREE_PHASE_API_VERSION_MINOR    (2U) // DEPRECATED
+#define THREE_PHASE_API_VERSION_MINOR    (3U) // DEPRECATED
 
 /**********************************************************************************************************************
  * Typedef definitions

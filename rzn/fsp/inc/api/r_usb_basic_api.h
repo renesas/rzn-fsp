@@ -59,7 +59,7 @@ FSP_HEADER
 
 /* USB Version Info */
 #define USB_API_VERSION_MAJOR      (1U)      // DEPRECATED
-#define USB_API_VERSION_MINOR      (2U)      // DEPRECATED
+#define USB_API_VERSION_MINOR      (3U)      // DEPRECATED
 
 /* USB Request Type Register */
 #define USB_BREQUEST               (0xFF00U) ///< b15-8

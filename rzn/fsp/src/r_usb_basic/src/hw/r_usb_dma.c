@@ -43,9 +43,11 @@
  ******************************************************************************/
   #if (BSP_CFG_RTOS == 0)
 usb_dma_int_t gs_usb_cstd_dma_int;
-  #endif                                                                                       /* (BSP_CFG_RTOS == 0) */
+  #endif                               /* (BSP_CFG_RTOS == 0) */
   #if (BSP_CFG_RTOS == 2)
+   #if !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L)
 static usb_utr_t g_usb_cstd_int_dma[USB_INT_BUFSIZE];
+   #endif /* !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
   #endif                                                                                       /* #if (BSP_CFG_RTOS == 2)*/
 
 usb_utr_t * get_usb_int_buf_dma(void);
@@ -541,9 +543,9 @@ void usb_cstd_dma_send_continue (usb_utr_t * ptr, uint16_t useport)
             if (g_usb_cstd_dma_fraction_size[ip][channel] > 0) /* fraction size(1-3) */
             {
                 cpu_write = true;                              /* Set flag for CPU FIFO Write */
- #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+  #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
                 useport = USB_CUSE;
- #endif
+  #endif
             }
             else
             {
@@ -636,9 +638,9 @@ void usb_cstd_dma_send_continue (usb_utr_t * ptr, uint16_t useport)
                 else
                 {
                     cpu_write = true;  /* Set flag for CPU FIFO Write */
- #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+  #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
                     useport = USB_CUSE;
- #endif
+  #endif
                 }
             }
         }

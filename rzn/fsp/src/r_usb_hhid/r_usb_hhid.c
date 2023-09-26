@@ -104,9 +104,9 @@ fsp_err_t R_USB_HHID_MaxPacketSizeGet (usb_ctrl_t * const p_api_ctrl,
     usb_utr_t  utr;
     uint16_t   pipe = 0;
     uint16_t   pipe_bit_map;
-#if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZA3UL)
+#if USB_IP_EHCI_OHCI == 1
     uint8_t epnum;
-#endif                                 /* #if defined(BSP_MCU_GROUP_RZN2L) */
+#endif                                 /* USB_IP_EHCI_OHCI == 1 */
 
     usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
 
@@ -158,10 +158,10 @@ fsp_err_t R_USB_HHID_MaxPacketSizeGet (usb_ctrl_t * const p_api_ctrl,
     utr.ipp     = usb_hstd_get_usb_ip_adr(utr.ip);
     utr.keyword = p_ctrl->device_address;
 
-#if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZA3UL)
+#if USB_IP_EHCI_OHCI == 1
     epnum = R_USB_HstdConvertEndpointNum((uint8_t) pipe);
     pipe  = R_USB_HstdGetPipeID(utr.keyword, epnum);
-#endif                                 /* #if defined(BSP_MCU_GROUP_RZN2L) */
+#endif                                 /* USB_IP_EHCI_OHCI == 1 */
 
     *p_size = usb_cstd_get_maxpacket_size(&utr, pipe);
 

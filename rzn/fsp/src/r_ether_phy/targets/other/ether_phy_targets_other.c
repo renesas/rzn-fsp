@@ -18,74 +18,52 @@
  * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
  **********************************************************************************************************************/
 
-#ifndef R_CRC_H
-#define R_CRC_H
-
-/*******************************************************************************************************************//**
- * @addtogroup CRC
- * @{
- **********************************************************************************************************************/
-
 /***********************************************************************************************************************
- * Includes
- **********************************************************************************************************************/
-#include "bsp_api.h"
-#include "r_crc_cfg.h"
-#include "r_crc_api.h"
+ * Includes   <System Includes> , "Project Includes"
+ ***********************************************************************************************************************/
 
-/* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
-FSP_HEADER
+#include "bsp_api.h"
+#include "r_ether_phy.h"
+
+#if ((ETHER_PHY_CFG_PHY_LSI & ETHER_PHY_CHIP_OTHER) == ETHER_PHY_CHIP_OTHER)
 
 /***********************************************************************************************************************
  * Macro definitions
- **********************************************************************************************************************/
+ ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Typedef definitions
- **********************************************************************************************************************/
-
-/** CRC extended configuration */
-typedef struct st_crc_extended_cfg
-{
-    /** DEPRECATED - channel will be moved to CRC API in the major release
-     *
-     * Channel number. */
-    uint8_t channel;
-} crc_extended_cfg_t;
-
-/** Driver instance control structure. */
-typedef struct st_crc_instance_ctrl
-{
-    uint32_t          open;
-    const crc_cfg_t * p_cfg;           // Pointer to initial configurations
-    R_CRC0_Type     * p_reg;           // Base register for this channel
-} crc_instance_ctrl_t;
-
-/**********************************************************************************************************************
- * Exported global variables
- **********************************************************************************************************************/
-
-/** @cond INC_HEADER_DEFS_SEC */
-/** Filled in Interface API structure for this Instance. */
-extern const crc_api_t g_crc_on_crc;
-
-/** @endcond */
+ ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
- * Public APIs
+ * Exported global variables (to be accessed by other files)
+ ***********************************************************************************************************************/
+void ether_phy_targets_initialize_other(ether_phy_instance_ctrl_t * p_instance_ctrl);
+
+/***********************************************************************************************************************
+ * Exported global function
+ ***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * Private global variables and functions
+ ***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * Functions
  **********************************************************************************************************************/
-fsp_err_t R_CRC_Open(crc_ctrl_t * const p_ctrl, crc_cfg_t const * const p_cfg);
-fsp_err_t R_CRC_Close(crc_ctrl_t * const p_ctrl);
-fsp_err_t R_CRC_Calculate(crc_ctrl_t * const p_ctrl, crc_input_t * const p_crc_input, uint32_t * calculatedValue);
-fsp_err_t R_CRC_CalculatedValueGet(crc_ctrl_t * const p_ctrl, uint32_t * calculatedValue);
-fsp_err_t R_CRC_SnoopEnable(crc_ctrl_t * const p_ctrl, uint32_t crc_seed);
-fsp_err_t R_CRC_SnoopDisable(crc_ctrl_t * const p_ctrl);
 
 /*******************************************************************************************************************//**
- * @} (end addtogroup CRC)
+ * PHY-LSI specific initialization processing
+ *
+ * @param[in]   p_instance_ctrl     Pointer to the control block for the channel
+ *
+ * @retval      none
  **********************************************************************************************************************/
+void ether_phy_targets_initialize_other (ether_phy_instance_ctrl_t * p_instance_ctrl)
+{
+    FSP_PARAMETER_NOT_USED(p_instance_ctrl);
 
-/* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
-FSP_FOOTER
+    /* Please fill in the initialization processing specific to PHY-LSI. */
+}
 
 #endif

@@ -156,6 +156,7 @@ const spi_flash_api_t g_spi_flash_on_xspi_qspi =
     .open           = R_XSPI_QSPI_Open,
     .directWrite    = R_XSPI_QSPI_DirectWrite,
     .directRead     = R_XSPI_QSPI_DirectRead,
+    .directTransfer = R_XSPI_QSPI_DirectTransfer,
     .spiProtocolSet = R_XSPI_QSPI_SpiProtocolSet,
     .write          = R_XSPI_QSPI_Write,
     .erase          = R_XSPI_QSPI_Erase,
@@ -163,9 +164,9 @@ const spi_flash_api_t g_spi_flash_on_xspi_qspi =
     .xipEnter       = R_XSPI_QSPI_XipEnter,
     .xipExit        = R_XSPI_QSPI_XipExit,
     .bankSet        = R_XSPI_QSPI_BankSet,
+    .autoCalibrate  = R_XSPI_QSPI_AutoCalibrate,
     .close          = R_XSPI_QSPI_Close,
     .versionGet     = R_XSPI_QSPI_VersionGet,
-    .directTransfer = R_XSPI_QSPI_DirectTransfer,
 };
 
 /***********************************************************************************************************************
@@ -417,6 +418,9 @@ fsp_err_t R_XSPI_QSPI_Write (spi_flash_ctrl_t    * p_ctrl,
 
     uint32_t i = 0;
 
+    FSP_CRITICAL_SECTION_DEFINE;
+    FSP_CRITICAL_SECTION_ENTER;
+
     /* Word access */
     if (0 == byte_count % XSPI_QSPI_PRV_WORD_ACCESS_SIZE)
     {
@@ -462,6 +466,8 @@ fsp_err_t R_XSPI_QSPI_Write (spi_flash_ctrl_t    * p_ctrl,
 
     /* Wait until memory access starts in write API. */
     FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->COMSTT_b.MEMACC, 1);
+
+    FSP_CRITICAL_SECTION_EXIT;
 
     return FSP_SUCCESS;
 }
@@ -623,6 +629,19 @@ fsp_err_t R_XSPI_QSPI_SpiProtocolSet (spi_flash_ctrl_t * p_ctrl, spi_flash_proto
                                                                           XSPI_QSPI_PRV_LIOCFGCS_PRTMD_MASK;
 
     return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * Auto-calibrate the OctaRAM device using the preamble pattern. Unsupported by XSPI_QSPI.
+ * Implements @ref spi_flash_api_t::autoCalibrate.
+ *
+ * @retval FSP_ERR_UNSUPPORTED         API not supported by XSPI_QSPI
+ **********************************************************************************************************************/
+fsp_err_t R_XSPI_QSPI_AutoCalibrate (spi_flash_ctrl_t * p_ctrl)
+{
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return FSP_ERR_UNSUPPORTED;
 }
 
 /*******************************************************************************************************************//**

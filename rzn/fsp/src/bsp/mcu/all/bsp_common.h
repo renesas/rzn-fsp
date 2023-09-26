@@ -57,9 +57,9 @@ FSP_HEADER
 
 /* Version of this module's code and API. */
 #define BSP_CODE_VERSION_MAJOR                 (1U) // DEPRECATED
-#define BSP_CODE_VERSION_MINOR                 (2U) // DEPRECATED
+#define BSP_CODE_VERSION_MINOR                 (3U) // DEPRECATED
 #define BSP_API_VERSION_MAJOR                  (1U) // DEPRECATED
-#define BSP_API_VERSION_MINOR                  (2U) // DEPRECATED
+#define BSP_API_VERSION_MINOR                  (3U) // DEPRECATED
 
 #define FSP_CONTEXT_SAVE
 #define FSP_CONTEXT_RESTORE

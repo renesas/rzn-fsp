@@ -177,6 +177,7 @@ const spi_flash_api_t g_spi_flash_on_xspi_ospi =
     .xipEnter       = R_XSPI_OSPI_XipEnter,
     .xipExit        = R_XSPI_OSPI_XipExit,
     .bankSet        = R_XSPI_OSPI_BankSet,
+    .autoCalibrate  = R_XSPI_OSPI_AutoCalibrate,
     .close          = R_XSPI_OSPI_Close,
     .versionGet     = R_XSPI_OSPI_VersionGet,
 };
@@ -413,6 +414,9 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
 
     uint32_t i = 0;
 
+    FSP_CRITICAL_SECTION_DEFINE;
+    FSP_CRITICAL_SECTION_ENTER;
+
     /* Word access */
     if (0 == byte_count % XSPI_OSPI_PRV_WORD_ACCESS_SIZE)
     {
@@ -483,6 +487,8 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         /* Push the pending data. */
         p_instance_ctrl->p_reg->BMCTL1_b.MWRPUSH = 1;
     }
+
+    FSP_CRITICAL_SECTION_EXIT;
 
     return FSP_SUCCESS;
 }
@@ -629,6 +635,20 @@ fsp_err_t R_XSPI_OSPI_SpiProtocolSet (spi_flash_ctrl_t * p_ctrl, spi_flash_proto
 
     /* Update the SPI protocol and its associated registers. */
     return r_xspi_ospi_spi_protocol_specific_settings(p_instance_ctrl, spi_protocol);
+}
+
+/*******************************************************************************************************************//**
+ * Auto-calibrate the OctaRAM device using the preamble pattern. Unsupported by XSPI_OSPI.
+ *
+ * Implements @ref spi_flash_api_t::autoCalibrate.
+ *
+ * @retval FSP_ERR_UNSUPPORTED         API not supported by XSPI_OSPI
+ **********************************************************************************************************************/
+fsp_err_t R_XSPI_OSPI_AutoCalibrate (spi_flash_ctrl_t * p_ctrl)
+{
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return FSP_ERR_UNSUPPORTED;
 }
 
 /*******************************************************************************************************************//**
