@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -49,7 +49,7 @@
 /* The maximum number of Transfer Descriptor memory */
 #define USB_OHCI_NUM_TD                  (64) // (0x100000 / USB_OHCI_MAXTDSIZE)
 
-#if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+#if defined(BSP_MCU_GROUP_RZN2L)
 
 /* The maximum number of OHCI Isochronous Device */
  #define USB_OHCI_ISO_MAXDEVICE          (4U)

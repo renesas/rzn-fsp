@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -30,6 +30,7 @@
 
 /* "CRC" in ASCII, used to determine if channel is open. */
 #define CRC_OPEN                          (0x00435243ULL)
+
 #define R_CRC0_CRCDOR_BY_CRCDOR_BY_Msk    (0xFFUL)
 #define R_CRC0_CRCDOR_HA_CRCDOR_HA_Msk    (0xFFFFUL)
 
@@ -80,7 +81,7 @@ const crc_api_t g_crc_on_crc =
  * configuration structure.
  *
  * @retval FSP_SUCCESS                       Configuration was successful.
- * @retval FSP_ERR_ASSERTION                 p_ctrl, p_cfg, or p_cfg->p_extend is NULL.
+ * @retval FSP_ERR_ASSERTION                 p_ctrl or p_cfg is NULL.
  * @retval FSP_ERR_ALREADY_OPEN              Module already open.
  * @retval FSP_ERR_IP_CHANNEL_NOT_PRESENT    The requested channel does not exist on this MCU.
  **********************************************************************************************************************/
@@ -91,32 +92,27 @@ fsp_err_t R_CRC_Open (crc_ctrl_t * const p_ctrl, crc_cfg_t const * const p_cfg)
 #if CRC_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(p_ctrl);
     FSP_ASSERT(p_cfg);
-    FSP_ASSERT(p_cfg->p_extend);
 
     /* Verify the control block has not already been initialized. */
     FSP_ERROR_RETURN(CRC_OPEN != p_instance_ctrl->open, FSP_ERR_ALREADY_OPEN);
-#endif
-
-    crc_extended_cfg_t * p_extend = (crc_extended_cfg_t *) p_cfg->p_extend;
-
-#if CRC_CFG_PARAM_CHECKING_ENABLE
 
     /* Make sure this channel exists. */
-    FSP_ERROR_RETURN(BSP_FEATURE_CRC_VALID_CHANNEL_MASK & (1U << p_extend->channel), FSP_ERR_IP_CHANNEL_NOT_PRESENT);
+    FSP_ERROR_RETURN(BSP_FEATURE_CRC_VALID_CHANNEL_MASK & (1U << p_cfg->channel), FSP_ERR_IP_CHANNEL_NOT_PRESENT);
 #endif
 
     /* Save the configuration  */
     p_instance_ctrl->p_cfg = p_cfg;
-    p_instance_ctrl->p_reg = (0U == p_extend->channel) ? R_CRC0 : R_CRC1;
+
+    p_instance_ctrl->p_reg = (0U == p_cfg->channel) ? R_CRC0 : R_CRC1;
 
     /* Mark driver as initialized by setting the open value to the ASCII equivalent of "CRC" */
     p_instance_ctrl->open = CRC_OPEN;
 
     /* Power on CRC */
-
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
-    R_BSP_MODULE_START(FSP_IP_CRC, p_extend->channel);
+    R_BSP_MODULE_START(FSP_IP_CRC, p_cfg->channel);
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
+
     uint8_t crccr0 = 0;
 
     /* Set bit order value */
@@ -152,10 +148,10 @@ fsp_err_t R_CRC_Close (crc_ctrl_t * const p_ctrl)
     FSP_ERROR_RETURN(CRC_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-    crc_extended_cfg_t * p_extend = (crc_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+    crc_cfg_t * p_cfg = (crc_cfg_t *) p_instance_ctrl->p_cfg;
 
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
-    R_BSP_MODULE_STOP(FSP_IP_CRC, p_extend->channel);
+    R_BSP_MODULE_STOP(FSP_IP_CRC, p_cfg->channel);
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 
     /* Mark driver as closed */
@@ -224,7 +220,6 @@ fsp_err_t R_CRC_CalculatedValueGet (crc_ctrl_t * const p_ctrl, uint32_t * calcul
 }
 
 /*******************************************************************************************************************//**
- *
  * @ref crc_api_t::snoopEnable is not supported on the CRC.
  *
  * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
@@ -239,7 +234,6 @@ fsp_err_t R_CRC_SnoopEnable (crc_ctrl_t * const p_ctrl, uint32_t crc_seed)
 }
 
 /*******************************************************************************************************************//**
- *
  * @ref crc_api_t::snoopDisable is not supported on the CRC.
  *
  * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
@@ -356,7 +350,7 @@ static void crc_calculate_polynomial (crc_instance_ctrl_t * const p_instance_ctr
     crc_seed_value_update(p_instance_ctrl, crc_seed);
 
     /* Write each element of the inputBuffer to the CRC Data Input Register. Each write to the
-     * Data Input Register generates a new calculated value in the Data Output Register.  */
+     * Data Input Register generates a new calculated value in the Data Output Register. */
     switch (p_instance_ctrl->p_cfg->polynomial)
     {
         case CRC_POLYNOMIAL_CRC_8:

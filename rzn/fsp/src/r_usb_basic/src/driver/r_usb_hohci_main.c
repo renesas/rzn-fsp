@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -44,42 +44,44 @@
 /***********************************************************************************************************************
  * Private global variables and functions
  ***********************************************************************************************************************/
-#if  USB_IP_EHCI_OHCI == 1
 
- #define USB_VAL_32          (32U)
- #define USB_VAL_XFF         (0x000000FFU)
- #define USB_VAL_XC0         (0x000000C0U)
- #define USB_VAL_X80         (0x00000080U)
- #define USB_VAL_FF32U       (0xFFFFFFFFU)
- #define USB_VAL_FMINTVL     (0x27782EDFU)
- #define USB_VAL_X10000      (0x10000U)
- #define USB_VAL_X8000       (0x8000U)
- #define USB_VAL_PESC_PES    (0x00020002U)
- #define USB_VAL_PESC        (0x00020000U)
- #define USB_VAL_PESC_CSC    (0x00030000U)
- #define USB_VAL_CSC_CCS     (0x00010001U)
- #define USB_VAL_CSC         (0x00010000U)
- #define USB_VAL_X001        (0x00000001U)
- #define USB_VAL_X0008U      (0x00080000U)
- #define USB_VAL_X10         (0x00000010U)
- #define USB_VAL_X001U       (0x00100000U)
- #define USB_VAL_X0004U      (0x00040000U)
- #define USB_VAL_X0004       (0x00000004U)
- #define USB_VAL_X0008B      (0x00000008U)
- #define USB_VAL_X8000U      (0x80000000U)
- #define USB_VAL_X8000B      (0x8000U)
- #define USB_VAL_X7FFFB      (0x7FFFU)
- #define USB_VAL_X3FFF       (0x00003FFFU)
- #define USB_VAL_2A2F        (0x2A2FU)
- #define USB_VAL_02001902    (0x02001902U)
- #define USB_VAL_X1000       (0x00001000U)
- #define USB_VAL_INTENB      (0x80000062U)
- #define USB_VAL_XFFFFU      (0xFFFF0000U)
- #define USB_VAL_X3C         (0x0000003CU)
- #define USB_VAL_X0002U      (0x00020000U)
- #define USB_VAL_X3C         (0x0000003CU)
- #define USB_VAL_X100        (0x00000100U)
- #define USB_VAL_X200        (0x00000200U)
+#define USB_VAL_32          (32U)
+#define USB_VAL_100         (100U)
+#define USB_VAL_XFF         (0x000000FFU)
+#define USB_VAL_XC0         (0x000000C0U)
+#define USB_VAL_X80         (0x00000080U)
+#define USB_VAL_FF32U       (0xFFFFFFFFU)
+#define USB_VAL_FMINTVL     (0x27782EDFU)
+#define USB_VAL_X10000      (0x10000U)
+#define USB_VAL_X8000       (0x8000U)
+#define USB_VAL_PESC_PES    (0x00020002U)
+#define USB_VAL_PESC        (0x00020000U)
+#define USB_VAL_PESC_CSC    (0x00030000U)
+#define USB_VAL_CSC_CCS     (0x00010001U)
+#define USB_VAL_CSC         (0x00010000U)
+#define USB_VAL_X001        (0x00000001U)
+#define USB_VAL_X0008U      (0x00080000U)
+#define USB_VAL_X10         (0x00000010U)
+#define USB_VAL_X001U       (0x00100000U)
+#define USB_VAL_X0004U      (0x00040000U)
+#define USB_VAL_X0004       (0x00000004U)
+#define USB_VAL_X0008B      (0x00000008U)
+#define USB_VAL_X8000U      (0x80000000U)
+#define USB_VAL_X8000B      (0x8000U)
+#define USB_VAL_X7FFFB      (0x7FFFU)
+#define USB_VAL_X3FFF       (0x00003FFFU)
+#define USB_VAL_2A2F        (0x2A2FU)
+#define USB_VAL_02001902    (0x02001902U)
+#define USB_VAL_X1000       (0x00001000U)
+#define USB_VAL_INTENB      (0x80000062U)
+#define USB_VAL_XFFFFU      (0xFFFF0000U)
+#define USB_VAL_X3C         (0x0000003CU)
+#define USB_VAL_X0002U      (0x00020000U)
+#define USB_VAL_X3C         (0x0000003CU)
+#define USB_VAL_X100        (0x00000100U)
+#define USB_VAL_X200        (0x00000200U)
+
+#if  USB_IP_EHCI_OHCI == 1
 
 /***********************************************************************************************************************
  * Static variables and functions
@@ -754,7 +756,7 @@ void usb_hstd_ohci_port_reset (uint32_t portnum)
 
     /* r_usb_hstd_hci_wait_time(10); */     /* Wait 10ms */
  #ifdef USB_CFG_HMSC_USE
-    R_BSP_SoftwareDelay(100, BSP_DELAY_UNITS_MILLISECONDS);
+    R_BSP_SoftwareDelay(USB_VAL_100, BSP_DELAY_UNITS_MILLISECONDS);
  #else
     R_BSP_SoftwareDelay(10, BSP_DELAY_UNITS_MILLISECONDS);
  #endif

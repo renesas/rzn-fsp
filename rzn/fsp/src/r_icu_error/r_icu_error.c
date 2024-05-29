@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -42,7 +42,7 @@
 /***********************************************************************************************************************
  * Private function prototypes
  **********************************************************************************************************************/
-static void r_icu_error_call_callback(icu_error_instance_ctrl_t * p_ctrl, error_callback_args_t * p_args);
+static void r_icu_error_call_callback(icu_error_instance_ctrl_t * p_instance_ctrl, error_callback_args_t * p_args);
 void        error_cpu0_int_isr(void);
 
 void error_peripherals_int_isr(void);
@@ -53,45 +53,45 @@ static const error_table_t * gp_error_handler_table;
  * Use to handle all error events at once. */
 static volatile const uint32_t * const gp_err_stat_table[ICU_ERROR_ERR_SOURCE_NUM] =
 {
-    [ICU_ERROR_EVENT_SOURCE_CPU0]         = &(R_ICU->CPU0ERR_STAT),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0] = &(R_ICU->PERIERR_STAT0),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_1] = &(R_ICU->PERIERR_STAT1),
+    [ERROR_EVENT_CPU0]         = &(R_ICU->CPU0ERR_STAT),
+    [ERROR_EVENT_PERIPHERAL_0] = &(R_ICU->PERIERR_STAT0),
+    [ERROR_EVENT_PERIPHERAL_1] = &(R_ICU->PERIERR_STAT1),
 };
 
 /* This array stores the address of the register containing the error event status clear bits.
  * Use to handle all error events at once. */
 static volatile uint32_t * const gp_err_clr_table[ICU_ERROR_ERR_SOURCE_NUM] =
 {
-    [ICU_ERROR_EVENT_SOURCE_CPU0]         = &(R_ICU->CPU0ERR_CLR),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0] = &(R_ICU->PERIERR_CLR0),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_1] = &(R_ICU->PERIERR_CLR1),
+    [ERROR_EVENT_CPU0]         = &(R_ICU->CPU0ERR_CLR),
+    [ERROR_EVENT_PERIPHERAL_0] = &(R_ICU->PERIERR_CLR0),
+    [ERROR_EVENT_PERIPHERAL_1] = &(R_ICU->PERIERR_CLR1),
 };
 
 /* This array stores the address of the register containing the E0 error event mask bits.
  * Use to handle all error events at once. */
 static volatile const uint32_t * const gp_err_e0msk_table[ICU_ERROR_ERR_SOURCE_NUM] =
 {
-    [ICU_ERROR_EVENT_SOURCE_CPU0]         = &(R_ICU->CPU0ERR_E0MSK),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0] = &(R_ICU->PERIERR_E0MSK0),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_1] = &(R_ICU->PERIERR_E0MSK1),
+    [ERROR_EVENT_CPU0]         = &(R_ICU->CPU0ERR_E0MSK),
+    [ERROR_EVENT_PERIPHERAL_0] = &(R_ICU->PERIERR_E0MSK0),
+    [ERROR_EVENT_PERIPHERAL_1] = &(R_ICU->PERIERR_E0MSK1),
 };
 
 /* This array stores the address of the register containing the E1 error event mask bits.
  * Use to handle all error events at once. */
 static volatile const uint32_t * const gp_err_e1msk_table[ICU_ERROR_ERR_SOURCE_NUM] =
 {
-    [ICU_ERROR_EVENT_SOURCE_CPU0]         = &(R_ICU->CPU0ERR_E1MSK),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0] = &(R_ICU->PERIERR_E1MSK0),
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_1] = &(R_ICU->PERIERR_E1MSK1),
+    [ERROR_EVENT_CPU0]         = &(R_ICU->CPU0ERR_E1MSK),
+    [ERROR_EVENT_PERIPHERAL_0] = &(R_ICU->PERIERR_E1MSK0),
+    [ERROR_EVENT_PERIPHERAL_1] = &(R_ICU->PERIERR_E1MSK1),
 };
 
 /* This array stores the register mask for each error event register.
  * Use to handle all error events at once. */
 static const uint32_t g_err_mask_table[ICU_ERROR_ERR_SOURCE_NUM] =
 {
-    [ICU_ERROR_EVENT_SOURCE_CPU0]         = ICU_ERROR_CPU_ERR_REG_MASK, // Mask for CPU0 error event register
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0] = BSP_FEATURE_ICU_ERROR_PERI_ERR0_REG_MASK,
-    [ICU_ERROR_EVENT_SOURCE_PERIPHERAL_1] = BSP_FEATURE_ICU_ERROR_PERI_ERR1_REG_MASK,
+    [ERROR_EVENT_CPU0]         = ICU_ERROR_CPU_ERR_REG_MASK, // Mask for CPU0 error event register
+    [ERROR_EVENT_PERIPHERAL_0] = BSP_FEATURE_ICU_ERROR_PERI_ERR0_REG_MASK,
+    [ERROR_EVENT_PERIPHERAL_1] = BSP_FEATURE_ICU_ERROR_PERI_ERR1_REG_MASK,
 };
 
 /***********************************************************************************************************************
@@ -127,24 +127,24 @@ const error_api_t g_error_on_icu_error =
  *
  * @note This function clears the status of error events configured to enable interrupts or resets on the FSP Configuration editor.
  ***********************************************************************************************************************/
-fsp_err_t R_ICU_ERROR_Open (error_ctrl_t * const p_api_ctrl, error_cfg_t const * const p_cfg)
+fsp_err_t R_ICU_ERROR_Open (error_ctrl_t * const p_ctrl, error_cfg_t const * const p_cfg)
 {
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) p_api_ctrl;
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) p_ctrl;
 
     /* Validate the parameters and check if the module is initialized */
 #if ICU_ERROR_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_ctrl);
+    FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_cfg);
-    FSP_ERROR_RETURN(ICU_ERROR_OPEN != p_ctrl->open, FSP_ERR_ALREADY_OPEN);
+    FSP_ERROR_RETURN(ICU_ERROR_OPEN != p_instance_ctrl->open, FSP_ERR_ALREADY_OPEN);
 #endif
 
     /* Save pointers for later use */
-    p_ctrl->p_cfg = p_cfg;
+    p_instance_ctrl->p_cfg = p_cfg;
     icu_error_extended_cfg_t * p_extend = (icu_error_extended_cfg_t *) p_cfg->p_extend;
 
-    p_ctrl->p_callback        = p_cfg->p_callback;
-    p_ctrl->p_context         = p_cfg->p_context;
-    p_ctrl->p_callback_memory = NULL;
+    p_instance_ctrl->p_callback        = p_cfg->p_callback;
+    p_instance_ctrl->p_context         = p_cfg->p_context;
+    p_instance_ctrl->p_callback_memory = NULL;
 
     /* If the status is in error, interrupts and resets occur the moment the mask is released.
      * Therefore, clear the status before releasing the mask. */
@@ -184,28 +184,28 @@ fsp_err_t R_ICU_ERROR_Open (error_ctrl_t * const p_api_ctrl, error_cfg_t const *
     /* Enable interrupts in GIC. */
     if (p_extend->cpu0_err0_irq >= 0)
     {
-        R_BSP_IrqCfgEnable(p_extend->cpu0_err0_irq, p_extend->cpu0_err0_ipl, p_ctrl);
+        R_BSP_IrqCfgEnable(p_extend->cpu0_err0_irq, p_extend->cpu0_err0_ipl, p_instance_ctrl);
     }
 
     if (p_extend->cpu0_err1_irq >= 0)
     {
-        R_BSP_IrqCfgEnable(p_extend->cpu0_err1_irq, p_extend->cpu0_err1_ipl, p_ctrl);
+        R_BSP_IrqCfgEnable(p_extend->cpu0_err1_irq, p_extend->cpu0_err1_ipl, p_instance_ctrl);
     }
 
     if (p_extend->peri_err0_irq >= 0)
     {
-        R_BSP_IrqCfgEnable(p_extend->peri_err0_irq, p_extend->peri_err0_ipl, p_ctrl);
+        R_BSP_IrqCfgEnable(p_extend->peri_err0_irq, p_extend->peri_err0_ipl, p_instance_ctrl);
     }
 
     if (p_extend->peri_err1_irq >= 0)
     {
-        R_BSP_IrqCfgEnable(p_extend->peri_err1_irq, p_extend->peri_err1_ipl, p_ctrl);
+        R_BSP_IrqCfgEnable(p_extend->peri_err1_irq, p_extend->peri_err1_ipl, p_instance_ctrl);
     }
 
     gp_error_handler_table = p_extend->p_error_handler_table;
 
     /* Mark driver as open by initializing it to "ERR" in its ASCII equivalent. */
-    p_ctrl->open = ICU_ERROR_OPEN;
+    p_instance_ctrl->open = ICU_ERROR_OPEN;
 
     return FSP_SUCCESS;
 }
@@ -219,17 +219,17 @@ fsp_err_t R_ICU_ERROR_Open (error_ctrl_t * const p_api_ctrl, error_cfg_t const *
  *
  * @note This function will disable the ERROR interrupt in the GIC.
  **********************************************************************************************************************/
-fsp_err_t R_ICU_ERROR_Close (error_ctrl_t * const p_api_ctrl)
+fsp_err_t R_ICU_ERROR_Close (error_ctrl_t * const p_ctrl)
 {
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) p_api_ctrl;
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) p_ctrl;
 
     /* Validate the parameter and check if the module is initialized */
 #if ICU_ERROR_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_ctrl);
-    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ASSERT(NULL != p_instance_ctrl);
+    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-    icu_error_extended_cfg_t * p_extend = ((icu_error_extended_cfg_t *) p_ctrl->p_cfg->p_extend);
+    icu_error_extended_cfg_t * p_extend = ((icu_error_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend);
 
     /* To avoid overwriting values set by other CPU cores, OR operation is performed. */
     R_ICU->CPU0ERR_RSTMSK  |= ((~p_extend->cpu0_err_reset_mask) & ICU_ERROR_CPU_ERR_REG_MASK);
@@ -270,7 +270,7 @@ fsp_err_t R_ICU_ERROR_Close (error_ctrl_t * const p_api_ctrl)
     }
 
     /* Mark driver as closed.  */
-    p_ctrl->open = 0U;
+    p_instance_ctrl->open = 0U;
 
     return FSP_SUCCESS;
 }
@@ -282,18 +282,18 @@ fsp_err_t R_ICU_ERROR_Close (error_ctrl_t * const p_api_ctrl)
  * @retval FSP_ERR_NOT_OPEN     Driver not open.
  * @retval FSP_ERR_ASSERTION    One or more pointers point to NULL.
  **********************************************************************************************************************/
-fsp_err_t R_ICU_ERROR_StatusGet (error_ctrl_t * const p_api_ctrl, uint32_t source, uint32_t * const p_status)
+fsp_err_t R_ICU_ERROR_StatusGet (error_ctrl_t * const p_ctrl, uint32_t source, uint32_t * const p_status)
 {
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) p_api_ctrl;
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) p_ctrl;
 
     /* Validate the parameters and check if the module is initialized */
 #if ICU_ERROR_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_ctrl);
+    FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_status);
-    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_instance_ctrl);
 
     /* Get status register value indicated by argument */
     *p_status = *(gp_err_stat_table[source]);
@@ -312,16 +312,16 @@ fsp_err_t R_ICU_ERROR_StatusGet (error_ctrl_t * const p_api_ctrl, uint32_t sourc
  * @retval FSP_ERR_ASSERTION    One or more pointers point to NULL.
  *
  **********************************************************************************************************************/
-fsp_err_t R_ICU_ERROR_StatusClear (error_ctrl_t * const p_api_ctrl, uint32_t source, uint32_t const event)
+fsp_err_t R_ICU_ERROR_StatusClear (error_ctrl_t * const p_ctrl, uint32_t source, uint32_t const event)
 {
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) p_api_ctrl;
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) p_ctrl;
 
-    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_instance_ctrl);
 
     /* Validate the parameters and check if the module is initialized */
 #if ICU_ERROR_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_ctrl);
-    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ASSERT(NULL != p_instance_ctrl);
+    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
     /* Clear status register of error events indicated by arguments */
@@ -338,23 +338,23 @@ fsp_err_t R_ICU_ERROR_StatusClear (error_ctrl_t * const p_api_ctrl, uint32_t sou
  * @retval  FSP_ERR_ASSERTION            A required pointer is NULL.
  * @retval  FSP_ERR_NOT_OPEN             The control block has not been opened.
  **********************************************************************************************************************/
-fsp_err_t R_ICU_ERROR_CallbackSet (error_ctrl_t * const          p_api_ctrl,
+fsp_err_t R_ICU_ERROR_CallbackSet (error_ctrl_t * const          p_ctrl,
                                    void (                      * p_callback)(error_callback_args_t *),
                                    void const * const            p_context,
                                    error_callback_args_t * const p_callback_memory)
 {
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) p_api_ctrl;
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) p_ctrl;
 
 #if ICU_ERROR_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_instance_ctrl);
     FSP_ASSERT(p_callback);
-    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ERROR_RETURN(ICU_ERROR_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
     /* Store callback and context */
-    p_ctrl->p_callback        = p_callback;
-    p_ctrl->p_context         = p_context;
-    p_ctrl->p_callback_memory = p_callback_memory;
+    p_instance_ctrl->p_callback        = p_callback;
+    p_instance_ctrl->p_context         = p_context;
+    p_instance_ctrl->p_callback_memory = p_callback_memory;
 
     return FSP_SUCCESS;
 }
@@ -370,15 +370,15 @@ fsp_err_t R_ICU_ERROR_CallbackSet (error_ctrl_t * const          p_api_ctrl,
 /*******************************************************************************************************************//**
  * Calls user callback.
  *
- * @param[in]     p_ctrl     Pointer to ICU_ERROR instance control block
- * @param[in]     p_args     Pointer to arguments on stack
+ * @param[in]     p_instance_ctrl     Pointer to ICU_ERROR instance control block
+ * @param[in]     p_args              Pointer to arguments on stack
  **********************************************************************************************************************/
-static void r_icu_error_call_callback (icu_error_instance_ctrl_t * p_ctrl, error_callback_args_t * p_args)
+static void r_icu_error_call_callback (icu_error_instance_ctrl_t * p_instance_ctrl, error_callback_args_t * p_args)
 {
     error_callback_args_t args;
 
     /* Store callback arguments in memory provided by user if available. */
-    error_callback_args_t * p_args_memory = p_ctrl->p_callback_memory;
+    error_callback_args_t * p_args_memory = p_instance_ctrl->p_callback_memory;
     if (NULL == p_args_memory)
     {
         /* Use provided args struct on stack */
@@ -393,12 +393,12 @@ static void r_icu_error_call_callback (icu_error_instance_ctrl_t * p_ctrl, error
         *p_args_memory = *p_args;
     }
 
-    p_ctrl->p_callback(p_args_memory);
+    p_instance_ctrl->p_callback(p_args_memory);
 
-    if (NULL != p_ctrl->p_callback_memory)
+    if (NULL != p_instance_ctrl->p_callback_memory)
     {
         /* Restore callback memory in case this is a nested interrupt. */
-        *p_ctrl->p_callback_memory = args;
+        *p_instance_ctrl->p_callback_memory = args;
     }
 }
 
@@ -410,14 +410,16 @@ static void r_icu_error_call_callback (icu_error_instance_ctrl_t * p_ctrl, error
  **********************************************************************************************************************/
 void error_cpu0_int_isr (void)
 {
+    ICU_ERROR_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     /* Save context if RTOS is used. */
-    FSP_CONTEXT_SAVE
+    FSP_CONTEXT_SAVE;
 
     IRQn_Type irq = R_FSP_CurrentIrqGet();
 
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
 
-    icu_error_extended_cfg_t * p_extend = (icu_error_extended_cfg_t *) p_ctrl->p_cfg->p_extend;
+    icu_error_extended_cfg_t * p_extend = (icu_error_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
 
     /* Get the current error status */
     uint32_t cpuerr_stat = R_ICU->CPU0ERR_STAT;
@@ -440,14 +442,14 @@ void error_cpu0_int_isr (void)
         error_callback_args_t args;
 
         /* Set data to identify callback to the user. */
-        args.p_context    = p_ctrl->p_context;
-        args.error_source = ICU_ERROR_EVENT_SOURCE_CPU0;
-        args.error_event  = 1U << (cpu_error_event & ICU_ERROR_ERR_EVENT_SHIFT_MASK);
+        args.p_context    = p_instance_ctrl->p_context;
+        args.error_event  = ERROR_EVENT_CPU0;
+        args.error_status = 1U << (cpu_error_event & ICU_ERROR_ERR_EVENT_SHIFT_MASK);
 
         /* Call the callback. */
-        if (NULL != p_ctrl->p_callback)
+        if (NULL != p_instance_ctrl->p_callback)
         {
-            r_icu_error_call_callback(p_ctrl, &args);
+            r_icu_error_call_callback(p_instance_ctrl, &args);
         }
 
         /* Clear the scanned flags one by one */
@@ -457,7 +459,9 @@ void error_cpu0_int_isr (void)
     /* Error status flag in the ICU module is cleared in the user application. */
 
     /* Restore context if RTOS is used. */
-    FSP_CONTEXT_RESTORE
+    FSP_CONTEXT_RESTORE;
+
+    ICU_ERROR_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }
 
 /*******************************************************************************************************************//**
@@ -468,16 +472,18 @@ void error_cpu0_int_isr (void)
  **********************************************************************************************************************/
 void error_peripherals_int_isr (void)
 {
+    ICU_ERROR_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     /* Save context if RTOS is used. */
-    FSP_CONTEXT_SAVE
+    FSP_CONTEXT_SAVE;
 
     IRQn_Type irq = R_FSP_CurrentIrqGet();
 
-    icu_error_instance_ctrl_t * p_ctrl = (icu_error_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
+    icu_error_instance_ctrl_t * p_instance_ctrl = (icu_error_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
 
-    icu_error_extended_cfg_t * p_extend = (icu_error_extended_cfg_t *) p_ctrl->p_cfg->p_extend;
+    icu_error_extended_cfg_t * p_extend = (icu_error_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
 
-    for (uint32_t source = ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0; source < ICU_ERROR_ERR_SOURCE_NUM; source++)
+    for (error_event_t source = ERROR_EVENT_PERIPHERAL_0; source < ICU_ERROR_ERR_SOURCE_NUM; source++)
     {
         /* Get the current error status */
         uint32_t perierr_stat = *(gp_err_stat_table[source]);
@@ -488,7 +494,7 @@ void error_peripherals_int_isr (void)
         perierr_stat &= ~event_mask;
 
         /* Error event number of the event at the beginning of each register */
-        uint32_t event_number_offset = ICU_ERROR_PERI_ERR_REG_SIZE * (source - ICU_ERROR_EVENT_SOURCE_PERIPHERAL_0);
+        uint32_t event_number_offset = ICU_ERROR_PERI_ERR_REG_SIZE * (uint32_t) (source - ERROR_EVENT_PERIPHERAL_0);
         uint32_t peri_error_event    = event_number_offset;
 
         /* After going through the event scan, the interrupt handler ends */
@@ -509,16 +515,16 @@ void error_peripherals_int_isr (void)
             error_callback_args_t args;
 
             /* Set data to identify callback to the user. */
-            args.p_context    = p_ctrl->p_context;
-            args.error_source = source;
-            args.error_event  = 1U <<
+            args.p_context    = p_instance_ctrl->p_context;
+            args.error_event  = source;
+            args.error_status = 1U <<
                                 ((peri_error_event - event_number_offset) &
                                  ICU_ERROR_ERR_EVENT_SHIFT_MASK);
 
             /* Call the callback. */
-            if (NULL != p_ctrl->p_callback)
+            if (NULL != p_instance_ctrl->p_callback)
             {
-                r_icu_error_call_callback(p_ctrl, &args);
+                r_icu_error_call_callback(p_instance_ctrl, &args);
             }
 
             /* Clear the scanned flags one by one */
@@ -529,5 +535,7 @@ void error_peripherals_int_isr (void)
     /* Error status flag in the ICU module is cleared in the user application. */
 
     /* Restore context if RTOS is used. */
-    FSP_CONTEXT_RESTORE
+    FSP_CONTEXT_RESTORE;
+
+    ICU_ERROR_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }

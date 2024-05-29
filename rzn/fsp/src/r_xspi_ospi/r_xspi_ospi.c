@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -32,10 +32,8 @@
 
 #define XSPI_OSPI_DEVICE_START_ADDRESS                     (0x60000000)
 
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_OFFSET              (8U)
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK          (0x1F)
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_OFFSET              (24U)
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK          (0x1F)
+#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK          (0x1FU)
+#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK          (0x1FU)
 
 #define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_OFFSET                (0U)
 #define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_VALUE_MASK            (0x3FFU)
@@ -146,15 +144,6 @@ static void r_xspi_ospi_direct_transfer(xspi_ospi_instance_ctrl_t         * p_in
  * Private global variables
  **********************************************************************************************************************/
 
-/** Version data structure used by error logger macro. */
-static const fsp_version_t g_ospi_version =
-{
-    .api_version_minor  = SPI_FLASH_API_VERSION_MINOR,
-    .api_version_major  = SPI_FLASH_API_VERSION_MAJOR,
-    .code_version_major = XSPI_OSPI_CODE_VERSION_MAJOR,
-    .code_version_minor = XSPI_OSPI_CODE_VERSION_MINOR
-};
-
 /*******************************************************************************************************************//**
  * @addtogroup XSPI_OSPI
  * @{
@@ -179,7 +168,6 @@ const spi_flash_api_t g_spi_flash_on_xspi_ospi =
     .bankSet        = R_XSPI_OSPI_BankSet,
     .autoCalibrate  = R_XSPI_OSPI_AutoCalibrate,
     .close          = R_XSPI_OSPI_Close,
-    .versionGet     = R_XSPI_OSPI_VersionGet,
 };
 
 /***********************************************************************************************************************
@@ -241,15 +229,13 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     /* Set xSPI drive/sampling timing. */
     if (XSPI_OSPI_CHIP_SELECT_0 == p_instance_ctrl->chip_select)
     {
-        p_instance_ctrl->p_reg->WRAPCFG =
-            (p_cfg_extend->data_latch_delay_clocks & XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK) <<
-                XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_OFFSET;
+        p_instance_ctrl->p_reg->WRAPCFG_b.DSSFTCS0 =
+            p_cfg_extend->data_latch_delay_clocks & XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK;
     }
     else
     {
-        p_instance_ctrl->p_reg->WRAPCFG =
-            (p_cfg_extend->data_latch_delay_clocks & XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK) <<
-                XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_OFFSET;
+        p_instance_ctrl->p_reg->WRAPCFG_b.DSSFTCS1 =
+            p_cfg_extend->data_latch_delay_clocks & XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK;
     }
 
     /* Set xSPI CSn signal timings. */
@@ -386,6 +372,8 @@ fsp_err_t R_XSPI_OSPI_XipExit (spi_flash_ctrl_t * p_ctrl)
  * @retval FSP_ERR_DEVICE_BUSY         Another Write/Erase transaction is in progress.
  *
  * @note In this API, data can be written up to 64 bytes at a time.
+ * @note This API performs page program operations to the device. Writing across pages is not supported.
+ * Please set the write address and write size according to the page size of your device.
  * @note In 8D-8D-8D(OPI) mode, written data must be even bytes in size.
  **********************************************************************************************************************/
 fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
@@ -488,6 +476,9 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         p_instance_ctrl->p_reg->BMCTL1_b.MWRPUSH = 1;
     }
 
+    /* Wait until memory access starts in write API. */
+    FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->COMSTT_b.MEMACC, 1);
+
     FSP_CRITICAL_SECTION_EXIT;
 
     return FSP_SUCCESS;
@@ -577,23 +568,22 @@ fsp_err_t R_XSPI_OSPI_StatusGet (spi_flash_ctrl_t * p_ctrl, spi_flash_status_t *
     FSP_ERROR_RETURN(XSPI_OSPI_PRV_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-    /* If R_XSPI_OSPI_StatusGet is called immediately after R_XSPI_OSPI_Write is called, the result could be WIP = 0.
-     *
-     * This occurs because the Read Status Register instruction command is issued
-     * before the Program command due to the xSPI write buffer operation.
-     * In this case, OSPI has not started the write operation, so WIP = 0.
-     *
-     * This is unintended behavior because R_XSPI_OSPI_StatusGet determines the end of the OSPI write operation.
-     * Therefore, it is necessary to judge as "Write In Progress" when data is in the write buffer. */
     uint32_t comstt  = p_instance_ctrl->p_reg->COMSTT;
     bool     memacc  = (bool) ((comstt >> XSPI_OSPI_PRV_COMSTT_MEMACC_OFFSET) & XSPI_OSPI_PRV_COMSTT_MEMACC_VALUE_MASK);
     bool     wrbufne =
         (bool) ((comstt >> XSPI_OSPI_PRV_COMSTT_WRBUFNE_OFFSET) & XSPI_OSPI_PRV_COMSTT_WRBUFNE_VALUE_MASK);
 
-    /* Read device status. */
-    bool write_in_progress = r_xspi_ospi_status_sub(p_instance_ctrl, p_instance_ctrl->p_cfg->write_status_bit);
-
-    p_status->write_in_progress = (bool) (wrbufne | memacc | write_in_progress);
+    if ((true == memacc) || (true == wrbufne))
+    {
+        /* If the xSPI is accessing memory or data is in the write buffer,
+         * it is judged a "write in progress" without access to device. */
+        p_status->write_in_progress = (bool) (wrbufne | memacc);
+    }
+    else
+    {
+        /* Read device status. */
+        p_status->write_in_progress = r_xspi_ospi_status_sub(p_instance_ctrl, p_instance_ctrl->p_cfg->write_status_bit);
+    }
 
     return FSP_SUCCESS;
 }
@@ -678,26 +668,6 @@ fsp_err_t R_XSPI_OSPI_Close (spi_flash_ctrl_t * p_ctrl)
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 
     p_instance_ctrl->open = 0U;
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * DEPRECATED Get the driver version based on compile time macros.
- *
- * Implements @ref spi_flash_api_t::versionGet.
- *
- * @retval     FSP_SUCCESS          Successful close.
- * @retval     FSP_ERR_ASSERTION    p_version is NULL.
- *
- **********************************************************************************************************************/
-fsp_err_t R_XSPI_OSPI_VersionGet (fsp_version_t * const p_version)
-{
-#if XSPI_OSPI_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_version);
-#endif
-
-    p_version->version_id = g_ospi_version.version_id;
 
     return FSP_SUCCESS;
 }

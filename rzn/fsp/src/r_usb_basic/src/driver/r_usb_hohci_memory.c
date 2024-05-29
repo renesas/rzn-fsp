@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -31,7 +31,7 @@
 /***********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
  ***********************************************************************************************************************/
-#include "r_usb_hhci_local.h"
+#include "../driver/inc/r_usb_hhci_local.h"
 
 /***********************************************************************************************************************
  * Macro definitions

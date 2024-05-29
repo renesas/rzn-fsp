@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -3748,7 +3748,6 @@ typedef struct                         /*!< (@ 0x80004000) R_CRC0 Structure     
     union
     {
         __IOM uint32_t CRCDIR;         /*!< (@ 0x00000004) CRC Data Input Register                                    */
-        __IOM uint16_t CRCDIR_HA;      /*!< (@ 0x00000004) CRC Data Input Register                                    */
         __IOM uint8_t  CRCDIR_BY;      /*!< (@ 0x00000004) CRC Data Input Register                                    */
     };
 
@@ -5994,8 +5993,7 @@ typedef struct                         /*!< (@ 0x80090060) R_DMA Structure      
             uint32_t                : 3;
         } DMAC1_RSSEL_b[3];
     };
-    __IM uint32_t RESERVED2[3];
-} R_DMA_Type;                          /*!< Size = 60 (0x3c)                                                          */
+} R_DMA_Type;                            /*!< Size = 48 (0x30)                                                          */
 
 /* =========================================================================================================================== */
 /* ================                                        R_PORT_NSR                                         ================ */
@@ -8389,10 +8387,13 @@ typedef struct                         /*!< (@ 0x80110200) R_ESC_INI Structure  
 
         struct
         {
-            __IOM uint32_t TXSFT0 : 2; /*!< [1..0] Set the delay time for ETH0_TXC of the EtherCAT                    */
-            __IOM uint32_t TXSFT1 : 2; /*!< [3..2] Set the delay time for ETH1_TXC of the EtherCAT                    */
-            __IOM uint32_t TXSFT2 : 2; /*!< [5..4] Set the delay time for ETH2_TXC of the EtherCAT                    */
-            uint32_t              : 26;
+            __IOM uint32_t TXSFT0 : 2; /*!< [1..0] Set the delay time for ETH0_TXEN and ETH0_TXDn of the
+                                        *   EtherCAT                                                                  */
+            __IOM uint32_t TXSFT1 : 2; /*!< [3..2] Set the delay time for ETH1_TXEN and ETH1_TXDn of the
+                                        *   EtherCAT                                                                  */
+            __IOM uint32_t TXSFT2 : 2; /*!< [5..4] Set the delay time for ETH2_TXEN and ETH2_TXDn of the
+                                        *   EtherCAT                                                                  */
+            uint32_t : 26;
         } ECATDBGC_b;
     };
 
@@ -8565,8 +8566,7 @@ typedef struct                         /*!< (@ 0x80120000) R_ETHSW Structure    
                                            *   0.                                                                        */
             __IOM uint32_t ENABLE : 1;    /*!< [6..6] If set, all Bridge Protocol Frames (BPDU) are forwarded
                                            *   exclusively to the management port specified in bits [3:0].               */
-            __IOM uint32_t DISCARD : 1;   /*!< [7..7] If set, BPDU frames are discarded always. Setting has
-                                           *   no effect, when the enable bit is set.                                    */
+            __IOM uint32_t DISCARD : 1;   /*!< [7..7] If set, BPDU frames are discarded always.                          */
             __IOM uint32_t MGMT_EN : 1;   /*!< [8..8] If set, BPDU frames received at the management port are
                                            *   forwarded to the ports given in the portmask given in this
                                            *   register, bypassing the normal forwarding decisions (except
@@ -11178,7 +11178,7 @@ typedef struct                         /*!< (@ 0x80120000) R_ETHSW Structure    
         struct
         {
             __IM uint32_t FCSERRCOUNT : 32;         /*!< [31..0] PORT n, this field indicates the number of MAC Valid
-                                                     *   Length except CRC error.                                                  */
+                                                     *   Length but CRC error.                                                     */
         } AFRAMECHECKSEQUENCEERRORS_P0_b;
     };
 
@@ -12046,7 +12046,7 @@ typedef struct                         /*!< (@ 0x80120000) R_ETHSW Structure    
         struct
         {
             __IM uint32_t FCSERRCOUNT : 32;         /*!< [31..0] PORT n, this field indicates the number of MAC Valid
-                                                     *   Length except CRC error.                                                  */
+                                                     *   Length but CRC error.                                                     */
         } AFRAMECHECKSEQUENCEERRORS_P1_b;
     };
 
@@ -12914,7 +12914,7 @@ typedef struct                         /*!< (@ 0x80120000) R_ETHSW Structure    
         struct
         {
             __IM uint32_t FCSERRCOUNT : 32;         /*!< [31..0] PORT n, this field indicates the number of MAC Valid
-                                                     *   Length except CRC error.                                                  */
+                                                     *   Length but CRC error.                                                     */
         } AFRAMECHECKSEQUENCEERRORS_P2_b;
     };
 
@@ -13577,7 +13577,7 @@ typedef struct                         /*!< (@ 0x80120000) R_ETHSW Structure    
         struct
         {
             __IM uint32_t FCSERRCOUNT : 32;         /*!< [31..0] PORT n, this field indicates the number of MAC Valid
-                                                     *   Length except CRC error.                                                  */
+                                                     *   Length but CRC error.                                                     */
         } AFRAMECHECKSEQUENCEERRORS_P3_b;
     };
 
@@ -27611,7 +27611,22 @@ typedef struct                         /*!< (@ 0x81280000) R_SYSC_S Structure   
             __IOM uint32_t SWR : 32;   /*!< [31..0] CPU0 Software Reset                                               */
         } SWRCPU0_b;
     };
-    __IM uint32_t RESERVED8[60];
+    __IM uint32_t RESERVED8[15];
+
+    union
+    {
+        __IOM uint32_t MRCTLI;           /*!< (@ 0x00000260) Module Reset Control Register I                            */
+
+        struct
+        {
+            __IOM uint32_t MRCTLI00 : 1; /*!< [0..0] PHOSTIF Reset Control                                              */
+            __IOM uint32_t MRCTLI01 : 1; /*!< [1..1] SHOSTIF (Master bus clock domain) Reset Control                    */
+            __IOM uint32_t MRCTLI02 : 1; /*!< [2..2] SHOSTIF (Slave bus clock domain) Reset Control                     */
+            __IOM uint32_t MRCTLI03 : 1; /*!< [3..3] SHOSTIF (IP clock domain) Reset Control                            */
+            uint32_t                : 28;
+        } MRCTLI_b;
+    };
+    __IM uint32_t RESERVED9[44];
 
     union
     {
@@ -27644,7 +27659,7 @@ typedef struct                         /*!< (@ 0x81280000) R_SYSC_S Structure   
             uint32_t                 : 20;
         } MSTPCRG_b;
     };
-    __IM uint32_t RESERVED9;
+    __IM uint32_t RESERVED10;
 
     union
     {
@@ -28232,7 +28247,7 @@ typedef struct                         /*!< (@ 0x90001000) R_MTU Structure      
 
     union
     {
-        __IOM uint8_t TRWERA;          /*!< (@ 0x00000284) Timer Read/Write Enable Register                           */
+        __IOM uint8_t TRWERA;          /*!< (@ 0x00000284) Timer Read/Write Enable Register A                         */
 
         struct
         {
@@ -28458,7 +28473,7 @@ typedef struct                         /*!< (@ 0x90001000) R_MTU Structure      
 
     union
     {
-        __IOM uint8_t TRWERB;          /*!< (@ 0x00000A84) Timer Read/Write Enable Register                           */
+        __IOM uint8_t TRWERB;          /*!< (@ 0x00000A84) Timer Read/Write Enable Register B                         */
 
         struct
         {
@@ -33329,7 +33344,6 @@ typedef struct                         /*!< (@ 0xC0060000) R_GSC Structure      
  #define R_CRC0_CRCCR0_DORCLR_Pos    (7UL)    /*!< DORCLR (Bit 7)                                        */
  #define R_CRC0_CRCCR0_DORCLR_Msk    (0x80UL) /*!< DORCLR (Bitfield-Mask: 0x01)                          */
 /* ========================================================  CRCDIR  ========================================================= */
-/* =======================================================  CRCDIR_HA  ======================================================= */
 /* =======================================================  CRCDIR_BY  ======================================================= */
 /* ========================================================  CRCDOR  ========================================================= */
 /* =======================================================  CRCDOR_HA  ======================================================= */
@@ -44544,6 +44558,15 @@ typedef struct                         /*!< (@ 0xC0060000) R_GSC Structure      
 /* ========================================================  SWRCPU0  ======================================================== */
  #define R_SYSC_S_SWRCPU0_SWR_Pos            (0UL)          /*!< SWR (Bit 0)                                           */
  #define R_SYSC_S_SWRCPU0_SWR_Msk            (0xffffffffUL) /*!< SWR (Bitfield-Mask: 0xffffffff)                       */
+/* ========================================================  MRCTLI  ========================================================= */
+ #define R_SYSC_S_MRCTLI_MRCTLI00_Pos        (0UL)          /*!< MRCTLI00 (Bit 0)                                      */
+ #define R_SYSC_S_MRCTLI_MRCTLI00_Msk        (0x1UL)        /*!< MRCTLI00 (Bitfield-Mask: 0x01)                        */
+ #define R_SYSC_S_MRCTLI_MRCTLI01_Pos        (1UL)          /*!< MRCTLI01 (Bit 1)                                      */
+ #define R_SYSC_S_MRCTLI_MRCTLI01_Msk        (0x2UL)        /*!< MRCTLI01 (Bitfield-Mask: 0x01)                        */
+ #define R_SYSC_S_MRCTLI_MRCTLI02_Pos        (2UL)          /*!< MRCTLI02 (Bit 2)                                      */
+ #define R_SYSC_S_MRCTLI_MRCTLI02_Msk        (0x4UL)        /*!< MRCTLI02 (Bitfield-Mask: 0x01)                        */
+ #define R_SYSC_S_MRCTLI_MRCTLI03_Pos        (3UL)          /*!< MRCTLI03 (Bit 3)                                      */
+ #define R_SYSC_S_MRCTLI_MRCTLI03_Msk        (0x8UL)        /*!< MRCTLI03 (Bitfield-Mask: 0x01)                        */
 /* ========================================================  MSTPCRF  ======================================================== */
  #define R_SYSC_S_MSTPCRF_MSTPCRF00_Pos      (0UL)          /*!< MSTPCRF00 (Bit 0)                                     */
  #define R_SYSC_S_MSTPCRF_MSTPCRF00_Msk      (0x1UL)        /*!< MSTPCRF00 (Bitfield-Mask: 0x01)                       */

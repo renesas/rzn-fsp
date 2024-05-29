@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -53,13 +53,8 @@ FSP_HEADER
 #define BSP_IRQ_DISABLED                       (0xFFU)
 
 /* Vector Number offset */
-#define BSP_VECTOR_NUM_OFFSET                  (32U)
-
-/* Version of this module's code and API. */
-#define BSP_CODE_VERSION_MAJOR                 (1U) // DEPRECATED
-#define BSP_CODE_VERSION_MINOR                 (3U) // DEPRECATED
-#define BSP_API_VERSION_MAJOR                  (1U) // DEPRECATED
-#define BSP_API_VERSION_MINOR                  (3U) // DEPRECATED
+#define BSP_VECTOR_NUM_OFFSET                  (32)
+#define BSP_INTERRUPT_TYPE_OFFSET              (16U)
 
 #define FSP_CONTEXT_SAVE
 #define FSP_CONTEXT_RESTORE
@@ -181,9 +176,6 @@ FSP_HEADER
         (timeout)--;                                                          \
     }
 
-/** Version data structure used by error logger macro. */
-extern const fsp_version_t g_bsp_version;
-
 #ifndef BSP_CFG_IRQ_MASK_LEVEL_FOR_CRITICAL_SECTION
  #define BSP_CFG_IRQ_MASK_LEVEL_FOR_CRITICAL_SECTION    (0U)
 #endif
@@ -191,7 +183,7 @@ extern const fsp_version_t g_bsp_version;
 /* This macro defines a variable for saving previous mask value */
 #ifndef FSP_CRITICAL_SECTION_DEFINE
 
- #define FSP_CRITICAL_SECTION_DEFINE              uint32_t old_mask_level = 0U
+ #define FSP_CRITICAL_SECTION_DEFINE              uintptr_t old_mask_level = 0U
 #endif
 
 /* These macros abstract methods to save and restore the interrupt state. */
@@ -217,6 +209,22 @@ extern const fsp_version_t g_bsp_version;
 
 /** Used to signify that the requested IRQ vector is not defined in this system. */
 #define FSP_INVALID_VECTOR                      ((IRQn_Type) - 33)
+
+/* This macro Enable or Disable interrupts. */
+#define BSP_INTERRUPT_ENABLE                    __asm volatile ("cpsie i"); \
+    __asm volatile ("isb");
+
+#define BSP_INTERRUPT_DISABLE                   __asm volatile ("cpsid i"); \
+    __asm volatile ("isb");
+
+/** In the event of an unrecoverable error the BSP will by default call the __BKPT() intrinsic function which will
+ *  alert the user of the error. The user can override this default behavior by defining their own
+ *  BSP_CFG_HANDLE_UNRECOVERABLE_ERROR macro.
+ */
+#if !defined(BSP_CFG_HANDLE_UNRECOVERABLE_ERROR)
+
+ #define BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(x)    __BKPT((x))
+#endif
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -259,15 +267,17 @@ typedef enum e_fsp_priv_clock
 /***********************************************************************************************************************
  * Exported global variables
  **********************************************************************************************************************/
+
 extern const uint32_t g_bsp_system_clock_select[][2];
 extern const uint32_t g_bsp_system_clock_select_ckio[][2];
 extern const uint32_t g_bsp_system_clock_select_xspi_clk[][2];
 
+extern IRQn_Type g_current_interrupt_num[];
+extern uint8_t   g_current_interrupt_pointer;
+
 /***********************************************************************************************************************
- * Global variables (defined in other files)
+ * Exported global functions (to be accessed by other files)
  **********************************************************************************************************************/
-extern uint16_t g_current_interrupt_num[];
-extern uint8_t  g_current_interrupt_pointer;
 
 /***********************************************************************************************************************
  * Inline Functions
@@ -281,7 +291,7 @@ extern uint8_t  g_current_interrupt_pointer;
 __STATIC_INLINE IRQn_Type R_FSP_CurrentIrqGet (void)
 {
     /* Return the current interrupt number. */
-    return (IRQn_Type) g_current_interrupt_num[(g_current_interrupt_pointer - 1U)];
+    return g_current_interrupt_num[(g_current_interrupt_pointer - 1U)];
 }
 
 /*******************************************************************************************************************//**
@@ -410,23 +420,11 @@ __STATIC_INLINE uint32_t R_FSP_SystemClockHzGet (fsp_priv_clock_t clock)
     return clock_hz;
 }
 
-/***********************************************************************************************************************
- * Exported global functions (to be accessed by other files)
- **********************************************************************************************************************/
 #if ((1 == BSP_CFG_ERROR_LOG) || (1 == BSP_CFG_ASSERT))
 
 /** Prototype of default function called before errors are returned in FSP code if BSP_CFG_LOG_ERRORS is set to 1. */
 void fsp_error_log(fsp_err_t err, const char * file, int32_t line);
 
-#endif
-
-/** In the event of an unrecoverable error the BSP will by default call the __BKPT() intrinsic function which will
- *  alert the user of the error. The user can override this default behavior by defining their own
- *  BSP_CFG_HANDLE_UNRECOVERABLE_ERROR macro.
- */
-#if !defined(BSP_CFG_HANDLE_UNRECOVERABLE_ERROR)
-
- #define BSP_CFG_HANDLE_UNRECOVERABLE_ERROR(x)    __BKPT((x))
 #endif
 
 /** @} (end addtogroup BSP_MCU) */

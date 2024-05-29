@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -81,8 +81,6 @@
 
 #define BSP_PRV_STARTUP_SCKCR2_FSELCPU0_ICLK_MUL2           (BSP_CLOCKS_FSELCPU0_ICLK_MUL2 << \
                                                              R_SYSC_S_SCKCR2_FSELCPU0_Pos)
-#define BSP_PRV_STARTUP_SCKCR2_FSELCPU1_ICLK_MUL2           (BSP_CLOCKS_FSELCPU1_ICLK_MUL2 << \
-                                                             R_SYSC_S_SCKCR2_FSELCPU1_Pos)
 
 /* Calculate the value to write to HIZCTRLEN. */
 #define BSP_PRV_STARTUP_HIZCTRLEN                           ((BSP_CFG_CLMA1MASK << 2) | (BSP_CFG_CLMA0MASK << 1) | \

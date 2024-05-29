@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -106,15 +106,6 @@ static inline void r_mtu3_write_protect_disable(mtu3_three_phase_instance_ctrl_t
  * Private global variables
  **********************************************************************************************************************/
 
-/* Version data structure used by error logger macro. */
-static const fsp_version_t g_mtu3_three_phase_version =
-{
-    .api_version_minor  = THREE_PHASE_API_VERSION_MINOR,
-    .api_version_major  = THREE_PHASE_API_VERSION_MAJOR,
-    .code_version_major = MTU3_THREE_PHASE_CODE_VERSION_MAJOR,
-    .code_version_minor = MTU3_THREE_PHASE_CODE_VERSION_MINOR
-};
-
 static const uint8_t tmdr1_md[3] =
 {
     R_MTU3_TMDR1_BFA_Msk | R_MTU3_TMDR1_BFB_Msk | MTU3_THREE_TMDR1_PWM_MODE1,
@@ -147,7 +138,6 @@ const three_phase_api_t g_three_phase_on_mtu3_three_phase =
     .dutyCycleSet = R_MTU3_THREE_PHASE_DutyCycleSet,
     .callbackSet  = R_MTU3_THREE_PHASE_CallbackSet,
     .close        = R_MTU3_THREE_PHASE_Close,
-    .versionGet   = R_MTU3_THREE_PHASE_VersionGet
 };
 
 /*******************************************************************************************************************//**
@@ -196,9 +186,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Open (three_phase_ctrl_t * const p_ctrl, three_phas
         p_instance_ctrl->p_reg_com = (R_MTU_Type *) (R_MTU_BASE + MTU3_THREE_BREG_OFFSET); /* set Base address of common ch MYU6/7 */
     }
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_disable(p_instance_ctrl);                                         /* Enable Read/Write Registers */
-#endif
 
     /* Open MTU3 Complementary PWM Mode ch : MTU3/4 or MTU6/7 */
     fsp_err_t err;
@@ -261,9 +249,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Open (three_phase_ctrl_t * const p_ctrl, three_phas
     FSP_PARAMETER_NOT_USED(err);
 #endif
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_enable(p_instance_ctrl); /* Disanable Read/Write Registers */
-#endif
 
     p_instance_ctrl->open = MTU3_THREE_PHASE_OPEN;
 
@@ -285,17 +271,13 @@ fsp_err_t R_MTU3_THREE_PHASE_Stop (three_phase_ctrl_t * const p_ctrl)
     FSP_ERROR_RETURN(MTU3_THREE_PHASE_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_disable(p_instance_ctrl);                                                 /* Enable Read/Write Registers */
-#endif
 
     /* When setting MTU6, "TSYRA" is used because the address of "MTU3_THREE_BREG_OFFSET" is added to p_reg_com at the time of "open". */
     p_instance_ctrl->p_reg_com->TSTRA &= (uint8_t) ~(R_MTU_TSTRA_CST3_Msk | R_MTU_TSTRA_CST4_Msk); /* Stop timer MTU3/4 or MTU6/7 */
     p_instance_ctrl->p_reg_com->TOERA &= (uint8_t) ~MTU3_THREE_TOER_ALL;                           /* output is disabled (non-active level) */
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_enable(p_instance_ctrl);                                                  /* Disanable Read/Write Registers */
-#endif
 
     return FSP_SUCCESS;
 }
@@ -315,9 +297,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Start (three_phase_ctrl_t * const p_ctrl)
     FSP_ERROR_RETURN(MTU3_THREE_PHASE_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_disable(p_instance_ctrl); /* Enable Read/Write Registers */
-#endif
 
     /* Start timer */
     *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg[MTU3_THREE_CH1ST] + MTU36_TCNT_OFFSET_ADDRESS) = 0U;
@@ -327,9 +307,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Start (three_phase_ctrl_t * const p_ctrl)
     p_instance_ctrl->p_reg_com->TOERA |= MTU3_THREE_TOER_ALL;                           /* MTU output is enabled; */
     p_instance_ctrl->p_reg_com->TSTRA |= (R_MTU_TSTRA_CST3_Msk | R_MTU_TSTRA_CST4_Msk); /* Start timer MTU3/4 or MTU6/7 */
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_enable(p_instance_ctrl);                                       /* Disanable Read/Write Registers */
-#endif
 
     return FSP_SUCCESS;
 }
@@ -349,9 +327,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Reset (three_phase_ctrl_t * const p_ctrl)
     FSP_ERROR_RETURN(MTU3_THREE_PHASE_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_disable(p_instance_ctrl); /* Enable Read/Write Registers */
-#endif
 
     /* Set whether the timer is running or stopped */
     /* When setting MTU6, "TSYRA" is used because the address of "MTU3_THREE_BREG_OFFSET" is added to p_reg_com at the time of "open". */
@@ -370,9 +346,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Reset (three_phase_ctrl_t * const p_ctrl)
         p_instance_ctrl->p_reg_com->TSTRA |= (R_MTU_TSTRA_CST3_Msk | R_MTU_TSTRA_CST4_Msk); /* Start timer MTU3/4 or MTU6/7 */
     }
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_enable(p_instance_ctrl);                                           /* Disanable Read/Write Registers */
-#endif
 
     return FSP_SUCCESS;
 }
@@ -477,9 +451,7 @@ fsp_err_t R_MTU3_THREE_PHASE_Close (three_phase_ctrl_t * const p_ctrl)
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(MTU3_THREE_PHASE_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
-    r_mtu3_write_protect_disable(p_instance_ctrl); /* Enable Read/Write Registers */
-#endif
+    r_mtu3_write_protect_disable(p_instance_ctrl);                                                 /* Enable Read/Write Registers */
 
     /* Stop timer & initial output level */
     /* When setting MTU6, "TSYRA" is used because the address of "MTU3_THREE_BREG_OFFSET" is added to p_reg_com at the time of "open". */
@@ -489,31 +461,10 @@ fsp_err_t R_MTU3_THREE_PHASE_Close (three_phase_ctrl_t * const p_ctrl)
     R_MTU3_Close(p_instance_ctrl->p_cfg->p_timer_instance[MTU3_THREE_CH1ST]->p_ctrl);
     R_MTU3_Close(p_instance_ctrl->p_cfg->p_timer_instance[MTU3_THREE_CH2ND]->p_ctrl);
 
-#ifdef MTU3_CFG_WRITE_PROTECT_ENABLE
     r_mtu3_write_protect_enable(p_instance_ctrl); /* Disanable Read/Write Registers */
-#endif
 
     /* Clear open flag. */
     p_instance_ctrl->open = 0U;
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * DEPRECATED Sets driver version based on compile time macros. Implements @ref three_phase_api_t::versionGet.
- *
- * @retval FSP_SUCCESS                 Version stored in p_version.
- * @retval FSP_ERR_ASSERTION           p_version was NULL.
- **********************************************************************************************************************/
-fsp_err_t R_MTU3_THREE_PHASE_VersionGet (fsp_version_t * const p_version)
-{
-#if MTU3_THREE_PHASE_CFG_PARAM_CHECKING_ENABLE
-
-    /* Verify parameters are valid */
-    FSP_ASSERT(NULL != p_version);
-#endif
-
-    p_version->version_id = g_mtu3_three_phase_version.version_id;
 
     return FSP_SUCCESS;
 }

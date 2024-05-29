@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -37,22 +37,19 @@
 /*******************************************************************************
  * Includes   <System Includes>, "Project Includes"
  *******************************************************************************/
-
-#include "r_usb_typedef.h"
-#include "r_usb_extern.h"
-#include "r_usb_bitdefine.h"
-#include "r_usb_reg_access.h"
+#include "../driver/inc/r_usb_typedef.h"
+#include "../driver/inc/r_usb_extern.h"
 
 #if  USB_IP_EHCI_OHCI == 0
+ #include "r_usb_bitdefine.h"
+ #include "r_usb_reg_access.h"
+
  #if USB_CFG_DMA == USB_CFG_ENABLE
   #include "r_usb_dmaca_rz_if.h"
   #include "r_usb_dmaca_rz_target.h"
- #endif                                /* USB_CFG_DMA == USB_CFG_ENABLE */
-
- #if (USB_CFG_DMA == USB_CFG_ENABLE)
   #include "r_usb_dmac.h"
 
-  #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+  #if defined(BSP_MCU_GROUP_RZN2L)
 
 /******************************************************************************
  * Exported global functions (to be accessed by other files)
@@ -74,7 +71,7 @@ void usb_dma_send_setting(usb_utr_t * ptr, uint32_t src_adr, uint16_t useport, u
 // uint8_t usb_cstd_dma_ref_ch_no(uint8_t ip_no, uint16_t use_port);
 void usb_dma_send_complete_event_set(uint8_t ip_no, uint16_t use_port);
 
-   #if !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L)
+   #if !defined(BSP_MCU_GROUP_RZN2L)
 void usb_ip0_d0fifo_callback(dmac_callback_args_t * cb_data);
 void usb_ip0_d1fifo_callback(dmac_callback_args_t * cb_data);
 void usb_ip1_d0fifo_callback(dmac_callback_args_t * cb_data);
@@ -198,9 +195,9 @@ void usb_cstd_dma_rcv_start (usb_utr_t * ptr, uint16_t pipe, uint16_t useport)
     uint8_t * p_data_ptr;
     uint8_t   ip;
     uint8_t   ch;
-   #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+   #if defined(BSP_MCU_GROUP_RZN2L)
     uint32_t length = g_usb_pstd_data_cnt[pipe];
-   #endif                              /* defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) */
+   #endif                              /* defined(BSP_MCU_GROUP_RZN2L) */
 
    #if USB_CFG_USE_USBIP == USB_CFG_IP0
 
@@ -686,9 +683,9 @@ void usb_dma_send_complete_event_set (uint8_t ip_no, uint16_t use_port)
     usb_cfg_t * p_cfg;
     usb_utr_t   utr;
 
-    #if defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L)
+    #if defined(BSP_MCU_GROUP_RZN2L)
     p_cfg = (usb_cfg_t *) R_FSP_IsrContextGet(VECTOR_NUMBER_USB_FDMA1); // @@
-    #else /* defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) */
+    #else /* defined(BSP_MCU_GROUP_RZN2L) */
     if (ip_no)
     {
      #if defined(BSP_MCU_GROUP_RA6M3)
@@ -701,7 +698,7 @@ void usb_dma_send_complete_event_set (uint8_t ip_no, uint16_t use_port)
     {
         p_cfg = (usb_cfg_t *) R_FSP_IsrContextGet((IRQn_Type) VECTOR_NUMBER_USBFS_FIFO_1); // @@
     }
-    #endif /* defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) */
+    #endif /* defined(BSP_MCU_GROUP_RZN2L) */
 
     gs_usb_cstd_dma_int.buf[gs_usb_cstd_dma_int.wp].ip        = ip_no;
     gs_usb_cstd_dma_int.buf[gs_usb_cstd_dma_int.wp].fifo_type = use_port;
@@ -741,7 +738,7 @@ void usb_dma_send_complete_event_set (uint8_t ip_no, uint16_t use_port)
  ******************************************************************************/
    #endif
 
-   #if !defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L)
+   #if !defined(BSP_MCU_GROUP_RZN2L)
 
 /*******************************************************************************
  * Function Name: usb_ip0_d0fifo_callback
@@ -806,7 +803,7 @@ void usb_ip1_d1fifo_callback (dmac_callback_args_t * cb_data)
 /******************************************************************************
  * End of function usb_ip1_d1fifo_callback
  ******************************************************************************/
-   #else                               /* defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
+   #else                               /* !defined(BSP_MCU_GROUP_RZN2L) */
 void usb_ip0_d0fifo_callback (void)
 {
     USB_DMACA_CHCTRL(0) |= USB_DMACA_CHSTAT_END_CLEAR;
@@ -864,7 +861,7 @@ void usb_ip1_d1fifo_callback (void)
 /******************************************************************************
  * End of function usb_ip1_d1fifo_callback
  ******************************************************************************/
-   #endif                              /* defined(BSP_MCU_GROUP_RZT2M) && !defined(BSP_MCU_GROUP_RZN2L) */
+   #endif                              /* !defined(BSP_MCU_GROUP_RZN2L) */
 
 /******************************************************************************
  * Function Name   : usb_dma_get_crtb
@@ -886,7 +883,7 @@ uint32_t usb_cstd_dma_get_crtb (uint8_t dma_ch)
 /******************************************************************************
  * End of function usb_dma_get_crtb
  ******************************************************************************/
-  #endif                               /* defined(BSP_MCU_GROUP_RZT2M) || defined(BSP_MCU_GROUP_RZN2L) */
+  #endif                               /* defined(BSP_MCU_GROUP_RZN2L) */
  #endif                                /* (USB_CFG_DMA == USB_CFG_ENABLE) */
 #endif  /* USB_IP_EHCI_OHCI == 0 */
 

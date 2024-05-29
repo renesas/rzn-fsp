@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -21,8 +21,16 @@
 #ifndef BSP_MODULE_H
 #define BSP_MODULE_H
 
+/***********************************************************************************************************************
+ * Includes   <System Includes> , "Project Includes"
+ **********************************************************************************************************************/
+
 /** Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
+
+/***********************************************************************************************************************
+ * Macro definitions
+ **********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
  * @addtogroup BSP_MCU
@@ -201,6 +209,18 @@ FSP_HEADER
 #define BSP_MSTP_REG_FSP_IP_PHOSTIF(channel)       R_SYSC_S->MSTPCRI
 #define BSP_MSTP_BIT_FSP_IP_PHOSTIF(channel)       (1U << (0U));
 #define BSP_MSTP_DMY_FSP_IP_PHOSTIF(channel)       ;
+
+/***********************************************************************************************************************
+ * Typedef definitions
+ **********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * Exported global variables
+ **********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * Exported global functions (to be accessed by other files)
+ **********************************************************************************************************************/
 
 /** Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER

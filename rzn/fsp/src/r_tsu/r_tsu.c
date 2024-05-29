@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -48,18 +48,19 @@
 /** TSU Implementation of ADC. */
 const adc_api_t g_adc_on_tsu =
 {
-    .open          = R_TSU_Open,
-    .scanCfg       = R_TSU_ScanCfg,
-    .scanStart     = R_TSU_ScanStart,
-    .scanStop      = R_TSU_ScanStop,
-    .scanStatusGet = R_TSU_StatusGet,
-    .read          = R_TSU_Read,
-    .read32        = R_TSU_Read32,
-    .calibrate     = R_TSU_Calibrate,
-    .offsetSet     = R_TSU_OffsetSet,
-    .callbackSet   = R_TSU_CallbackSet,
-    .close         = R_TSU_Close,
-    .infoGet       = R_TSU_InfoGet,
+    .open           = R_TSU_Open,
+    .scanCfg        = R_TSU_ScanCfg,
+    .scanStart      = R_TSU_ScanStart,
+    .scanGroupStart = R_TSU_ScanGroupStart,
+    .scanStop       = R_TSU_ScanStop,
+    .scanStatusGet  = R_TSU_StatusGet,
+    .read           = R_TSU_Read,
+    .read32         = R_TSU_Read32,
+    .calibrate      = R_TSU_Calibrate,
+    .offsetSet      = R_TSU_OffsetSet,
+    .callbackSet    = R_TSU_CallbackSet,
+    .close          = R_TSU_Close,
+    .infoGet        = R_TSU_InfoGet,
 };
 
 /*******************************************************************************************************************//**
@@ -309,6 +310,20 @@ fsp_err_t R_TSU_ScanCfg (adc_ctrl_t * p_ctrl, void const * const p_extend)
 }
 
 /*******************************************************************************************************************//**
+ * @ref adc_api_t::scanGroupStart is not supported on the TSU.
+ *
+ * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
+ **********************************************************************************************************************/
+fsp_err_t R_TSU_ScanGroupStart (adc_ctrl_t * p_ctrl, adc_group_mask_t group_mask)
+{
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(group_mask);
+
+    /* Return the unsupported error. */
+    return FSP_ERR_UNSUPPORTED;
+}
+
+/*******************************************************************************************************************//**
  * @ref adc_api_t::read32 is not supported on the TSU.
  *
  * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
@@ -328,7 +343,7 @@ fsp_err_t R_TSU_Read32 (adc_ctrl_t * p_ctrl, adc_channel_t const reg_id, uint32_
  *
  * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
  **********************************************************************************************************************/
-fsp_err_t R_TSU_Calibrate (adc_ctrl_t * const p_ctrl, void * const p_extend)
+fsp_err_t R_TSU_Calibrate (adc_ctrl_t * const p_ctrl, void const * p_extend)
 {
     FSP_PARAMETER_NOT_USED(p_ctrl);
     FSP_PARAMETER_NOT_USED(p_extend);
@@ -357,12 +372,12 @@ fsp_err_t R_TSU_OffsetSet (adc_ctrl_t * const p_ctrl, adc_channel_t const reg_id
  *
  * @retval FSP_ERR_UNSUPPORTED         Function not supported in this implementation.
  **********************************************************************************************************************/
-fsp_err_t R_TSU_CallbackSet (adc_ctrl_t * const          p_api_ctrl,
+fsp_err_t R_TSU_CallbackSet (adc_ctrl_t * const          p_ctrl,
                              void (                    * p_callback)(adc_callback_args_t *),
                              void const * const          p_context,
                              adc_callback_args_t * const p_callback_memory)
 {
-    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_ctrl);
     FSP_PARAMETER_NOT_USED(p_callback);
     FSP_PARAMETER_NOT_USED(p_context);
     FSP_PARAMETER_NOT_USED(p_callback_memory);

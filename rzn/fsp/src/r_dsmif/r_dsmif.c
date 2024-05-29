@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -30,20 +30,27 @@
 /**********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#define DSMIF_VALID_UNIT_MASK      (0x3U) /* Unit0-1 */
+#define DSMIF_VALID_UNIT_MASK                       (0x3U) /* Unit0-1 */
 
-#define DSMIF_CMSH_DEFAULT         (0x0U)
+#define DSMIF_CMSH_DEFAULT                          (0x0U)
 
-#define VECNUM_DSMIF0_CDRUI        ((IRQn_Type) 343)
-#define VECNUM_DSMIF1_CDRUI        ((IRQn_Type) 344)
+#define VECNUM_DSMIF0_CDRUI                         ((IRQn_Type) 343)
+#define VECNUM_DSMIF1_CDRUI                         ((IRQn_Type) 344)
 
-#define DSMIF_OPEN                 (0x44534D49U)
+#define DSMIF_OPEN                                  (0x44534D49U)
 
-#define DSMIF_DATA_TYPE_MASK       (0x0300U)
-#define DSMIF_DATA_CHANNEL_MASK    (0x0003U)
-#define DSMIF_DATA_TYPE_SHIFT      (0x8U)
+#define DSMIF_DATA_TYPE_MASK                        (0x0300U)
+#define DSMIF_DATA_CHANNEL_MASK                     (0x0003U)
+#define DSMIF_DATA_TYPE_SHIFT                       (0x8U)
 
-#define DSMIF_REGID_MASK           (0x000000FFU)
+#define DSMIF_CHANNEL_OVERCURRENT_STATUS_FLAGS      (R_DSMIF0_DSCESR_OCFL0_Msk | R_DSMIF0_DSCESR_OCFL1_Msk | \
+                                                     R_DSMIF0_DSCESR_OCFL2_Msk | R_DSMIF0_DSCESR_OCFH0_Msk | \
+                                                     R_DSMIF0_DSCESR_OCFH1_Msk | R_DSMIF0_DSCESR_OCFH2_Msk)
+#define DSMIF_CHANNEL_SHORT_CIRCUIT_STATUS_FLAGS    (R_DSMIF0_DSCESR_SCF0_Msk | \
+                                                     R_DSMIF0_DSCESR_SCF1_Msk | R_DSMIF0_DSCESR_SCF2_Msk)
+#define DSMIF_OVERCURRENT_SUM_STATUS_FLAGS          (R_DSMIF0_DSCESR_SUMERRL_Msk | R_DSMIF0_DSCESR_SUMERRH_Msk)
+
+#define DSMIF_REGID_MASK                            (0x000000FFU)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -64,15 +71,6 @@ static fsp_err_t r_dsmif_stop(dsmif_instance_ctrl_t * const p_instance_ctrl);
 static void      r_dsmif_open_irq_cfg(dsmif_instance_ctrl_t * const p_instance_ctrl, adc_cfg_t const * const p_cfg);
 static void      r_dsmif_disable_irq(IRQn_Type irq);
 
-/** Version data structure used by error logger macro. */
-static const fsp_version_t g_dsmif_version =
-{
-    .api_version_minor  = ADC_API_VERSION_MINOR,
-    .api_version_major  = ADC_API_VERSION_MAJOR,
-    .code_version_major = DSMIF_CODE_VERSION_MAJOR,
-    .code_version_minor = DSMIF_CODE_VERSION_MINOR
-};
-
 void dsmif_cdrui_isr(void);
 
 /***********************************************************************************************************************
@@ -88,7 +86,6 @@ const adc_api_t g_adc_on_dsmif =
     .scanStatusGet = R_DSMIF_StatusGet,
     .read32        = R_DSMIF_Read,
     .close         = R_DSMIF_Close,
-    .versionGet    = R_DSMIF_VersionGet,
     .callbackSet   = R_DSMIF_CallbackSet
 };
 
@@ -399,7 +396,36 @@ fsp_err_t R_DSMIF_StatusGet (adc_ctrl_t * p_ctrl, adc_status_t * p_status)
         }
     }
 
-    p_status->error_status = p_instance_ctrl->p_reg->DSCESR;
+    return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * Returns the error status of a scan started by software.
+ *
+ * @retval  FSP_SUCCESS                No software scan is in progress.
+ * @retval  FSP_ERR_ASSERTION          An input pointer was NULL.
+ * @retval  FSP_ERR_NOT_OPEN           Instance control block is not open.
+ **********************************************************************************************************************/
+fsp_err_t R_DSMIF_ErrorStatusGet (adc_ctrl_t * p_ctrl, dsmif_error_status_t * p_error_status)
+{
+    dsmif_instance_ctrl_t * p_instance_ctrl = (dsmif_instance_ctrl_t *) p_ctrl;
+
+#if (1 == DSMIF_CFG_PARAM_CHECKING_ENABLE)
+
+    /* Verify the pointers are not NULL and ensure the DSMIF unit is already open. */
+    FSP_ASSERT(NULL != p_instance_ctrl);
+    FSP_ASSERT(NULL != p_error_status);
+    FSP_ERROR_RETURN(DSMIF_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
+#endif
+    p_error_status->channel_overcurrent_status =
+        (dsmif_channel_overcurrent_status_t) (p_instance_ctrl->p_reg->DSCESR &
+                                              DSMIF_CHANNEL_OVERCURRENT_STATUS_FLAGS);
+    p_error_status->channel_short_circuit_status =
+        (dsmif_channel_short_circuit_status_t) ((p_instance_ctrl->p_reg->DSCESR &
+                                                 DSMIF_CHANNEL_SHORT_CIRCUIT_STATUS_FLAGS) >> 8U);
+    p_error_status->overcurrent_sum_status =
+        (dsmif_overcurrent_sum_status_t) ((p_instance_ctrl->p_reg->DSCESR &
+                                           DSMIF_OVERCURRENT_SUM_STATUS_FLAGS) >> 16U);
 
     return FSP_SUCCESS;
 }
@@ -496,42 +522,23 @@ fsp_err_t R_DSMIF_Close (adc_ctrl_t * p_ctrl)
  * @retval  FSP_ERR_ASSERTION            A required pointer is NULL.
  * @retval  FSP_ERR_NOT_OPEN             The control block has not been opened.
  **********************************************************************************************************************/
-fsp_err_t R_DSMIF_CallbackSet (adc_ctrl_t * const          p_api_ctrl,
+fsp_err_t R_DSMIF_CallbackSet (adc_ctrl_t * const          p_ctrl,
                                void (                    * p_callback)(adc_callback_args_t *),
                                void const * const          p_context,
                                adc_callback_args_t * const p_callback_memory)
 {
-    dsmif_instance_ctrl_t * p_ctrl = (dsmif_instance_ctrl_t *) p_api_ctrl;
+    dsmif_instance_ctrl_t * p_instance_ctrl = (dsmif_instance_ctrl_t *) p_ctrl;
 
 #if DSMIF_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_instance_ctrl);
     FSP_ASSERT(p_callback);
-    FSP_ERROR_RETURN(DSMIF_OPEN == p_ctrl->opened, FSP_ERR_NOT_OPEN);
+    FSP_ERROR_RETURN(DSMIF_OPEN == p_instance_ctrl->opened, FSP_ERR_NOT_OPEN);
 #endif
 
     /* Store callback and context */
-    p_ctrl->p_callback        = p_callback;
-    p_ctrl->p_context         = p_context;
-    p_ctrl->p_callback_memory = p_callback_memory;
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * DEPRECATED Sets driver version based on compile time macros.
- *
- * @retval FSP_SUCCESS                 Version stored in p_version.
- * @retval FSP_ERR_ASSERTION           p_version was NULL.
- **********************************************************************************************************************/
-fsp_err_t R_DSMIF_VersionGet (fsp_version_t * const p_version)
-{
-#if DSMIF_CFG_PARAM_CHECKING_ENABLE
-
-    /* Verify parameters are valid */
-    FSP_ASSERT(NULL != p_version);
-#endif
-
-    p_version->version_id = g_dsmif_version.version_id;
+    p_instance_ctrl->p_callback        = p_callback;
+    p_instance_ctrl->p_context         = p_context;
+    p_instance_ctrl->p_callback_memory = p_callback_memory;
 
     return FSP_SUCCESS;
 }
@@ -725,6 +732,8 @@ static void r_dsmif_disable_irq (IRQn_Type irq)
  **********************************************************************************************************************/
 void dsmif_cdrui_isr (void)
 {
+    DSMIF_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     /* Save context if RTOS is used */
     FSP_CONTEXT_SAVE;
 
@@ -772,4 +781,6 @@ void dsmif_cdrui_isr (void)
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE;
+
+    DSMIF_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }

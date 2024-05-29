@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -28,7 +28,7 @@
  **********************************************************************************************************************/
 #define BSP_RESET_MRCTL_BIT_SHIFT_MASK        (0x0000001FU)
 #define BSP_RESET_MRCTL_SELECT_MASK           (0x001F0000U)
-#define BSP_RESET_MRCTL_REGION_SELECT_MASK    (0x01000000U)
+#define BSP_RESET_MRCTL_REGION_SELECT_MASK    (0x00400000U)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -65,7 +65,10 @@ void R_BSP_SystemReset (void)
 void R_BSP_CPUReset (bsp_reset_t cpu)
 {
     /* CPU0 software reset. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
     R_SYSC_S->SWRCPU0 = BSP_PRV_RESET_KEY;
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
+    __WFI();
     FSP_PARAMETER_NOT_USED(cpu);
 }
 
@@ -94,9 +97,9 @@ void R_BSP_ModuleResetEnable (bsp_module_reset_t module_to_enable)
     /** When MRCTLn register exists in the safety region,
      *  it is necessary to add an offset of safety region. */
     p_reg = (uint32_t *) &R_SYSC_NS->MRCTLA +
-            (((uint32_t) module_to_enable & BSP_RESET_MRCTL_SELECT_MASK) >> 16U);
-    p_reg = (uint32_t *) ((uint32_t) p_reg + (uint32_t) (module_to_enable & BSP_RESET_MRCTL_REGION_SELECT_MASK));
-    mrctl = (uint32_t) (1U << ((uint32_t) module_to_enable & BSP_RESET_MRCTL_BIT_SHIFT_MASK));
+            (((module_to_enable & BSP_RESET_MRCTL_SELECT_MASK) >> 16U) +
+             (module_to_enable & BSP_RESET_MRCTL_REGION_SELECT_MASK));
+    mrctl = 1U << (module_to_enable & BSP_RESET_MRCTL_BIT_SHIFT_MASK);
 
     /** Enable module reset state using MRCTLE register. */
     *p_reg |= mrctl;
@@ -118,9 +121,9 @@ void R_BSP_ModuleResetDisable (bsp_module_reset_t module_to_disable)
     /** When MRCTLn register exists in the safety region,
      *  it is necessary to add an offset of safety region. */
     p_reg = (uint32_t *) &R_SYSC_NS->MRCTLA +
-            (((uint32_t) module_to_disable & BSP_RESET_MRCTL_SELECT_MASK) >> 16U);
-    p_reg = (uint32_t *) ((uint32_t) p_reg + (uint32_t) (module_to_disable & BSP_RESET_MRCTL_REGION_SELECT_MASK));
-    mrctl = (uint32_t) (1U << ((uint32_t) module_to_disable & BSP_RESET_MRCTL_BIT_SHIFT_MASK));
+            (((module_to_disable & BSP_RESET_MRCTL_SELECT_MASK) >> 16U) +
+             (module_to_disable & BSP_RESET_MRCTL_REGION_SELECT_MASK));
+    mrctl = 1U << (module_to_disable & BSP_RESET_MRCTL_BIT_SHIFT_MASK);
 
     /** Disable module stop state using MRCTLn register. */
     *p_reg &= ~mrctl;

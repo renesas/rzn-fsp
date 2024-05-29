@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -55,15 +55,6 @@ void poeg_event_isr(void);
  * Private global variables
  **********************************************************************************************************************/
 
-/* Version data structure used by error logger macro. */
-static const fsp_version_t g_poeg_version =
-{
-    .api_version_minor  = POEG_API_VERSION_MINOR,
-    .api_version_major  = POEG_API_VERSION_MAJOR,
-    .code_version_major = POEG_CODE_VERSION_MAJOR,
-    .code_version_minor = POEG_CODE_VERSION_MINOR
-};
-
 /***********************************************************************************************************************
  * Global Variables
  **********************************************************************************************************************/
@@ -77,7 +68,6 @@ const poeg_api_t g_poeg_on_poeg =
     .statusGet     = R_POEG_StatusGet,
     .callbackSet   = R_POEG_CallbackSet,
     .close         = R_POEG_Close,
-    .versionGet    = R_POEG_VersionGet
 };
 
 /*******************************************************************************************************************//**
@@ -291,23 +281,6 @@ fsp_err_t R_POEG_Close (poeg_ctrl_t * const p_ctrl)
     return FSP_SUCCESS;
 }
 
-/*******************************************************************************************************************//**
- * DEPRECATED Sets driver version based on compile time macros. Implements @ref poeg_api_t::versionGet.
- *
- * @retval FSP_SUCCESS                 Version stored in p_version.
- * @retval FSP_ERR_ASSERTION           p_version was NULL.
- **********************************************************************************************************************/
-fsp_err_t R_POEG_VersionGet (fsp_version_t * const p_version)
-{
-#if POEG_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_version);
-#endif
-
-    p_version->version_id = g_poeg_version.version_id;
-
-    return FSP_SUCCESS;
-}
-
 /** @} (end addtogroup POEG) */
 
 /*******************************************************************************************************************//**
@@ -319,6 +292,8 @@ fsp_err_t R_POEG_VersionGet (fsp_version_t * const p_version)
  **********************************************************************************************************************/
 void poeg_event_isr (void)
 {
+    POEG_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     /* Save context if RTOS is used */
     FSP_CONTEXT_SAVE;
 
@@ -356,4 +331,6 @@ void poeg_event_isr (void)
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE;
+
+    POEG_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }

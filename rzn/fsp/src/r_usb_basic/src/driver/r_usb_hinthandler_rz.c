@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -34,6 +34,7 @@
  **********************************************************************************************************************/
 #include "r_usb_basic_if.h"
 #include "r_usb_extern.h"
+
 #if   USB_IP_EHCI_OHCI == 1
 
 /***********************************************************************************************************************
@@ -95,6 +96,8 @@ void R_USB_isr (void)
 {
     uint32_t int_state;
 
+    USB_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     int_state = USB00->INTSTATUS;
     if (USB00_AHB_INT == (int_state & USB00_AHB_INT))
     {
@@ -118,6 +121,8 @@ void R_USB_isr (void)
     else
     {
     }
+
+    USB_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }                                      /* End of function R_USB_isr() */
 
 #endif                                 /* USB_IP_EHCI_OHCI == 1 */

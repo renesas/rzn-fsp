@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -447,6 +447,8 @@ static fsp_err_t r_wdt_parameter_checking (wdt_instance_ctrl_t * const p_instanc
  **********************************************************************************************************************/
 void wdt_underflow_isr (uint32_t id)
 {
+    WDT_CFG_MULTIPLEX_INTERRUPT_ENABLE;
+
     FSP_PARAMETER_NOT_USED(id);
 
     /* Call user registered callback */
@@ -480,4 +482,6 @@ void wdt_underflow_isr (uint32_t id)
             }
         }
     }
+
+    WDT_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }

@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -499,9 +499,9 @@ static uint16_t usb_hhid_cmd_submit (usb_utr_t * ptr, usb_cb_t complete)
 #if (BSP_CFG_RTOS)
  #if USB_IP_EHCI_OHCI == 1
     err = usb_hstd_transfer_start(&usb_shhid_string_req[ptr->ip]);
- #else                                 /* #if USB_IP_EHCI_OHCI == 1 */
+ #else                                 /* #if USB_IP_EHCI_OHCI == 0 */
     err = usb_hstd_transfer_start_req(&usb_shhid_string_req[ptr->ip]);
- #endif /* #if USB_IP_EHCI_OHCI == 1 */
+ #endif /* #if USB_IP_EHCI_OHCI == 0 */
     if (USB_OK == err)
     {
         hhid_retval = usb_hhid_req_trans_wait_tmo((uint16_t) USB_VALUE_3000);
@@ -795,7 +795,7 @@ void usb_hhid_registration (usb_utr_t * ptr)
     usb_hstd_driver_registration(ptr, &driver);            /* Host HID class driver registration. */
  #if (BSP_CFG_RTOS == 2)
     R_USB_CstdSetTaskPri(USB_HHID_TSK, USB_PRI_3);
- #endif
+ #endif /* if(BSP_CFG_RTOS == 2) */
 #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
 }
 

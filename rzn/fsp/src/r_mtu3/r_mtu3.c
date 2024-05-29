@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -190,6 +190,26 @@
 #define MTU3_TGRV_OFFSET_WORD               (0x10U)
 #define MTU3_TGRW_OFFSET_WORD               (0x20U)
 
+#define MTU3_TGRB_D_OFFSET_WORD             (0x2U)
+
+#define MTU1_TIOR_IOB_INPUT_MTU8_TGRC       (0x0EU)   /* Input capture at occurrence of compare match or input capture in the MTU8.TGRC register */
+#define MTU8_TCR_CCLR_TGRC_COMPARE          (0x05U)   /* TCNT cleared by TGRC compare match/input capture */
+#define MTU8_TIOR_IOB_INPUT_MTU1_TCNT       (0x0EU)   /* Capture input source is the clock source for counting in MTU1.Input capture on counting up or down by MTU1.TCNT */
+#define MTU0_TCR2_TPSC_MTIOC1A              (0x07U)   /* External clock: counts on MTIOC1A pin input */
+#define MTU0_TIOR_IOB_INPUT_MTU1_TCNT       (0x0CU)   /* Capture input source is the clock source for counting in MTU1.Input capture on counting up or down by MTU1.TCNT */
+#define MTU0_TIOR_IOA_INPUT_MTU8_TGTC       (0x0EU)   /* Input capture on generation of compare match with MTU8.TGRC */
+#define MTU0_TCR_CCLR_TGRC_COMPARE          (0x05U)   /* TCNT cleared by TGRC compare match/input capture */
+
+#define MTU_TIOR_INPUT_RISING_EDGE          (0x08U)   /* Input capture at rising edge */
+#define MTU_TIOR_INPUT_FALLING_EDGE         (0x09U)   /* Input capture at falling edge */
+#define MTU_TIOR_INPUT_BOTH_EDGE            (0x0AU)   /* Input capture at both edge */
+
+#define MTU_TGR_INITIAL_VAL                 (0xFFFFU) /* TGR initial value */
+
+#define MTU0_TGRA_16BIT_MODE_INITIAL_VAL    (40000)   /* 0.2ms(200MHz) */
+#define MTU0_TGRC_16BIT_MODE_INITIAL_VAL    (50000)   /* 0.25ms(200MHz) */
+#define MTU8_TGRC_32BIT_MODE_INITIAL_VAL    (200000)  /* 1ms(200MHz) */
+
 /* UVW offset address(ch5) */
 #define MTU5_U_OFFSET_ADDRESS               (0x0U)
 #define MTU5_V_OFFSET_ADDRESS               (0x10U)
@@ -222,6 +242,16 @@ typedef enum e_mtu3_channel
     MTU3_CHANNEL_8 = 8,                ///< MTU3 channel8
 } mtu3_channel_t;
 
+#define MTU3_PHASE_COUNTING_MODE_1_MD     0x4U
+#define MTU3_PHASE_COUNTING_MODE_2_MD     0x5U
+#define MTU3_PHASE_COUNTING_MODE_3_MD     0x6U
+#define MTU3_PHASE_COUNTING_MODE_4_MD     0x7U
+#define MTU3_PHASE_COUNTING_MODE_5_MD     0x9U
+
+#define MTU3_PHASE_COUNTING_MODE_PCB_0    0x0U
+#define MTU3_PHASE_COUNTING_MODE_PCB_1    (0x1U << 3)
+#define MTU3_PHASE_COUNTING_MODE_PCB_2    (0x2U << 3)
+
 /***********************************************************************************************************************
  * Private function prototypes
  **********************************************************************************************************************/
@@ -237,6 +267,11 @@ static void     r_mtu3_enable_irq(IRQn_Type const irq, uint32_t priority, void *
 static void     mtu3_enable_interrupt(mtu3_instance_ctrl_t * const p_instance_ctrl);
 static void     mtu3_disable_interrupt(mtu3_instance_ctrl_t * const p_instance_ctrl);
 static void     r_mtu3_call_callback(mtu3_instance_ctrl_t * p_ctrl, timer_event_t event, uint32_t capture);
+static void     mtu3_event_operation_config(mtu3_instance_ctrl_t * const p_instance_ctrl,
+                                            timer_cfg_t const * const    p_cfg);
+static void mtu3_count_mode_set(mtu3_instance_ctrl_t * const p_instance_ctrl, mtu3_phase_counting_mode_t mode);
+static void mtu3_count_mode_hardware_initialize(mtu3_instance_ctrl_t * const p_instance_ctrl,
+                                                timer_cfg_t const * const    p_cfg);
 
 /***********************************************************************************************************************
  * ISR prototypes
@@ -252,15 +287,6 @@ void mtu3_capture_w_isr(void);
 /***********************************************************************************************************************
  * Private global variables
  **********************************************************************************************************************/
-
-/* Version data structure used by error logger macro. */
-static const fsp_version_t g_mtu3_version =
-{
-    .api_version_minor  = TIMER_API_VERSION_MINOR,
-    .api_version_major  = TIMER_API_VERSION_MAJOR,
-    .code_version_major = MTU3_CODE_VERSION_MAJOR,
-    .code_version_minor = MTU3_CODE_VERSION_MINOR
-};
 
 /* Divided value table of MTU3. */
 /* Defined based on the values of TCR.TPSC and TCR2.TPSC2.(External clock(MTCLKA, MTIOC1A, etc) is defined as 1 division) */
@@ -492,7 +518,6 @@ const timer_api_t g_timer_on_mtu3 =
     .reset       = R_MTU3_Reset,
     .callbackSet = R_MTU3_CallbackSet,
     .close       = R_MTU3_Close,
-    .versionGet  = R_MTU3_VersionGet
 };
 
 /*******************************************************************************************************************//**
@@ -576,15 +601,24 @@ fsp_err_t R_MTU3_Stop (timer_ctrl_t * const p_ctrl)
 fsp_err_t R_MTU3_Start (timer_ctrl_t * const p_ctrl)
 {
     mtu3_instance_ctrl_t * p_instance_ctrl = (mtu3_instance_ctrl_t *) p_ctrl;
+
 #if MTU3_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ERROR_RETURN(MTU3_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+
     /* Start timer */
     if ((MTU3_CHANNEL_6 == p_instance_ctrl->p_cfg->channel) || (MTU3_CHANNEL_7 == p_instance_ctrl->p_cfg->channel))
     {
         p_instance_ctrl->p_reg_com->TSTRB |= mtu3_tstr_val[p_instance_ctrl->p_cfg->channel];
+    }
+    /* Start timer for counting mode */
+    else if ((MTU3_PHASE_COUNTING_MODE_NONE != p_extend->counting_mode) &&
+             (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode))
+    {
+        p_instance_ctrl->p_reg_com->TSTRA |= (R_MTU_TSTRA_CST1_Msk | R_MTU_TSTRA_CST2_Msk);
     }
 
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
@@ -646,11 +680,12 @@ fsp_err_t R_MTU3_PeriodSet (timer_ctrl_t * const p_ctrl, mtu3_counter_t * const 
     if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) (p_counter->tgru_counts - 1U);
+                                tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) =
+            (uint16_t) (p_counter->tgru_counts - 1U);
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_V_OFFSET_ADDRESS) = (uint16_t) (p_counter->tgrv_counts - 1U);
+                                MTU5_V_OFFSET_ADDRESS) = (uint16_t) (p_counter->tgrv_counts - 1U);
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_W_OFFSET_ADDRESS) = (uint16_t) (p_counter->tgrw_counts - 1U);
+                                MTU5_W_OFFSET_ADDRESS) = (uint16_t) (p_counter->tgrw_counts - 1U);
 
         return FSP_SUCCESS;
     }
@@ -683,9 +718,9 @@ fsp_err_t R_MTU3_PeriodSet (timer_ctrl_t * const p_ctrl, mtu3_counter_t * const 
     {
         /* MTU1 and 2 without TGRC and TGRD should write TGRA and TGRB */
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
+                                tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
+                                MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
     }
     else
     {
@@ -693,15 +728,16 @@ fsp_err_t R_MTU3_PeriodSet (timer_ctrl_t * const p_ctrl, mtu3_counter_t * const 
         if (0U == mtu3_get_tstr(p_instance_ctrl))
         {
             *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                           tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
+                                    tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                    MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
         }
 
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
+                                tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) new_tgra_counts;
         *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
+                                MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) new_tgrb_counts;
     }
 
     return FSP_SUCCESS;
@@ -745,10 +781,12 @@ fsp_err_t R_MTU3_InfoGet (timer_ctrl_t * const p_ctrl, mtu3_info_t * const p_inf
     else
     {
         p_info->count_param.tgra_counts =
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]);
         p_info->count_param.tgrb_counts =
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_WORD);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                    MTU3_TGRB_D_OFFSET_WORD);
     }
 
     /* Get and store clock frequency */
@@ -790,6 +828,8 @@ fsp_err_t R_MTU3_StatusGet (timer_ctrl_t * const p_ctrl, mtu3_status_t * const p
     FSP_ERROR_RETURN(MTU3_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+
     /* Get counter state. */
     if (0U == mtu3_get_tstr(p_instance_ctrl))
     {
@@ -807,24 +847,34 @@ fsp_err_t R_MTU3_StatusGet (timer_ctrl_t * const p_ctrl, mtu3_status_t * const p
         p_status->counter =
             *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]);
     }
+    else if ((MTU3_PHASE_COUNTING_MODE_NONE != p_extend->counting_mode) &&
+             (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode))
+    {
+        /* In the case of 32bit, the position information (encoder counter) is stored in MTU1.TCNTLW*/
+        p_status->counter = R_MTU1->TCNTLW;
+    }
 
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
     else if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         p_status->tgru_counter =
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]);
         p_status->tgrv_counter =
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU5_V_OFFSET_ADDRESS);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                    MTU5_V_OFFSET_ADDRESS);
         p_status->tgrv_counter =
-            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU5_W_OFFSET_ADDRESS);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                    MTU5_W_OFFSET_ADDRESS);
     }
 #endif
     else
     {
         p_status->counter =
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]);
     }
 
     return FSP_SUCCESS;
@@ -964,23 +1014,23 @@ fsp_err_t R_MTU3_AdcTriggerSet (timer_ctrl_t * const     p_ctrl,
  * @retval  FSP_ERR_ASSERTION            A required pointer is NULL.
  * @retval  FSP_ERR_NOT_OPEN             The control block has not been opened.
  **********************************************************************************************************************/
-fsp_err_t R_MTU3_CallbackSet (timer_ctrl_t * const          p_api_ctrl,
+fsp_err_t R_MTU3_CallbackSet (timer_ctrl_t * const          p_ctrl,
                               void (                      * p_callback)(timer_callback_args_t *),
                               void const * const            p_context,
                               timer_callback_args_t * const p_callback_memory)
 {
-    mtu3_instance_ctrl_t * p_ctrl = (mtu3_instance_ctrl_t *) p_api_ctrl;
+    mtu3_instance_ctrl_t * p_instance_ctrl = (mtu3_instance_ctrl_t *) p_ctrl;
 
 #if MTU3_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(p_ctrl);
+    FSP_ASSERT(p_instance_ctrl);
     FSP_ASSERT(p_callback);
-    FSP_ERROR_RETURN(MTU3_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ERROR_RETURN(MTU3_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
     /* Store callback and context */
-    p_ctrl->p_callback        = p_callback;
-    p_ctrl->p_context         = p_context;
-    p_ctrl->p_callback_memory = p_callback_memory;
+    p_instance_ctrl->p_callback        = p_callback;
+    p_instance_ctrl->p_context         = p_context;
+    p_instance_ctrl->p_callback_memory = p_callback_memory;
 
     return FSP_SUCCESS;
 }
@@ -1022,25 +1072,6 @@ fsp_err_t R_MTU3_Close (timer_ctrl_t * const p_ctrl)
     mtu3_disable_interrupt(p_instance_ctrl);
 
     return err;
-}
-
-/*******************************************************************************************************************//**
- * DEPRECATED Sets driver version based on compile time macros.
- *
- * @retval FSP_SUCCESS                 Version stored in p_version.
- * @retval FSP_ERR_ASSERTION           p_version was NULL.
- **********************************************************************************************************************/
-fsp_err_t R_MTU3_VersionGet (fsp_version_t * const p_version)
-{
-#if MTU3_CFG_PARAM_CHECKING_ENABLE
-
-    /* Verify parameters are valid */
-    FSP_ASSERT(NULL != p_version);
-#endif
-
-    p_version->version_id = g_mtu3_version.version_id;
-
-    return FSP_SUCCESS;
 }
 
 /** @} (end addtogroup MTU3) */
@@ -1279,6 +1310,146 @@ static void mtu3_hardware_initialize (mtu3_instance_ctrl_t * const p_instance_ct
         *((uint8_t *) p_instance_ctrl->p_reg + tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |=
             (uint8_t) (p_extend->adc_request_enable << R_MTU0_TIER_TTGE_Pos);
     }
+
+    /*Set MTU3 event link operation*/
+    mtu3_event_operation_config(p_instance_ctrl, p_cfg);
+
+    /* Enable counting mode */
+    if ((MTU3_PHASE_COUNTING_MODE_NONE != p_extend->counting_mode) &&
+        (MTU3_CHANNEL_1 == p_instance_ctrl->p_cfg->channel))
+    {
+        /*Initialization structure based on configurations */
+        mtu3_count_mode_hardware_initialize(p_instance_ctrl, p_cfg);
+
+        /* Configure the up/down count mode. These are not affected by enable/disable. */
+        mtu3_count_mode_set(p_instance_ctrl, p_extend->counting_mode);
+
+        if (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode)
+        {
+            p_instance_ctrl->p_reg_com->TSTRA |= mtu3_tstr_val[p_instance_ctrl->p_cfg->channel];
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_2_MD;
+
+            /* Set MTU1.TCNTLW count clear factor to MTU1.TGRALW input capture. */
+            R_MTU1->TCR_b.CCLR = MTU3_TCNT_CLEAR_TGRA;
+
+            switch (p_extend->counting_mode)
+            {
+                case MTU3_PHASE_COUNTING_MODE_NONE:
+                {
+                    break;
+                }
+
+                case MTU3_PHASE_COUNTING_MODE_1:
+                case MTU3_PHASE_COUNTING_MODE_210:
+                case MTU3_PHASE_COUNTING_MODE_310:
+                case MTU3_PHASE_COUNTING_MODE_4:
+                {
+                    /* Set the effective edge of both edge. */
+                    R_MTU1->TIOR_b.IOA = MTU_TIOR_INPUT_BOTH_EDGE;
+                    R_MTU1->TIOR_b.IOB = MTU_TIOR_INPUT_BOTH_EDGE;
+                    break;
+                }
+
+                case MTU3_PHASE_COUNTING_MODE_200:
+                case MTU3_PHASE_COUNTING_MODE_300:
+                case MTU3_PHASE_COUNTING_MODE_50:
+                case MTU3_PHASE_COUNTING_MODE_51:
+                {
+                    /* Set the effective edge of falling edge. */
+                    R_MTU1->TIOR_b.IOA = MTU_TIOR_INPUT_FALLING_EDGE;
+                    R_MTU1->TIOR_b.IOB = MTU_TIOR_INPUT_FALLING_EDGE;
+                    break;
+                }
+
+                case MTU3_PHASE_COUNTING_MODE_201:
+                case MTU3_PHASE_COUNTING_MODE_301:
+                {
+                    /* Set the effective edge of rising edge. */
+                    R_MTU1->TIOR_b.IOA = MTU_TIOR_INPUT_RISING_EDGE;
+                    R_MTU1->TIOR_b.IOB = MTU_TIOR_INPUT_RISING_EDGE;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+/*******************************************************************************************************************//**
+ * Writes to the ELOPA or ELOPB register in ELC driver to set up  MTU event operation
+ *
+ * @param[in]  p_instance_ctrl        Instance control block.
+ * @param[in]  p_cfg                  Pointer to timer configuration.
+ **********************************************************************************************************************/
+static void mtu3_event_operation_config (mtu3_instance_ctrl_t * const p_instance_ctrl, timer_cfg_t const * const p_cfg)
+{
+    uint32_t elopa = 0;
+    uint32_t elopb = 0;
+
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_cfg->p_extend;
+
+    elopa = R_ELO->ELOPA;
+    elopb = R_ELO->ELOPB;
+
+    if (MTU3_CHANNEL_0 == p_instance_ctrl->p_cfg->channel)
+    {
+        elopa &= ~R_ELO_ELOPA_MTU0MD_Msk;
+        elopa |= (uint32_t) ((p_extend->mtu3_elc_event_operation.mtu0_elc_operation) << R_ELO_ELOPA_MTU0MD_Pos);
+    }
+
+    if (MTU3_CHANNEL_3 == p_instance_ctrl->p_cfg->channel)
+    {
+        elopa &= ~R_ELO_ELOPA_MTU3MD_Msk;
+        elopa |= (uint32_t) ((p_extend->mtu3_elc_event_operation.mtu3_elc_operation) << R_ELO_ELOPA_MTU3MD_Pos);
+    }
+
+    if (MTU3_CHANNEL_4 == p_instance_ctrl->p_cfg->channel)
+    {
+        elopb &= ~R_ELO_ELOPB_MTU4MD_Msk;
+        elopb |= (uint32_t) ((p_extend->mtu3_elc_event_operation.mtu4_elc_operation) << R_ELO_ELOPB_MTU4MD_Pos);
+    }
+
+    /*Set the value for ELOPA, ELOPB*/
+    R_ELO->ELOPA = elopa;
+    R_ELO->ELOPB = elopb;
+}
+
+/*******************************************************************************************************************//**
+ * Performs hardware initialization of the MTU3 mode phase count
+ * @param[in]  p_instance_ctrl        Instance control block.
+ * @param[in]  p_cfg                  Pointer to timer configuration.
+ **********************************************************************************************************************/
+static void mtu3_count_mode_hardware_initialize (mtu3_instance_ctrl_t * const p_instance_ctrl,
+                                                 timer_cfg_t const * const    p_cfg)
+{
+    /* Save pointer to extended configuration structure. */
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_cfg->p_extend;
+
+    /* Clear the TMDR3 register to zero */
+    R_MTU1->TMDR3 &= (uint8_t) ~(R_MTU1_TMDR3_LWA_Msk | R_MTU1_TMDR3_PHCKSEL_Msk);
+
+    /* Normal mode */
+    if (MTU3_BIT_MODE_NORMAL_16BIT == p_extend->bit_mode)
+    {
+        /* 16-bit access is enabled. */
+        R_MTU1->TMDR3 &= (uint8_t) ~R_MTU1_TMDR3_LWA_Msk;
+
+        /* Select phase counting mode. */
+        *((uint8_t *) p_instance_ctrl->p_reg +
+          tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) =
+            (uint8_t) (p_extend->counting_mode << R_MTU1_TMDR1_MD_Pos);
+    }
+    else
+    {
+        /* 32-bit access is enabled. */
+        R_MTU1->TMDR3 = R_MTU1_TMDR3_LWA_Msk;
+
+        /* Select phase counting mode. If LWA = 1, the MTU1 setting takes precedence. */
+        R_MTU1->TMDR1 = (uint8_t) (p_extend->counting_mode << R_MTU1_TMDR1_MD_Pos);
+    }
+
+    /* Select A- or B-phase input pin */
+    R_MTU1->TMDR3 |= (uint8_t) (p_extend->external_clock << R_MTU1_TMDR3_PHCKSEL_Pos);
 }
 
 /*******************************************************************************************************************//**
@@ -1353,29 +1524,31 @@ static void mtu3_counter_initialize (mtu3_instance_ctrl_t * const p_instance_ctr
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
     else if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) (p_uvw_cfg->tgru_val - 1U);
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_V_OFFSET_ADDRESS) = (uint16_t) (p_uvw_cfg->tgrv_val - 1U);
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_W_OFFSET_ADDRESS) = (uint16_t) (p_uvw_cfg->tgrw_val - 1U);
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) (p_uvw_cfg->tgru_val - 1U);
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                MTU5_V_OFFSET_ADDRESS) = (uint16_t) (p_uvw_cfg->tgrv_val - 1U);
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                MTU5_W_OFFSET_ADDRESS) = (uint16_t) (p_uvw_cfg->tgrw_val - 1U);
     }
 #endif
     else
     {
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) (p_extend->tgra_val - 1U);
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) (p_extend->tgrb_val - 1U);
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) (p_extend->tgra_val - 1U);
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) (p_extend->tgrb_val - 1U);
 
         /* TGRC and TGRD do not exist in MTU1 and MTU2 */
         if (!((MTU3_CHANNEL_1 == p_instance_ctrl->p_cfg->channel) ||
               (MTU3_CHANNEL_2 == p_instance_ctrl->p_cfg->channel)))
         {
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) =
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel]) =
                 (uint16_t) (p_extend->tgrc_val - 1U);
-            *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                           MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) (p_extend->tgrd_val - 1U);
+            *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                    tgrc_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                    MTU3_TGRB_D_OFFSET_WORD) = (uint16_t) (p_extend->tgrd_val - 1U);
         }
     }
 }
@@ -1388,29 +1561,37 @@ static void mtu3_counter_initialize (mtu3_instance_ctrl_t * const p_instance_ctr
  **********************************************************************************************************************/
 static void mtu3_set_count (mtu3_instance_ctrl_t * const p_instance_ctrl, uint32_t counter)
 {
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+
     /* Set timer counter. */
     if (MTU3_CHANNEL_8 == p_instance_ctrl->p_cfg->channel)
     {
         /* MTU8.TCNT should be accessed in 32-bit units */
         *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]) = counter;
     }
+    else if ((MTU3_PHASE_COUNTING_MODE_NONE != p_extend->counting_mode) &&
+             (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode))
+    {
+        /* In the case of 32bit, value encoder counter is stored in MTU1. */
+        R_MTU1->TCNTLW = counter;
+    }
 
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
     else if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         /* Since it is a register dedicated to MTU5, set it directly. */
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) counter;
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_V_OFFSET_ADDRESS) = (uint16_t) counter;
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                       MTU5_W_OFFSET_ADDRESS) = (uint16_t) counter;
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) counter;
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                MTU5_V_OFFSET_ADDRESS) = (uint16_t) counter;
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                MTU5_W_OFFSET_ADDRESS) = (uint16_t) counter;
     }
 #endif
     else
     {
-        *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
-                       tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) counter;
+        *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                tcnt_ofs_addr[p_instance_ctrl->p_cfg->channel]) = (uint16_t) counter;
     }
 }
 
@@ -1421,12 +1602,18 @@ static void mtu3_set_count (mtu3_instance_ctrl_t * const p_instance_ctrl, uint32
  **********************************************************************************************************************/
 static uint8_t mtu3_get_tstr (mtu3_instance_ctrl_t * const p_instance_ctrl)
 {
-    uint8_t ret_val;
+    uint8_t               ret_val;
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
 
     /* Check the operating status */
     if ((MTU3_CHANNEL_6 == p_instance_ctrl->p_cfg->channel) || (MTU3_CHANNEL_7 == p_instance_ctrl->p_cfg->channel))
     {
         ret_val = (p_instance_ctrl->p_reg_com->TSTRB & mtu3_tstr_val[p_instance_ctrl->p_cfg->channel]);
+    }
+    else if ((MTU3_PHASE_COUNTING_MODE_NONE != p_extend->counting_mode) &&
+             (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode))
+    {
+        ret_val = (p_instance_ctrl->p_reg_com->TSTRA & (R_MTU_TSTRA_CST1_Msk | R_MTU_TSTRA_CST2_Msk));
     }
 
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
@@ -1451,10 +1638,18 @@ static uint8_t mtu3_get_tstr (mtu3_instance_ctrl_t * const p_instance_ctrl)
  **********************************************************************************************************************/
 static void mtu3_stop_timer (mtu3_instance_ctrl_t * const p_instance_ctrl)
 {
+    mtu3_extended_cfg_t * p_extend = (mtu3_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+
     /* Stop timer */
     if ((MTU3_CHANNEL_6 == p_instance_ctrl->p_cfg->channel) || (MTU3_CHANNEL_7 == p_instance_ctrl->p_cfg->channel))
     {
         p_instance_ctrl->p_reg_com->TSTRB &= (uint8_t) ~mtu3_tstr_val[p_instance_ctrl->p_cfg->channel];
+    }
+    /* Stop timer for counting mode */
+    else if ((MTU3_PHASE_COUNTING_MODE_NONE == p_extend->counting_mode) &&
+             (MTU3_BIT_MODE_NORMAL_32BIT == p_extend->bit_mode))
+    {
+        p_instance_ctrl->p_reg_com->TSTRA &= (uint8_t) ~(R_MTU_TSTRA_CST1_Msk | R_MTU_TSTRA_CST2_Msk);
     }
 
 #if MTU3_PRV_UVW_FEATURES_ENABLED == MTU3_CFG_UVW_SUPPORT_ENABLE
@@ -1514,7 +1709,6 @@ static void mtu3_disable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl
     if (MTU3_CHANNEL_5 == p_instance_ctrl->p_cfg->channel)
     {
         mtu3_extended_uvw_cfg_t const * p_uvw_cfg = p_extend->p_uvw_cfg;
-
         *((uint8_t *) p_instance_ctrl->p_reg +
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) &= (uint8_t) ~R_MTU5_TIER_TGIE5U_Msk;
         *((uint8_t *) p_instance_ctrl->p_reg +
@@ -1565,6 +1759,7 @@ static void mtu3_enable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl)
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5V_Msk;
         *((uint8_t *) p_instance_ctrl->p_reg +
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU5_TIER_TGIE5W_Msk;
+
         r_mtu3_enable_irq(p_uvw_cfg->capture_u_irq, p_uvw_cfg->capture_u_ipl, p_instance_ctrl);
         r_mtu3_enable_irq(p_uvw_cfg->capture_v_irq, p_uvw_cfg->capture_v_ipl, p_instance_ctrl);
         r_mtu3_enable_irq(p_uvw_cfg->capture_w_irq, p_uvw_cfg->capture_w_ipl, p_instance_ctrl);
@@ -1573,13 +1768,13 @@ static void mtu3_enable_interrupt (mtu3_instance_ctrl_t * const p_instance_ctrl)
 #endif
     {
         /* Enable CPU interrupts if callback is not null. */
-
         *((uint8_t *) p_instance_ctrl->p_reg +
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TCIEV_Msk;
         *((uint8_t *) p_instance_ctrl->p_reg +
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEA_Msk;
         *((uint8_t *) p_instance_ctrl->p_reg +
           tier_ofs_addr[p_instance_ctrl->p_cfg->channel]) |= R_MTU0_TIER_TGIEB_Msk;
+
         r_mtu3_enable_irq(p_instance_ctrl->p_cfg->cycle_end_irq, p_instance_ctrl->p_cfg->cycle_end_ipl,
                           p_instance_ctrl);
         r_mtu3_enable_irq(p_extend->capture_a_irq, p_extend->capture_a_ipl, p_instance_ctrl);
@@ -1692,6 +1887,8 @@ static void r_mtu3_call_callback (mtu3_instance_ctrl_t * p_ctrl, timer_event_t e
  **********************************************************************************************************************/
 static void r_mtu3_capture_common_isr (mtu3_prv_capture_event_t event)
 {
+    MTU3_CFG_MULTIPLEX_INTERRUPT_ENABLE
+
     /* Save context if RTOS is used */
     FSP_CONTEXT_SAVE
 
@@ -1712,7 +1909,8 @@ static void r_mtu3_capture_common_isr (mtu3_prv_capture_event_t event)
         else
         {
             counter =
-                *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]);
+                *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                        tgra_ofs_addr[p_instance_ctrl->p_cfg->channel]);
         }
 
         /* TSR.TGFA Flag Clear(MTU ch1-ch4, ch6-ch7) */
@@ -1736,8 +1934,9 @@ static void r_mtu3_capture_common_isr (mtu3_prv_capture_event_t event)
         else
         {
             counter =
-                *(uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg + tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
-                               MTU3_TGRB_D_OFFSET_WORD);
+                *(volatile uint16_t *) ((uint8_t *) p_instance_ctrl->p_reg +
+                                        tgra_ofs_addr[p_instance_ctrl->p_cfg->channel] +
+                                        MTU3_TGRB_D_OFFSET_WORD);
         }
 
         /* TSR.TGFB Flag Clear(MTU ch1-ch4, ch6-ch7) */
@@ -1778,6 +1977,8 @@ static void r_mtu3_capture_common_isr (mtu3_prv_capture_event_t event)
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE
+
+        MTU3_CFG_MULTIPLEX_INTERRUPT_DISABLE
 }
 
 /*******************************************************************************************************************//**
@@ -1785,8 +1986,10 @@ static void r_mtu3_capture_common_isr (mtu3_prv_capture_event_t event)
  **********************************************************************************************************************/
 void mtu3_counter_overflow_isr (void)
 {
+    MTU3_CFG_MULTIPLEX_INTERRUPT_ENABLE
+
     /* Save context if RTOS is used */
-    FSP_CONTEXT_SAVE;
+        FSP_CONTEXT_SAVE;
 
     IRQn_Type irq = R_FSP_CurrentIrqGet();
 
@@ -1800,6 +2003,8 @@ void mtu3_counter_overflow_isr (void)
 
     /* Restore context if RTOS is used */
     FSP_CONTEXT_RESTORE;
+
+    MTU3_CFG_MULTIPLEX_INTERRUPT_DISABLE
 }
 
 /*******************************************************************************************************************//**
@@ -1850,4 +2055,107 @@ void mtu3_capture_v_isr (void)
 void mtu3_capture_w_isr (void)
 {
     r_mtu3_capture_common_isr(MTU3_PRV_CAPTURE_EVENT_W);
+}
+
+/*******************************************************************************************************************//**
+ * Performs mtu3_count_mode_set.
+ *
+ * @param[in]  p_instance_ctrl        Instance control block.
+ * @param[in]  mode                   Set the mode.
+ **********************************************************************************************************************/
+static void mtu3_count_mode_set (mtu3_instance_ctrl_t * const p_instance_ctrl, mtu3_phase_counting_mode_t mode)
+{
+    switch (mode)
+    {
+        case MTU3_PHASE_COUNTING_MODE_1:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_1_MD;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_200:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_2_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_0;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_201:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_2_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_1;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_210:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_2_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_2;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_300:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_3_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_0;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_301:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_3_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_1;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_310:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_3_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_2;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_4:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_4_MD;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_50:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_5_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_0;
+            break;
+        }
+
+        case MTU3_PHASE_COUNTING_MODE_51:
+        {
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tmdr1_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_5_MD;
+            *((uint8_t *) p_instance_ctrl->p_reg +
+              tcr2_ofs_addr[p_instance_ctrl->p_cfg->channel]) = MTU3_PHASE_COUNTING_MODE_PCB_1;
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
 }

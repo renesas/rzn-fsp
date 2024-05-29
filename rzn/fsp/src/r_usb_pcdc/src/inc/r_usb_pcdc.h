@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -22,23 +22,23 @@
 #define R_USB_PCDC_LOCAL_H
 
 /******************************************************************************
- Includes   <System Includes> , "Project Includes"
+ * Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 
 /*****************************************************************************
- Macro definitions
+ * Macro definitions
  ******************************************************************************/
 
 /******************************************************************************
- Exported global variables
+ * Exported global variables
  ******************************************************************************/
 
 /******************************************************************************
- Exported global functions (to be accessed by other files)
-******************************************************************************/
+ * Exported global functions (to be accessed by other files)
+ ******************************************************************************/
 
+#endif                                 /* R_USB_PCDC_LOCAL_H */
 
-#endif  /* R_USB_PCDC_LOCAL_H */
 /******************************************************************************
- End  Of File
+ * End  Of File
  ******************************************************************************/

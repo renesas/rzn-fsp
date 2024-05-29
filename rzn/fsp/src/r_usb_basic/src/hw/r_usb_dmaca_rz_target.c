@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -35,15 +35,15 @@
  *              : 13.04.2015 1.03     Added RX231.
  *******************************************************************************/
 
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
 /*******************************************************************************
  * Includes <System Includes>, "Project Includes"
  *******************************************************************************/
 
 /* Definitions for DMACA support */
-#include "r_usb_dmaca_rz_if.h"
-#include "r_usb_dmaca_rz_private.h"
-
-#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+#include "../hw/inc/r_usb_dmaca_rz_if.h"
+#include "../hw/inc/r_usb_dmaca_rz_private.h"
 
 /*******************************************************************************
  * Macro definitions
@@ -72,7 +72,7 @@ void r_usb_dmaca_intDMAC1I_isr(void);
  ************************************************************************************/
 void r_usb_dmaca_intDMAC0I_isr (void)
 {
- #if USB_CFG_DMA == USB_CFG_ENABLE
+#if USB_CFG_DMA == USB_CFG_ENABLE
     if (((uint32_t) NULL != (uint32_t) p_USB_DMACI_Handlers[USB_DMACA_CH0]))
     {
         ((DMACI_Callback) p_USB_DMACI_Handlers[USB_DMACA_CH0])();
@@ -81,7 +81,7 @@ void r_usb_dmaca_intDMAC0I_isr (void)
     {
         /* do something */
     }
- #endif                                /* USB_CFG_DMA == USB_CFG_ENABLE */
+#endif                                 /* USB_CFG_DMA == USB_CFG_ENABLE */
 }
 
 /************************************************************************************
@@ -96,7 +96,7 @@ void r_usb_dmaca_intDMAC0I_isr (void)
  ************************************************************************************/
 void r_usb_dmaca_intDMAC1I_isr (void)
 {
- #if USB_CFG_DMA == USB_CFG_ENABLE
+#if USB_CFG_DMA == USB_CFG_ENABLE
     if (((uint32_t) NULL != (uint32_t) p_USB_DMACI_Handlers[USB_DMACA_CH1]))
     {
         ((DMACI_Callback) p_USB_DMACI_Handlers[USB_DMACA_CH1])();
@@ -105,10 +105,10 @@ void r_usb_dmaca_intDMAC1I_isr (void)
     {
         /* do something */
     }
- #endif                                /* USB_CFG_DMA == USB_CFG_ENABLE */
+#endif                                 /* USB_CFG_DMA == USB_CFG_ENABLE */
 }
 
- #if USB_CFG_DMA == USB_CFG_ENABLE
+#if USB_CFG_DMA == USB_CFG_ENABLE
 
 /*******************************************************************************
  * Exported global variables (to be accessed by other files)
@@ -168,29 +168,29 @@ usb_dmaca_return_t r_usb_dmaca_int_disable_set (uint8_t channel)
     {
         case USB_DMACA_CH0:
         {
-  #if USB_CFG_USE_USBIP == USB_CFG_IP0
+ #if USB_CFG_USE_USBIP == USB_CFG_IP0
             R_BSP_IrqDisable(VECTOR_NUMBER_USB_FDMA0);
 
 /* R_INTC_SetPriority(INTC_ID_USB_USBFDMA00, 0); */
-  #else
+ #else
             R_BSP_IrqDisable(VECTOR_NUMBER_USB_FDMA1);
 
 /* R_INTC_SetPriority(INTC_ID_USB_USBFDMA10, 0); */
-  #endif
+ #endif
             break;
         }
 
         case USB_DMACA_CH1:
         {
-  #if USB_CFG_USE_USBIP == USB_CFG_IP0
+ #if USB_CFG_USE_USBIP == USB_CFG_IP0
             R_BSP_IrqDisable(VECTOR_NUMBER_USB_FDMA0);
 
 /* R_INTC_SetPriority(INTC_ID_USB_USBFDMA01, 0); */
-  #else
+ #else
             R_BSP_IrqDisable(VECTOR_NUMBER_USB_FDMA1);
 
             /* R_INTC_SetPriority(INTC_ID_USB_USBFDMA11, 0); */
-  #endif
+ #endif
             break;
         }
 
@@ -226,19 +226,19 @@ usb_dmaca_return_t r_usb_dmaca_int_enable_set (uint8_t channel, uint8_t priority
     {
         case USB_DMACA_CH0:
         {
-  #if USB_CFG_USE_USBIP == USB_CFG_IP0
-  #else
+ #if USB_CFG_USE_USBIP == USB_CFG_IP0
+ #else
             R_BSP_IrqCfgEnable(VECTOR_NUMBER_USB_FDMA0, 12, NULL);
-  #endif
+ #endif
             break;
         }
 
         case USB_DMACA_CH1:
         {
-  #if USB_CFG_USE_USBIP == USB_CFG_IP0
-  #else
+ #if USB_CFG_USE_USBIP == USB_CFG_IP0
+ #else
             R_BSP_IrqCfgEnable(VECTOR_NUMBER_USB_FDMA1, 12, NULL);
-  #endif
+ #endif
             break;
         }
 
@@ -253,6 +253,6 @@ usb_dmaca_return_t r_usb_dmaca_int_enable_set (uint8_t channel, uint8_t priority
     return USB_DMACA_SUCCESS;
 }
 
- #endif
+#endif
 #endif                                 /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
 /* End of File */

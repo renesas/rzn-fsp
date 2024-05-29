@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
  *
  * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
  * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
@@ -40,12 +40,9 @@ FSP_HEADER
  * Macro definitions
  **********************************************************************************************************************/
 
-#define DSMIF_CODE_VERSION_MAJOR    (1U) // DEPRECATED
-#define DSMIF_CODE_VERSION_MINOR    (3U) // DEPRECATED
+#define DSMIF_MAX_NUM_CHANNELS    (3U)
 
-#define DSMIF_MAX_NUM_CHANNELS      (3U)
-
-#define DSMIF_STOP_TIMEOUT          (0x000FFFFFU)
+#define DSMIF_STOP_TIMEOUT        (0x000FFFFFU)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -122,7 +119,7 @@ typedef enum e_dsmif_data_shift
     DSMIF_DATA_SHIFT_6_0  = 17,        ///< Data shift setting for overcurrent detection [6:0]
     DSMIF_DATA_SHIFT_5_0  = 18,        ///< Data shift setting for overcurrent detection [5:0]
     DSMIF_DATA_SHIFT_4_0  = 19,        ///< Data shift setting for overcurrent detection [4:0]
-} dsimf_data_shift_t;
+} dsmif_data_shift_t;
 
 /* 39.2.2.4 DSCMCTCRCHn : Current Measurement Capture Trigger Control Register Channel n (n = 0 to 2) */
 typedef enum e_dsmif_capture_trigger
@@ -176,11 +173,11 @@ typedef struct st_dsmif_channel_cfg
     dsmif_master_clock_t ckdiv;        ///< A/D conversion clock division ratio
     dsmif_filter_order_t cmsinc;       ///< Current measurement filter order setting
     uint32_t             cmdec;        ///< Decimation ratio selection for current measurement
-    dsimf_data_shift_t   cmsh;         ///< Data shift setting for current measurement
+    dsmif_data_shift_t   cmsh;         ///< Data shift setting for current measurement
     bool                 sde;          ///< Short circuit detection enable bit
     dsmif_filter_order_t ocsinc;       ///< Overcurrent detection filter order setting
     uint32_t             ocdec;        ///< Decimation ratio selection for overcurrent detection
-    dsimf_data_shift_t   ocsh;         ///< Data shift setting for overcurrent detection
+    dsmif_data_shift_t   ocsh;         ///< Data shift setting for overcurrent detection
     uint32_t             ocmptbl;      ///< Overcurrent detection lower limit
     uint32_t             ocmptbh;      ///< Overcurrent detection upper limit
     uint32_t             scntl;        ///< Short circuit detection low continuous detection count
@@ -227,6 +224,80 @@ typedef struct
     void const * p_context;
 } dsmif_instance_ctrl_t;
 
+/** DSMIF Channel Overcurrent detect status. */
+typedef enum e_dsmif_channel_overcurrent_status
+{
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_LOWER_LIMIT_0 = 1 << 0U,  ///< Channel 0 overcurrent lower limit detection 0  flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_LOWER_LIMIT_0 = 1 << 1U,  ///< Channel 1 overcurrent lower limit detection 0 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_LOWER_LIMIT_0 = 1 << 2U,  ///< Channel 2 overcurrent lower limit detection 0 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_UPPER_LIMIT_0 = 1 << 3U,  ///< Channel 0 overcurrent upper limit exceeded 0 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_UPPER_LIMIT_0 = 1 << 4U,  ///< Channel 1 overcurrent upper limit exceeded 0 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_UPPER_LIMIT_0 = 1 << 5U,  ///< Channel 2 overcurrent upper limit exceeded 0 flag
+
+#if (4 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_NOTIFY)
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_LOWER_LIMIT_1 = 1 << 6U,  ///< Channel 0 overcurrent lower limit detection 1 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_LOWER_LIMIT_1 = 1 << 7U,  ///< Channel 1 overcurrent lower limit detection 1 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_LOWER_LIMIT_1 = 1 << 8U,  ///< Channel 2 overcurrent lower limit detection 1 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_UPPER_LIMIT_1 = 1 << 9U,  ///< Channel 0 overcurrent upper limit exceeded 1 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_UPPER_LIMIT_1 = 1 << 10U, ///< Channel 1 overcurrent upper limit exceeded 1 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_UPPER_LIMIT_1 = 1 << 11U, ///< Channel 2 overcurrent upper limit exceeded 1 flag
+
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_LOWER_LIMIT_2 = 1 << 12U, ///< Channel 0 overcurrent lower limit detection 2 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_LOWER_LIMIT_2 = 1 << 13U, ///< Channel 1 overcurrent lower limit detection 2 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_LOWER_LIMIT_2 = 1 << 14U, ///< Channel 2 overcurrent lower limit detection 2 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH0_UPPER_LIMIT_2 = 1 << 15U, ///< Channel 0 overcurrent upper limit exceeded 2 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH1_UPPER_LIMIT_2 = 1 << 16U, ///< Channel 1 overcurrent upper limit exceeded 2 flag
+    DSMIF_CHANNEL_OVERCURRENT_STATUS_CH2_UPPER_LIMIT_2 = 1 << 17U, ///< Channel 2 overcurrent upper limit exceeded 2 flag
+#endif
+} dsmif_channel_overcurrent_status_t;
+
+/** DSMIF Channel Short circuit detect status. */
+typedef enum e_dsmif_channel_short_circuit_status
+{
+    DSMIF_CHANNEL_SHORT_CIRCUIT_STATUS_CH0 = 1 << 0U, ///< Channel 0 short circuit detection flag
+    DSMIF_CHANNEL_SHORT_CIRCUIT_STATUS_CH1 = 1 << 1U, ///< Channel 1 short circuit detection flag
+    DSMIF_CHANNEL_SHORT_CIRCUIT_STATUS_CH2 = 1 << 2U, ///< Channel 2 short circuit detection flag
+} dsmif_channel_short_circuit_status_t;
+
+/** DSMIF Overcurrent Sum detect status. */
+typedef enum e_dsmif_overcurrent_sum_status
+{
+    DSMIF_OVERCURRENT_SUM_STATUS_LOWER_LIMIT = 1 << 0U, ///< Overcurrent sum error lower limit detection flag
+    DSMIF_OVERCURRENT_SUM_STATUS_UPPER_LIMIT = 1 << 1U, ///< Overcurrent sum error upper limit detection flag
+} dsmif_overcurrent_sum_status_t;
+
+#if (4 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_NOTIFY)
+
+/** DSMIF Overcurrent Window detect status. */
+typedef enum e_dsmif_channel_overcurrent_window_status
+{
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH0_0 = 1 << 0U,  ///< Channel 0 overcurrent detection window notification 0 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH1_0 = 1 << 1U,  ///< Channel 1 overcurrent detection window notification 0 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH2_0 = 1 << 2U,  ///< Channel 2 overcurrent detection window notification 0 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH0_1 = 1 << 3U,  ///< Channel 0 overcurrent detection window notification 1 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH1_1 = 1 << 4U,  ///< Channel 1 overcurrent detection window notification 1 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH2_1 = 1 << 5U,  ///< Channel 2 overcurrent detection window notification 1 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH0_2 = 1 << 6U,  ///< Channel 0 overcurrent detection window notification 2 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH1_2 = 1 << 7U,  ///< Channel 1 overcurrent detection window notification 2 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH2_2 = 1 << 8U,  ///< Channel 2 overcurrent detection window notification 2 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH0_3 = 1 << 9U,  ///< Channel 0 overcurrent detection window notification 3 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH1_3 = 1 << 10U, ///< Channel 1 overcurrent detection window notification 3 flag
+    DSMIF_OVERCURRENT_WINDOW_STATUS_CH2_3 = 1 << 11U, ///< Channel 2 overcurrent detection window notification 3 flag
+} dsmif_channel_overcurrent_window_status_t;
+#endif
+
+/** DSMIF Error status. */
+typedef struct st_dsmif_error_status
+{
+    dsmif_channel_overcurrent_status_t   channel_overcurrent_status;             ///< Channel Overcurrent state
+    dsmif_channel_short_circuit_status_t channel_short_circuit_status;           ///< Channel Short circuit state
+    dsmif_overcurrent_sum_status_t       overcurrent_sum_status;                 ///< Overcurrent Sum state
+
+#if (4 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_NOTIFY)
+    dsmif_channel_overcurrent_window_status_t channel_overcurrent_window_status; ///< Channel Overcurrent Window State
+#endif
+} dsmif_error_status_t;
+
 /**********************************************************************************************************************
  * Exported global variables
  **********************************************************************************************************************/
@@ -247,11 +318,11 @@ fsp_err_t R_DSMIF_CfgSet(adc_ctrl_t * p_ctrl, adc_cfg_t const * const p_cfg);
 fsp_err_t R_DSMIF_Read(adc_ctrl_t * p_ctrl, adc_channel_t const reg_id, uint32_t * const p_data);
 fsp_err_t R_DSMIF_StatusGet(adc_ctrl_t * p_ctrl, adc_status_t * p_status);
 fsp_err_t R_DSMIF_Close(adc_ctrl_t * p_ctrl);
-fsp_err_t R_DSMIF_VersionGet(fsp_version_t * const p_version);
-fsp_err_t R_DSMIF_CallbackSet(adc_ctrl_t * const          p_api_ctrl,
+fsp_err_t R_DSMIF_CallbackSet(adc_ctrl_t * const          p_ctrl,
                               void (                    * p_callback)(adc_callback_args_t *),
                               void const * const          p_context,
                               adc_callback_args_t * const p_callback_memory);
+fsp_err_t R_DSMIF_ErrorStatusGet(adc_ctrl_t * p_ctrl, dsmif_error_status_t * p_error_status);
 
 /*******************************************************************************************************************//**
  * @} (end defgroup DSMIF)
