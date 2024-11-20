@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -154,6 +140,8 @@ fsp_err_t R_ICU_ExternalIrqOpen (external_irq_ctrl_t * const p_ctrl, external_ir
     }
     else
     {
+#if (1 == BSP_FEATURE_ICU_SAFETY_REGISTER_TYPE)
+
         /* Set the digital filter divider. */
         uint32_t clksel = R_ICU->S_PORTNF_CLKSEL;
         clksel &= ~(ICU_PORTNF_CLKSEL_MASK << ICU_S_PORTNF_OFFSET(p_cfg->channel));
@@ -178,6 +166,33 @@ fsp_err_t R_ICU_ExternalIrqOpen (external_irq_ctrl_t * const p_ctrl, external_ir
 
         /* Write S_PORTNF_FLTSEL. */
         R_ICU->S_PORTNF_FLTSEL = fltsel;
+#else
+
+        /* Set the digital filter divider. */
+        uint32_t clksel = R_ICU_S->S_PORTNF_CLKSEL;
+        clksel &= ~(ICU_PORTNF_CLKSEL_MASK << ICU_S_PORTNF_OFFSET(p_cfg->channel));
+        clksel |= (uint32_t) (p_cfg->clock_source_div << ICU_S_PORTNF_OFFSET(p_cfg->channel));
+
+        /* Enable/Disable digital filter. */
+        uint32_t fltsel = R_ICU_S->S_PORTNF_FLTSEL;
+        fltsel &= ~(ICU_PORTNF_FLTSEL_MASK << (p_cfg->channel - ICU_SAFETY_REGISTER_OFFSET));
+        fltsel |=
+            (uint32_t) (((true == p_cfg->filter_enable) ? 1U : 0U) << (p_cfg->channel - ICU_SAFETY_REGISTER_OFFSET));
+
+        /* Set the IRQ trigger. */
+        uint32_t md = R_ICU_S->S_PORTNF_MD;
+        md &= ~(ICU_PORTNF_MD_MASK << ICU_S_PORTNF_OFFSET(p_cfg->channel));
+        md |= (uint32_t) (g_icu_detect_mode[p_cfg->trigger] << (ICU_S_PORTNF_OFFSET(p_cfg->channel)));
+
+        /* Write S_PORTNF_CLKSEL. */
+        R_ICU_S->S_PORTNF_CLKSEL = clksel;
+
+        /* Write S_PORTNF_MD. */
+        R_ICU_S->S_PORTNF_MD = md;
+
+        /* Write S_PORTNF_FLTSEL. */
+        R_ICU_S->S_PORTNF_FLTSEL = fltsel;
+#endif
     }
 
     /* NOTE: User can have the driver opened when the IRQ is not in the vector table. This is for use cases
@@ -334,7 +349,6 @@ void r_icu_isr (void)
     }
 
     /* Restore context if RTOS is used */
-
     FSP_CONTEXT_RESTORE;
 
     ICU_CFG_MULTIPLEX_INTERRUPT_DISABLE;

@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -657,6 +643,9 @@ fsp_err_t R_GMAC_LinkProcess (ether_ctrl_t * const p_ctrl)
     gmac_port_mask_t        previous_link_establish_status;
     ether_phy_instance_t ** pp_phy_instance;
     gmac_extend_cfg_t     * p_extend;
+    void (* temp_p_callback)(ether_callback_args_t *);
+    ether_callback_args_t * temp_p_callback_memory;
+    void const            * temp_p_context;
 
     uint32_t i;
 
@@ -681,6 +670,11 @@ fsp_err_t R_GMAC_LinkProcess (ether_ctrl_t * const p_ctrl)
          *//* back up previous_link_status */
         temp_previous_link_status = p_instance_ctrl->previous_link_status;
 
+        /* back up callback and contex */
+        temp_p_callback        = p_instance_ctrl->p_callback;
+        temp_p_callback_memory = p_instance_ctrl->p_callback_memory;
+        temp_p_context         = p_instance_ctrl->p_context;
+
         err = R_GMAC_Close((ether_ctrl_t *) p_instance_ctrl);
         GMAC_ERROR_RETURN(FSP_SUCCESS == err, err);
 
@@ -689,6 +683,11 @@ fsp_err_t R_GMAC_LinkProcess (ether_ctrl_t * const p_ctrl)
 
         /* restore previous_link_status */
         p_instance_ctrl->previous_link_status = temp_previous_link_status;
+
+        /* restore callback and contex */
+        p_instance_ctrl->p_callback        = temp_p_callback;
+        p_instance_ctrl->p_callback_memory = temp_p_callback_memory;
+        p_instance_ctrl->p_context         = temp_p_context;
     }
 
     previous_link_establish_status = p_instance_ctrl->link_establish_status;
@@ -729,8 +728,12 @@ fsp_err_t R_GMAC_LinkProcess (ether_ctrl_t * const p_ctrl)
              * and sending and receiving is permitted.
              */
             gmac_configure_mac(p_instance_ctrl, p_gmac_cfg->p_mac_address, GMAC_NO_USE_MAGIC_PACKET_DETECT);
-
             gmac_configure_operation(p_instance_ctrl);
+
+            if (GMAC_MAGIC_PACKET_DETECTING == p_instance_ctrl->magic_packet)
+            {
+                R_GMAC_WakeOnLANEnable(p_ctrl);
+            }
         }
     }
     else
@@ -821,6 +824,8 @@ fsp_err_t R_GMAC_WakeOnLANEnable (ether_ctrl_t * const p_ctrl)
     FSP_ASSERT(p_instance_ctrl);
     GMAC_ERROR_RETURN(GMAC_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
+
+    p_instance_ctrl->magic_packet = GMAC_MAGIC_PACKET_DETECTING;
 
     /* When the Link up processing is completed */
     /* Change to the magic packet detection mode.  */
@@ -1654,6 +1659,44 @@ static void gmac_configure_mac (gmac_instance_ctrl_t * const p_instance_ctrl,
 
     p_reg_gmac->MAR0_H_b.ADDRHI = (uint16_t) mac_h;
     p_reg_gmac->MAR0_L_b.ADDRLO = mac_l;
+
+    /* Set MAC address 1 */
+    uint8_t * mac_addr1 = ((gmac_extend_cfg_t *) p_instance_ctrl->p_gmac_cfg->p_extend)->p_mac_address1;
+    if (0 != mac_addr1)
+    {
+        mac_h = ((uint32_t) mac_addr1[5] << 8) |
+                ((uint32_t) mac_addr1[4] << 0);
+
+        mac_l = ((uint32_t) mac_addr1[3] << 24) |
+                ((uint32_t) mac_addr1[2] << 16) |
+                ((uint32_t) mac_addr1[1] << 8) |
+                ((uint32_t) mac_addr1[0] << 0);
+
+        p_reg_gmac->MAR1_H_b.ADDRHI = (uint16_t) mac_h;
+        p_reg_gmac->MAR1_H_b.MBC    = 0;
+        p_reg_gmac->MAR1_H_b.SA     = 0;
+        p_reg_gmac->MAR1_H_b.AE     = 1;
+        p_reg_gmac->MAR1_L_b.ADDRLO = mac_l;
+    }
+
+    /* Set MAC address 2 */
+    uint8_t * mac_addr2 = ((gmac_extend_cfg_t *) p_instance_ctrl->p_gmac_cfg->p_extend)->p_mac_address2;
+    if (0 != mac_addr2)
+    {
+        mac_h = ((uint32_t) mac_addr2[5] << 8) |
+                ((uint32_t) mac_addr2[4] << 0);
+
+        mac_l = ((uint32_t) mac_addr2[3] << 24) |
+                ((uint32_t) mac_addr2[2] << 16) |
+                ((uint32_t) mac_addr2[1] << 8) |
+                ((uint32_t) mac_addr2[0] << 0);
+
+        p_reg_gmac->MAR2_H_b.ADDRHI = (uint16_t) mac_h;
+        p_reg_gmac->MAR2_H_b.MBC    = 0;
+        p_reg_gmac->MAR2_H_b.SA     = 0;
+        p_reg_gmac->MAR2_H_b.AE     = 1;
+        p_reg_gmac->MAR2_L_b.ADDRLO = mac_l;
+    }
 
     /* Initialize receive and transmit descriptors */
     gmac_init_descriptors(p_instance_ctrl);

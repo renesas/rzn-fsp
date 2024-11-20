@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /******************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -105,7 +91,7 @@ static void usb_pstd_interrupt (uint16_t type, uint16_t status, usb_cfg_t * p_cf
 
     utr.ip = p_cfg->module_number;
   #if (USB_CFG_DMA == USB_CFG_ENABLE)
-   #if !defined(BSP_MCU_GROUP_RZN2L)
+   #if !defined(BSP_MCU_GROUP_RZN2L) && !defined(BSP_MCU_GROUP_RZN2H)
     utr.p_transfer_rx = p_cfg->p_transfer_rx;
     utr.p_transfer_tx = p_cfg->p_transfer_tx;
    #endif
@@ -151,9 +137,9 @@ static void usb_pstd_interrupt (uint16_t type, uint16_t status, usb_cfg_t * p_cf
         /* VBUS */
         case USB_INT_VBINT:
         {
-  #if defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L)
+  #if defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H)
             hw_usb_set_cnen(p_cfg->module_number);
-  #endif                                       /* defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) */
+  #endif                                       /* defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H) */
             if (USB_ATTACH == usb_pstd_chk_vbsts(utr.ip))
             {
                 USB_PRINTF0("VBUS int attach\n");
@@ -423,9 +409,9 @@ static void usb_pstd_interrupt (usb_utr_t * p_mess)
         /* VBUS */
         case USB_INT_VBINT:
         {
-  #if defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L)
+  #if defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H)
             hw_usb_set_cnen(p_mess->ip);
-  #endif                                         /* defined(BSP_MCU_GROUP_RA6M3)  || defined(BSP_MCU_GROUP_RZN2L) */
+  #endif                                         /* defined(BSP_MCU_GROUP_RA6M3)  || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H) */
             if (USB_ATTACH == usb_pstd_chk_vbsts(p_mess->ip))
             {
                 USB_PRINTF0("VBUS int attach\n");
@@ -899,9 +885,9 @@ uint16_t usb_pstd_get_alternate_num (uint16_t int_num)
     i   = ptr[0];
 
     /* Interface descriptor[0] */
-    ptr     = (uint8_t *) ((uint32_t) ptr + ptr[0]);
-    length  = (uint16_t) (*(uint8_t *) ((uint32_t) g_usb_pstd_driver.p_configtbl + (uint16_t) 2U));
-    length |= (uint16_t) ((uint16_t) (*(uint8_t *) ((uint32_t) g_usb_pstd_driver.p_configtbl + (uint16_t) 3U)) << 8U);
+    ptr     = (uint8_t *) ((uintptr_t) ptr + ptr[0]);
+    length  = (uint16_t) (*(uint8_t *) ((uintptr_t) g_usb_pstd_driver.p_configtbl + (uint16_t) 2U));
+    length |= (uint16_t) ((uint16_t) (*(uint8_t *) ((uintptr_t) g_usb_pstd_driver.p_configtbl + (uint16_t) 3U)) << 8U);
 
     /* Search descriptor table size */
     /* WAIT_LOOP */
@@ -922,7 +908,7 @@ uint16_t usb_pstd_get_alternate_num (uint16_t int_num)
                 i = (uint16_t) (i + ptr[0]);
 
                 /* Interface descriptor[0] */
-                ptr = (uint8_t *) ((uint32_t) ptr + ptr[0]);
+                ptr = (uint8_t *) ((uintptr_t) ptr + ptr[0]);
                 break;
             }
 
@@ -948,7 +934,7 @@ uint16_t usb_pstd_get_alternate_num (uint16_t int_num)
                 i = (uint16_t) (i + ptr[0]);
 
                 /* Interface descriptor[0] */
-                ptr = (uint8_t *) ((uint32_t) ptr + ptr[0]);
+                ptr = (uint8_t *) ((uintptr_t) ptr + ptr[0]);
                 break;
             }
         }
@@ -985,10 +971,10 @@ void usb_pstd_set_eptbl_index (uint16_t int_num, uint16_t alt_num)
     /* Configuration descriptor */
     ptr     = g_usb_pstd_driver.p_configtbl;
     i       = *ptr;
-    length  = (uint16_t) (*(uint8_t *) ((uint32_t) ptr + (uint32_t) 3U));
+    length  = (uint16_t) (*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 3U));
     length  = (uint16_t) (length << 8);
-    length  = (uint16_t) (length + (uint16_t) (*(uint8_t *) ((uint32_t) ptr + (uint32_t) 2U)));
-    ptr     = (uint8_t *) ((uint32_t) ptr + (*ptr));
+    length  = (uint16_t) (length + (uint16_t) (*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 2U)));
+    ptr     = (uint8_t *) ((uintptr_t) ptr + (*ptr));
     start   = 0;
     numbers = 0;
     j       = 0;
@@ -997,23 +983,23 @@ void usb_pstd_set_eptbl_index (uint16_t int_num, uint16_t alt_num)
     for ( ; i < length; )
     {
         /* Descriptor type ? */
-        switch (*(uint8_t *) ((uint32_t) ptr + (uint32_t) 1U))
+        switch (*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 1U))
         {
             /* Interface */
             case USB_DT_INTERFACE:
             {
-                if (((*(uint8_t *) ((uint32_t) ptr + (uint32_t) 2U)) == int_num) &&
-                    ((*(uint8_t *) ((uint32_t) ptr + (uint32_t) 3U)) == alt_num))
+                if (((*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 2U)) == int_num) &&
+                    ((*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 3U)) == alt_num))
                 {
-                    numbers = *(uint8_t *) ((uint32_t) ptr + (uint32_t) 4U);
+                    numbers = *(uint8_t *) ((uintptr_t) ptr + (uint32_t) 4U);
                 }
                 else
                 {
-                    start = (uint16_t) (start + (uint16_t) (*(uint8_t *) ((uint32_t) ptr + (uint32_t) 4U)));
+                    start = (uint16_t) (start + (uint16_t) (*(uint8_t *) ((uintptr_t) ptr + (uint32_t) 4U)));
                 }
 
                 i   = (uint8_t) (i + (*ptr));
-                ptr = (uint8_t *) ((uint32_t) ptr + (*ptr));
+                ptr = (uint8_t *) ((uintptr_t) ptr + (*ptr));
                 break;
             }
 
@@ -1022,7 +1008,7 @@ void usb_pstd_set_eptbl_index (uint16_t int_num, uint16_t alt_num)
             {
                 if (j < numbers)
                 {
-                    ep = (uint16_t) *(uint8_t *) ((uint32_t) ptr + (uint32_t) 2U);
+                    ep = (uint16_t) *(uint8_t *) ((uintptr_t) ptr + (uint32_t) 2U);
                     if (USB_EP_IN == (ep & USB_EP_DIRMASK))
                     {
                         dir = 1;       /* IN */
@@ -1038,7 +1024,7 @@ void usb_pstd_set_eptbl_index (uint16_t int_num, uint16_t alt_num)
                 }
 
                 i   = (uint16_t) (i + (*ptr));
-                ptr = (uint8_t *) ((uint32_t) ptr + (*ptr));
+                ptr = (uint8_t *) ((uintptr_t) ptr + (*ptr));
                 break;
             }
 
@@ -1058,7 +1044,7 @@ void usb_pstd_set_eptbl_index (uint16_t int_num, uint16_t alt_num)
             default:
             {
                 i   = (uint16_t) (i + (*ptr));
-                ptr = (uint8_t *) ((uint32_t) ptr + (*ptr));
+                ptr = (uint8_t *) ((uintptr_t) ptr + (*ptr));
                 break;
             }
         }
@@ -1085,7 +1071,7 @@ uint16_t usb_pstd_chk_remote (void)
     }
 
     /* Get Configuration Descriptor - bmAttributes */
-    atr = *(uint8_t *) ((uint32_t) g_usb_pstd_driver.p_configtbl + (uint32_t) 7U);
+    atr = *(uint8_t *) ((uintptr_t) g_usb_pstd_driver.p_configtbl + (uint32_t) 7U);
 
     /* Remote WakeUp check(= D5) */
     if (USB_CF_RWUPON == (atr & USB_CF_RWUPON))
@@ -1118,7 +1104,7 @@ uint8_t usb_pstd_get_current_power (void)
     uint8_t currentpower;
 
     /* Standard configuration descriptor */
-    tmp = *(uint8_t *) ((uint32_t) g_usb_pstd_driver.p_configtbl + (uint32_t) 7U);
+    tmp = *(uint8_t *) ((uintptr_t) g_usb_pstd_driver.p_configtbl + (uint32_t) 7U);
     if (USB_CF_SELFP == (tmp & USB_CF_SELFP))
     {
         /* Self Powered */
@@ -1307,7 +1293,7 @@ usb_er_t usb_pstd_transfer_start (usb_utr_t * ptr)
     }
 
   #if (BSP_CFG_RTOS == 0)
-    if (USB_NULL != g_p_usb_pstd_pipe[pipenum])
+    if (NULL != g_p_usb_pstd_pipe[pipenum])
     {
         /* Get PIPE TYPE */
         if (USB_TYPFIELD_ISO != usb_cstd_get_pipe_type(ptr, pipenum))
@@ -1375,7 +1361,7 @@ usb_er_t usb_pstd_transfer_end (usb_utr_t * p_utr, uint16_t pipe)
         return USB_ERROR;              /* Error */
     }
 
-    if (USB_NULL == g_p_usb_pstd_pipe[pipe])
+    if (NULL == g_p_usb_pstd_pipe[pipe])
     {
         USB_PRINTF0("### usb_pstd_transfer_end overlaps\n");
         err = USB_ERROR;
@@ -1672,7 +1658,7 @@ void usb_peri_devdefault (usb_utr_t * ptr, uint16_t mode, uint16_t data2)
  #if (defined(USB_CFG_PCDC_USE) | defined(USB_CFG_PHID_USE))
     usb_instance_ctrl_t ctrl;
   #if (USB_CFG_DMA == USB_CFG_ENABLE)
-   #if !defined(BSP_MCU_GROUP_RZN2L)
+   #if !defined(BSP_MCU_GROUP_RZN2L) && !defined(BSP_MCU_GROUP_RZN2H)
     ctrl.p_transfer_rx = ptr->p_transfer_rx;
     ctrl.p_transfer_tx = ptr->p_transfer_tx;
    #endif
@@ -1688,12 +1674,12 @@ void usb_peri_devdefault (usb_utr_t * ptr, uint16_t mode, uint16_t data2)
 
         /* Set Descriptor type.  */
         /* Hi-Speed Mode */
-        if (USB_NULL != g_usb_pstd_driver.p_configtbl)
+        if (NULL != g_usb_pstd_driver.p_configtbl)
         {
             g_usb_pstd_driver.p_configtbl[1] = USB_DT_OTHER_SPEED_CONF;
         }
 
-        if (USB_NULL != g_usb_pstd_driver.p_othertbl)
+        if (NULL != g_usb_pstd_driver.p_othertbl)
         {
             g_usb_pstd_driver.p_othertbl[1] = USB_DT_CONFIGURATION;
         }
@@ -1704,18 +1690,18 @@ void usb_peri_devdefault (usb_utr_t * ptr, uint16_t mode, uint16_t data2)
 
         /* Set Descriptor type. */
         /* Full-Speed Mode */
-        if (USB_NULL != g_usb_pstd_driver.p_configtbl)
+        if (NULL != g_usb_pstd_driver.p_configtbl)
         {
             g_usb_pstd_driver.p_configtbl[1] = USB_DT_CONFIGURATION;
         }
 
-        if (USB_NULL != g_usb_pstd_driver.p_othertbl)
+        if (NULL != g_usb_pstd_driver.p_othertbl)
         {
             g_usb_pstd_driver.p_othertbl[1] = USB_DT_OTHER_SPEED_CONF;
         }
     }
 
-    if (USB_NULL == ptable)
+    if (NULL == ptable)
     {
         while (1)
         {
@@ -1723,9 +1709,9 @@ void usb_peri_devdefault (usb_utr_t * ptr, uint16_t mode, uint16_t data2)
         }
     }
 
-    len = (uint16_t) (*(uint8_t *) ((uint32_t) ptable + (uint32_t) 3));
+    len = (uint16_t) (*(uint8_t *) ((uintptr_t) ptable + (uint32_t) 3));
     len = (uint16_t) (len << 8);
-    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uint32_t) ptable + (uint32_t) 2)));
+    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uintptr_t) ptable + (uint32_t) 2)));
 
     usb_pstd_clr_pipe_table(ptr->ip);
     usb_peri_pipe_info(ptable, mode, len, ptr);
@@ -1801,7 +1787,7 @@ void usb_peri_configured (usb_utr_t * ptr, uint16_t data1, uint16_t data2)
 
     ctrl.module_number = ptr->ip;
  #if (USB_CFG_DMA == USB_CFG_ENABLE)
-  #if !defined(BSP_MCU_GROUP_RZN2L)
+  #if !defined(BSP_MCU_GROUP_RZN2L) && !defined(BSP_MCU_GROUP_RZN2H)
     ctrl.p_transfer_rx = ptr->p_transfer_rx;
     ctrl.p_transfer_tx = ptr->p_transfer_tx;
   #endif
@@ -1879,7 +1865,7 @@ void usb_peri_resume (usb_utr_t * ptr, uint16_t data1, uint16_t data2)
 
     ctrl.module_number = ptr->ip;
  #if (USB_CFG_DMA == USB_CFG_ENABLE)
-  #if !defined(BSP_MCU_GROUP_RZN2L)
+  #if !defined(BSP_MCU_GROUP_RZN2L) && !defined(BSP_MCU_GROUP_RZN2H)
     ctrl.p_transfer_rx = ptr->p_transfer_rx;
     ctrl.p_transfer_tx = ptr->p_transfer_tx;
   #endif

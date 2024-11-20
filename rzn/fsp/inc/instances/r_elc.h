@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************************************************//**
  * @addtogroup ELC
@@ -43,6 +29,49 @@ FSP_HEADER
 /***********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
+
+/** GPT/MTU event source definitions. */
+typedef enum e_elc_gpt_event_mask
+{
+    ELC_GPT_EVENT_MASK_OFF         = (0x3FFF3FFFU), ///< GPT Event not selected
+    ELC_GPT_EVENT_MASK_GPTX_BIT_0  = (1U << 0U),    ///< GPT2n Event BIT0  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_1  = (1U << 1U),    ///< GPT2n Event BIT1  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_2  = (1U << 2U),    ///< GPT2n Event BIT2  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_3  = (1U << 3U),    ///< GPT2n Event BIT3  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_4  = (1U << 4U),    ///< GPT2n Event BIT4  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_5  = (1U << 5U),    ///< GPT2n Event BIT5  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_6  = (1U << 6U),    ///< GPT2n Event BIT6  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_7  = (1U << 7U),    ///< GPT2n Event BIT7  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_8  = (1U << 8U),    ///< GPT2n Event BIT8  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_9  = (1U << 9U),    ///< GPT2n Event BIT9  mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_10 = (1U << 10U),   ///< GPT2n Event BIT10 mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_11 = (1U << 11U),   ///< GPT2n Event BIT11 mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_12 = (1U << 12U),   ///< GPT2n Event BIT12 mask
+    ELC_GPT_EVENT_MASK_GPTX_BIT_13 = (1U << 13U),   ///< GPT2n Event BIT13 mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_0  = (1U << 16U),   ///< GPT2n+1 Event BIT0  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_1  = (1U << 17U),   ///< GPT2n+1 Event BIT1  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_2  = (1U << 18U),   ///< GPT2n+1 Event BIT2  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_3  = (1U << 19U),   ///< GPT2n+1 Event BIT3  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_4  = (1U << 20U),   ///< GPT2n+1 Event BIT4  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_5  = (1U << 21U),   ///< GPT2n+1 Event BIT5  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_6  = (1U << 22U),   ///< GPT2n+1 Event BIT6  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_7  = (1U << 23U),   ///< GPT2n+1 Event BIT7  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_8  = (1U << 24U),   ///< GPT2n+1 Event BIT8  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_9  = (1U << 25U),   ///< GPT2n+1 Event BIT9  mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_10 = (1U << 26U),   ///< GPT2n+1 Event BIT10 mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_11 = (1U << 27U),   ///< GPT2n+1 Event BIT11 mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_12 = (1U << 28U),   ///< GPT2n+1 Event BIT12 mask
+    ELC_GPT_EVENT_MASK_GPTY_BIT_13 = (1U << 29U),   ///< GPT2n+1 Event BIT13 mask
+} elc_gpt_event_mask_t;
+
+#if (1 == ELC_CFG_EXTEND_SUPPORTED)
+
+/** Extended configuration structure for ELC. */
+typedef struct st_elc_extended_cfg
+{
+    uint32_t elc_gpt_event_mask[BSP_FEATURE_ELC_GPT_EVENT_MASK_NUM]; ///< ELC GPT Event source mask
+} elc_extended_cfg_t;
+#endif
 
 /** ELC private control block. DO NOT MODIFY. Initialization occurs when R_ELC_Open() is called. */
 typedef struct st_elc_instance_ctrl

@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 #ifndef R_SPI_H
 #define R_SPI_H
@@ -118,6 +104,39 @@ typedef enum e_spi_clock_source
     SPI_CLOCK_SOURCE_PCLKM
 } spi_clock_source_t;
 
+/** SPI master receive clock. */
+typedef enum e_spi_master_receive_clock
+{
+    SPI_MASTER_RECEIVE_CLOCK_MRIOCLK,  ///< MRIOCLK
+    SPI_MASTER_RECEIVE_CLOCK_MRCLK,    ///< MRCLK
+} spi_master_receive_clock_t;
+
+/** SPI max analog delay for MRIOCLK. */
+typedef enum e_spi_mrioclk_analog_delay
+{
+    SPI_MRIOCLK_ANALOG_DELAY_NODELAY,  ///< No delay
+    SPI_MRIOCLK_ANALOG_DELAY_1_1_NS,   ///< 1.1 ns
+    SPI_MRIOCLK_ANALOG_DELAY_2_2_NS,   ///< 2.2 ns
+    SPI_MRIOCLK_ANALOG_DELAY_3_3_NS,   ///< 3.3 ns
+    SPI_MRIOCLK_ANALOG_DELAY_4_4_NS,   ///< 4.4 ns
+    SPI_MRIOCLK_ANALOG_DELAY_5_5_NS,   ///< 5.5 ns
+    SPI_MRIOCLK_ANALOG_DELAY_6_6_NS,   ///< 6.6 ns
+    SPI_MRIOCLK_ANALOG_DELAY_7_7_NS,   ///< 7.7 ns
+} spi_mrioclk_analog_delay_t;
+
+/** SPI digital delay for MRCLK. */
+typedef enum e_spi_mrclk_digital_delay
+{
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_0,   ///< 0 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_1,   ///< 1 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_2,   ///< 2 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_3,   ///< 3 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_4,   ///< 4 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_5,   ///< 5 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_6,   ///< 6 PCLKSPIn
+    SPI_MRCLK_DIGITAL_DELAY_CLOCK_7,   ///< 7 PCLKSPIn
+} spi_mrclk_digital_delay_t;
+
 /** SPI Clock Divider settings. */
 typedef struct
 {
@@ -143,6 +162,9 @@ typedef struct st_spi_extended_cfg
     uint8_t transmit_fifo_threshold;                 ///< Transmit FIFO threshold (0~3)
     uint8_t receive_fifo_threshold;                  ///< Receive FIFO threshold (0~3)
     uint8_t receive_data_ready_detect_adjustment;    ///< Receive data ready detect timing(0~255PCLKSPIn)
+    spi_master_receive_clock_t master_receive_clock; ///< SPI master receive clock
+    spi_mrioclk_analog_delay_t mrioclk_analog_delay; ///< SPI max analog delay for MRIOCLK
+    spi_mrclk_digital_delay_t  mrclk_digital_delay;  ///< SPI digital delay for MRCLK
 } spi_extended_cfg_t;
 
 /** Channel control block. DO NOT INITIALIZE.  Initialization occurs when @ref spi_api_t::open is called. */

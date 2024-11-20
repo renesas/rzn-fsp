@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /******************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -598,9 +584,9 @@ static void usb_pstd_get_descriptor1 (usb_utr_t * p_utr)
                         p_table = g_usb_pstd_driver.p_configtbl;
                     }
 
-                    len = (uint16_t) (*(uint8_t *) ((uint32_t) p_table + (uint32_t) 3));
+                    len = (uint16_t) (*(uint8_t *) ((uintptr_t) p_table + (uint32_t) 3));
                     len = (uint16_t) (len << 8);
-                    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uint32_t) p_table + (uint32_t) 2)));
+                    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uintptr_t) p_table + (uint32_t) 2)));
 
                     /* Descriptor > wLength */
                     if (g_usb_pstd_req_length < len)
@@ -629,7 +615,7 @@ static void usb_pstd_get_descriptor1 (usb_utr_t * p_utr)
                 if (idx < g_usb_pstd_driver.num_string)
                 {
                     p_table = g_usb_pstd_driver.p_stringtbl[idx];
-                    len     = (uint16_t) (*(uint8_t *) ((uint32_t) p_table + (uint32_t) 0));
+                    len     = (uint16_t) (*(uint8_t *) ((uintptr_t) p_table + (uint32_t) 0));
                     if (g_usb_pstd_req_length < len)
                     {
                         /* Control read start */
@@ -706,9 +692,9 @@ static void usb_pstd_get_descriptor1 (usb_utr_t * p_utr)
                         p_table = g_usb_pstd_driver.p_othertbl;
                     }
 
-                    len = (uint16_t) (*(uint8_t *) ((uint32_t) p_table + (uint32_t) 3));
+                    len = (uint16_t) (*(uint8_t *) ((uintptr_t) p_table + (uint32_t) 3));
                     len = (uint16_t) (len << 8);
-                    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uint32_t) p_table + (uint32_t) 2)));
+                    len = (uint16_t) (len + (uint16_t) (*(uint8_t *) ((uintptr_t) p_table + (uint32_t) 2)));
 
                     /* Descriptor > wLength */
                     if (g_usb_pstd_req_length < len)
@@ -752,7 +738,7 @@ static void usb_pstd_get_descriptor1 (usb_utr_t * p_utr)
         g_usb_pstd_req_reg.request_value  = g_usb_pstd_req_value;
         g_usb_pstd_req_reg.request_index  = g_usb_pstd_req_index;
         g_usb_pstd_req_reg.request_length = g_usb_pstd_req_length;
-        if (USB_NULL != g_usb_pstd_driver.ctrltrans)
+        if (NULL != g_usb_pstd_driver.ctrltrans)
         {
             (*g_usb_pstd_driver.ctrltrans)(&g_usb_pstd_req_reg, (uint16_t) USB_NO_ARG, p_utr);
         }
@@ -1272,7 +1258,7 @@ static void usb_pstd_set_configuration0 (usb_utr_t * p_utr)
 
     if (g_usb_pstd_req_value != config_num)
     {
-        if (USB_NULL != g_usb_pstd_driver.devconfig)
+        if (NULL != g_usb_pstd_driver.devconfig)
         {
             /* Registration open function call */
             (*g_usb_pstd_driver.devconfig)(p_utr, g_usb_pstd_config_num, USB_NULL);
@@ -1359,7 +1345,7 @@ static void usb_pstd_set_configuration3 (usb_utr_t * p_utr)
  ******************************************************************************/
 static void usb_pstd_set_interface0 (usb_utr_t * p_utr)
 {
-    if (USB_NULL != g_usb_pstd_driver.interface)
+    if (NULL != g_usb_pstd_driver.interface)
     {
         /* Interfaced change function call */
         (*g_usb_pstd_driver.interface)(p_utr, g_usb_pstd_alt_num[g_usb_pstd_req_index], USB_NULL);

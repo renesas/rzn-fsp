@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * File Name    : r_usb_hdriver.c
@@ -50,8 +36,10 @@
 /***********************************************************************************************************************
  * Private global variables and functions
  ***********************************************************************************************************************/
+ #if 0 == BSP_LP64_SUPPORT
 void usb_memcpy(uint32_t addr1, uint32_t addr2, uint32_t size);
 
+ #endif
 st_usb_pipe_t g_usb_hstd_pipe[USB_MAXPIPE + 1U];          /* pipe information */
 
 /***********************************************************************************************************************
@@ -288,15 +276,15 @@ usb_er_t usb_hstd_transfer_start (st_usb_utr_t * p_utr)
 
     if (USB_PIPE0 == pipe_id)
     {
-        err = r_usb_hstd_hci_make_transfer_request(p_utr,                                 /* utr */
-                                                   p_utr->p_setup,                        /* setup */
-                                                   p_utr->p_setup[4],                     /* devaddr << USB_DEVADDRBIT), */
-                                                   0,                                     /* epnum */
-                                                   USB_EP_CNTRL,                          /* eptype */
-                                                   (p_utr->p_setup[0] & USB_DEV_TO_HOST), /* epdir */
-                                                   p_utr->tranlen,                        /* tranlen */
-                                                   (uint32_t) p_utr->p_tranadr,           /* tranadr */
-                                                   0                                      /* mps */
+        err = r_usb_hstd_hci_make_transfer_request(p_utr,                                   /* utr */
+                                                   p_utr->p_setup,                          /* setup */
+                                                   p_utr->p_setup[4],                       /* devaddr << USB_DEVADDRBIT), */
+                                                   0,                                       /* epnum */
+                                                   USB_EP_CNTRL,                            /* eptype */
+                                                   (p_utr->p_setup[0] & USB_DEV_TO_HOST),   /* epdir */
+                                                   p_utr->tranlen,                          /* tranlen */
+                                                   (uint32_t) (uintptr_t) p_utr->p_tranadr, /* tranadr */
+                                                   0                                        /* mps */
                                                    );
     }
     else
@@ -307,15 +295,15 @@ usb_er_t usb_hstd_transfer_start (st_usb_utr_t * p_utr)
         pipe_dir  = usb_hstd_get_pipe_dir(pipe_id);
         mps       = usb_hstd_get_max_packet_size(pipe_id);
 
-        err = r_usb_hstd_hci_make_transfer_request(p_utr,                       /* utr */
-                                                   (void *) USB_NULL,           /* setup */
-                                                   dev_addr,                    /* devaddr */
-                                                   ep_num,                      /* epnum */
-                                                   pipe_type,                   /* eptype */
-                                                   pipe_dir,                    /* epdir */
-                                                   p_utr->tranlen,              /* tranlen */
-                                                   (uint32_t) p_utr->p_tranadr, /* tranadr */
-                                                   mps                          /* mps */
+        err = r_usb_hstd_hci_make_transfer_request(p_utr,                                   /* utr */
+                                                   (void *) USB_NULL,                       /* setup */
+                                                   dev_addr,                                /* devaddr */
+                                                   ep_num,                                  /* epnum */
+                                                   pipe_type,                               /* eptype */
+                                                   pipe_dir,                                /* epdir */
+                                                   p_utr->tranlen,                          /* tranlen */
+                                                   (uint32_t) (uintptr_t) p_utr->p_tranadr, /* tranadr */
+                                                   mps                                      /* mps */
                                                    );
     }
 
@@ -438,15 +426,25 @@ void usb_hstd_transfer_end_cb (usb_utr_t * ptr, void * p_utr, uint32_t actual_si
 
     if (1 == g_data_read_flag)
     {
-        if ((p_mess->keyword != USB_PIPE0) && (g_usb_hstd_pipe[p_mess->keyword].direction == USB_DATA_DIR_IN))      /* API USB_Read */
+        if ((p_mess->keyword != USB_PIPE0) && (g_usb_hstd_pipe[p_mess->keyword].direction == USB_DATA_DIR_IN)) /* API USB_Read */
         {
+ #if 0 == BSP_LP64_SUPPORT
             usb_memcpy(g_data_buf_addr[p_mess->ip][devadr], (uint32_t) p_mess->p_tranadr, p_mess->tranlen);
+ #else
+            memcpy((void *) g_data_buf_addr[p_mess->ip][devadr], (void *) p_mess->p_tranadr, p_mess->tranlen);
+ #endif
         }
         else if ((p_mess->keyword == USB_PIPE0) && (g_usb_hstd_pipe[p_mess->keyword].direction == USB_DATA_DIR_IN)) /* API Controll transfer */
         {
             if (0 != g_data_buf_addr[p_mess->ip][p_mess->keyword])
             {
+ #if 0 == BSP_LP64_SUPPORT
                 usb_memcpy(g_data_buf_addr[p_mess->ip][p_mess->keyword], (uint32_t) p_mess->p_tranadr, p_mess->tranlen);
+ #else
+                memcpy((void *) g_data_buf_addr[p_mess->ip][p_mess->keyword],
+                       (void *) p_mess->p_tranadr,
+                       p_mess->tranlen);
+ #endif
             }
         }
         else
@@ -468,11 +466,13 @@ void usb_hstd_transfer_end_cb (usb_utr_t * ptr, void * p_utr, uint32_t actual_si
     p_mess->complete(p_mess, devadr, data2);
 }                                      /* End of function usb_hstd_transfer_end_cb() */
 
+ #if 0 == BSP_LP64_SUPPORT
 void usb_memcpy (uint32_t addr1, uint32_t addr2, uint32_t size)
 {
     memcpy((void *) addr1, (void *) addr2, size);
 }
 
+ #endif
 #endif                                 /* USB_IP_EHCI_OHCI == 1 */
 
 /***********************************************************************************************************************

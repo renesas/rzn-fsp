@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************************************************//**
  * @addtogroup XSPI_QSPI
@@ -114,6 +100,24 @@ typedef enum e_xspi_qspi_prefetch_function
     XSPI_QSPI_PREFETCH_FUNCTION_ENABLE  = 0x01, ///< Prefetch function enable
 } xspi_qspi_prefetch_function_t;
 
+/* IO voltage settings */
+typedef enum e_xspi_qspi_io_voltage
+{
+    XSPI_QSPI_IO_VOLTAGE_1_8V = 0x00,  ///< IO voltage 1.8V
+    XSPI_QSPI_IO_VOLTAGE_3_3V = 0x01,  ///< IO voltage 3.3V
+} xspi_qspi_io_voltage_t;
+
+/* Address space settings */
+typedef struct st_qspi_address_space
+{
+    uint32_t unit0_cs0_end_address;    ///< xSPI unit0 cs0 end address
+    uint32_t unit0_cs1_start_address;  ///< xSPI unit0 cs1 start address
+    uint32_t unit0_cs1_end_address;    ///< xSPI unit0 cs1 end address
+    uint32_t unit1_cs0_end_address;    ///< xSPI unit1 cs0 end address
+    uint32_t unit1_cs1_start_address;  ///< xSPI unit1 cs1 start address
+    uint32_t unit1_cs1_end_address;    ///< xSPI unit1 cs1 end address
+} xspi_qspi_address_space_t;
+
 /* Extended configuration. */
 typedef struct st_xspi_qspi_extended_cfg
 {
@@ -122,6 +126,8 @@ typedef struct st_xspi_qspi_extended_cfg
     xspi_qspi_memory_size_t            memory_size;       ///< Size of memory device
     xspi_qspi_timing_setting_t const * p_timing_settings; ///< Memory mapped timing settings
     xspi_qspi_prefetch_function_t      prefetch_en;       ///< Prefetch function settings
+    xspi_qspi_io_voltage_t             io_voltage;        ///< Voltage setting of xSPI IO domain
+    xspi_qspi_address_space_t const  * p_address_space;   ///< Address space settings when custom address space enabled
 } xspi_qspi_extended_cfg_t;
 
 /** Instance control block. DO NOT INITIALIZE.  Initialization occurs when @ref spi_flash_api_t::open is called */

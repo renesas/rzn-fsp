@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /**********************************************************************************************************************
  * Includes
@@ -42,8 +28,8 @@
 #define SCI_I2C_PRV_MDDR_REG_MIN                    (0x80)
 #define SCI_I2C_PRV_DUMMY_WRITE_DATA_FOR_READ_OP    (0xFFU)
 #define SCI_I2C_PRV_DATA_REG_MASK                   (0xFFFFFF00)
-#define SCI_I2C_PRV_GENERATE_REQUEST(R, X)    ((R & ~(R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk))          \
-                                               | (1U << R_SCI0_ICR_IICSDAS_Pos) | (1U << R_SCI0_ICR_IICSCLS_Pos) \
+#define SCI_I2C_PRV_GENERATE_REQUEST(R, X)    ((R & ~(uint32_t) (R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk)) \
+                                               | (1U << R_SCI0_ICR_IICSDAS_Pos) | (1U << R_SCI0_ICR_IICSCLS_Pos)   \
                                                | X)
 
 /**********************************************************************************************************************
@@ -193,7 +179,7 @@ fsp_err_t R_SCI_I2C_Open (i2c_master_ctrl_t * const p_ctrl, i2c_master_cfg_t con
     {
         /* Non-Safety Peripheral */
         p_instance_ctrl->p_reg =
-            (R_SCI0_Type *) ((uint32_t) R_SCI0 + (p_cfg->channel * ((uint32_t) R_SCI1 - (uint32_t) R_SCI0)));
+            (R_SCI0_Type *) ((uintptr_t) R_SCI0 + (p_cfg->channel * ((uintptr_t) R_SCI1 - (uintptr_t) R_SCI0)));
     }
     else
     {
@@ -989,7 +975,7 @@ static void sci_i2c_tei_handler (sci_i2c_instance_ctrl_t * const p_instance_ctrl
         if (p_instance_ctrl->restarted)
         {
             /* Configure SDA and SCL for serial output. */
-            p_instance_ctrl->p_reg->ICR &= ~(R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
+            p_instance_ctrl->p_reg->ICR &= ~(uint32_t) (R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
         }
         else
         {
@@ -997,7 +983,7 @@ static void sci_i2c_tei_handler (sci_i2c_instance_ctrl_t * const p_instance_ctrl
             p_instance_ctrl->p_reg->ICR |= R_SCI0_ICR_IICSCLS_Msk | R_SCI0_ICR_IICSDAS_Msk;
 
             /* Disable the transmitter and receiver */
-            p_instance_ctrl->p_reg->CCR0 &= ~(R_SCI0_CCR0_TE_Msk | R_SCI0_CCR0_RE_Msk);
+            p_instance_ctrl->p_reg->CCR0 &= ~(uint32_t) (R_SCI0_CCR0_TE_Msk | R_SCI0_CCR0_RE_Msk);
 
             /* Dummy read to ensure that interrupts are disabled. */
             volatile uint32_t dummy = p_instance_ctrl->p_reg->CCR0;
@@ -1066,7 +1052,6 @@ static fsp_err_t sci_i2c_transfer_configure (sci_i2c_instance_ctrl_t        * p_
                                              sci_i2c_dmac_interrupt_trigger_t trigger)
 {
     fsp_err_t err;
-    IRQn_Type irq;
 
     /* Set default transfer info and open receive transfer module, if enabled. */
  #if (SCI_I2C_CFG_PARAM_CHECKING_ENABLE)
@@ -1078,7 +1063,6 @@ static fsp_err_t sci_i2c_transfer_configure (sci_i2c_instance_ctrl_t        * p_
     transfer_info_t * p_info = p_transfer->p_cfg->p_info;
     if (SCI_I2C_DMAC_INTERRUPT_TRIGGER_RXI == trigger)
     {
-        irq                    = p_instance_ctrl->p_cfg->rxi_irq;
         p_info->mode           = TRANSFER_MODE_NORMAL;
         p_info->src_addr_mode  = TRANSFER_ADDR_MODE_FIXED;
         p_info->dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED;
@@ -1089,7 +1073,6 @@ static fsp_err_t sci_i2c_transfer_configure (sci_i2c_instance_ctrl_t        * p_
         /* In case of read operation using DMAC, the TXI interrupt will trigger the DMAC to write 0xFF into TDR
          * (See Figure "Example of the procedure for master reception operations in simple I2C mode (when ICR.IICINTM
          * is 1, and transmission interrupts and reception interrupts are in use.)" in the RZ microprocessor manual). */
-        irq = p_instance_ctrl->p_cfg->txi_irq;
 
         /* In case of Write operation this will be reconfigured */
         p_info->mode           = TRANSFER_MODE_NORMAL;
@@ -1098,11 +1081,7 @@ static fsp_err_t sci_i2c_transfer_configure (sci_i2c_instance_ctrl_t        * p_
         p_info->p_dest         = (void *) (&(p_instance_ctrl->p_reg->TDR));
     }
 
-    transfer_cfg_t      * p_cfg               = (transfer_cfg_t *) p_transfer->p_cfg;
-    dmac_extended_cfg_t * p_dmac_extended_cfg = (dmac_extended_cfg_t *) p_cfg->p_extend;
-    p_dmac_extended_cfg->activation_source = (elc_event_t) irq;
-
-    err = p_transfer->p_api->open(p_transfer->p_ctrl, p_cfg);
+    err = p_transfer->p_api->open(p_transfer->p_ctrl, p_transfer->p_cfg);
     FSP_ERROR_RETURN((FSP_SUCCESS == err), err);
 
     return FSP_SUCCESS;
@@ -1327,7 +1306,7 @@ static void sci_i2c_tei_send_address (sci_i2c_instance_ctrl_t * const p_instance
     }
 
     /* Configure SDA and SCL for serial output. */
-    p_instance_ctrl->p_reg->ICR &= ~(R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
+    p_instance_ctrl->p_reg->ICR &= ~(uint32_t) (R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
 
     /* Write 1 byte data to data LSB byte in TDR. */
     p_instance_ctrl->p_reg->TDR = SCI_I2C_PRV_DATA_REG_MASK | data;
@@ -1383,7 +1362,7 @@ static void sci_i2c_issue_restart_or_stop (sci_i2c_instance_ctrl_t * const p_ins
      * - IICDL, IICINTM, IICCSC, and IICACKT settings must be preserved.
      */
     uint32_t icr = p_instance_ctrl->p_reg->ICR;
-    icr &= ~(R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
+    icr &= ~(uint32_t) (R_SCI0_ICR_IICSDAS_Msk | R_SCI0_ICR_IICSCLS_Msk);
     icr |= (1U << R_SCI0_ICR_IICSDAS_Pos) | (1U << R_SCI0_ICR_IICSCLS_Pos);
 
     if (true == p_instance_ctrl->restart)

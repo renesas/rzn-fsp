@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -367,7 +353,7 @@ fsp_err_t R_SCI_UART_Open (uart_ctrl_t * const p_ctrl, uart_cfg_t const * const 
 
     if (SCI_UART_FLOW_CONTROL_HARDWARE_CTSRTS == ((sci_uart_extended_cfg_t *) p_cfg->p_extend)->flow_control)
     {
-        FSP_ERROR_RETURN((0U != (((1U << (p_cfg->channel)) & BSP_FEATURE_SCI_UART_CSTPEN_CHANNELS))),
+        FSP_ERROR_RETURN((0U != (((1U << (p_cfg->channel)) & BSP_FEATURE_SCI_UART_CTSPEN_CHANNELS))),
                          FSP_ERR_INVALID_ARGUMENT);
     }
 
@@ -413,7 +399,7 @@ fsp_err_t R_SCI_UART_Open (uart_ctrl_t * const p_ctrl, uart_cfg_t const * const 
     {
         /* Non-Safety Peripheral */
         p_instance_ctrl->p_reg =
-            (R_SCI0_Type *) ((uint32_t) R_SCI0 + (p_cfg->channel * ((uint32_t) R_SCI1 - (uint32_t) R_SCI0)));
+            (R_SCI0_Type *) ((uintptr_t) R_SCI0 + (p_cfg->channel * ((uintptr_t) R_SCI1 - (uintptr_t) R_SCI0)));
     }
     else
     {
@@ -1163,7 +1149,7 @@ static fsp_err_t r_sci_read_write_param_check (sci_uart_instance_ctrl_t const * 
     if (2U == p_instance_ctrl->data_bytes)
     {
         /* Do not allow odd buffer address if data length is 9 bits. */
-        FSP_ERROR_RETURN((0U == ((uint32_t) addr & SCI_UART_ALIGN_2_BYTES)), FSP_ERR_INVALID_ARGUMENT);
+        FSP_ERROR_RETURN((0U == ((uintptr_t) addr & SCI_UART_ALIGN_2_BYTES)), FSP_ERR_INVALID_ARGUMENT);
 
         /* Do not allow odd number of data bytes if data length is 9 bits. */
         FSP_ERROR_RETURN(0U == (bytes % 2U), FSP_ERR_INVALID_ARGUMENT);
@@ -1257,7 +1243,7 @@ static fsp_err_t r_sci_uart_transfer_open (sci_uart_instance_ctrl_t * const p_in
             r_sci_uart_transfer_configure(p_instance_ctrl,
                                           p_cfg->p_transfer_rx,
                                           (uint32_t *) &p_info->p_src,
-                                          (uint32_t) &(p_instance_ctrl->p_reg->RDR));
+                                          (uint32_t) (uintptr_t) &(p_instance_ctrl->p_reg->RDR));
         FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
     }
  #endif
@@ -1276,7 +1262,7 @@ static fsp_err_t r_sci_uart_transfer_open (sci_uart_instance_ctrl_t * const p_in
             r_sci_uart_transfer_configure(p_instance_ctrl,
                                           p_cfg->p_transfer_tx,
                                           (uint32_t *) &p_info->p_dest,
-                                          (uint32_t) &p_instance_ctrl->p_reg->TDR);
+                                          (uint32_t) (uintptr_t) &p_instance_ctrl->p_reg->TDR);
 
   #if (SCI_UART_CFG_RX_ENABLE)
         if ((err != FSP_SUCCESS) && (NULL != p_cfg->p_transfer_rx))
@@ -1343,7 +1329,7 @@ static void r_sci_uart_config_set (sci_uart_instance_ctrl_t * const p_instance_c
      * of RXD). */
     ccr3 |= (p_extend->rx_edge_start & 1U) << SCI_UART_CCR3_RxDSEL_OFFSET;
 
-    ccr3 |= ((uint32_t) p_extend->rs485_setting.enable << R_SCI0_CCR3_DEN_Pos) & R_SCI0_CCR3_DEN_Msk;
+    ccr3 |= ((uint32_t) p_extend->rs485_setting.enable << R_SCI0_CCR3_DEN_Pos) & (uint32_t) R_SCI0_CCR3_DEN_Msk;
 
     /* Configure SPEN bit. */
     if (SCI_UART_CLOCK_SOURCE_PCLKM == p_extend->clock_source)
@@ -1403,9 +1389,9 @@ static void r_sci_uart_config_set (sci_uart_instance_ctrl_t * const p_instance_c
     /* Configure RS-485 DE assertion settings. */
     uint32_t dcr = ((uint32_t) (p_extend->rs485_setting.polarity << R_SCI0_DCR_DEPOL_Pos)) & R_SCI0_DCR_DEPOL_Msk;
     dcr |= ((uint32_t) p_extend->rs485_setting.assertion_time << R_SCI0_DCR_DEAST_Pos) &
-           R_SCI0_DCR_DEAST_Msk;
+           (uint32_t) R_SCI0_DCR_DEAST_Msk;
     dcr |= ((uint32_t) p_extend->rs485_setting.negation_time << R_SCI0_DCR_DENGT_Pos) &
-           R_SCI0_DCR_DENGT_Msk;
+           (uint32_t) R_SCI0_DCR_DENGT_Msk;
     p_instance_ctrl->p_reg->DCR = dcr;
 }
 

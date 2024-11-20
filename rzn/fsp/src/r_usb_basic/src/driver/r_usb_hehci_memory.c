@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * File Name    : r_usb_hEhciMemory.c
@@ -162,7 +148,7 @@ void usb_hstd_ehci_init_periodic_frame_list (void)
  ***********************************************************************************************************************/
 uint32_t usb_hstd_ehci_get_periodic_frame_list_addr (void)
 {
-    return (uint32_t) &gs_usb_hstd_ehci_periodic_frame_list[0];
+    return (uint32_t) (uintptr_t) &gs_usb_hstd_ehci_periodic_frame_list[0];
 }                                      /* End of function usb_hstd_ehci_get_periodic_frame_list_addr() */
 
 /***********************************************************************************************************************
@@ -188,8 +174,13 @@ st_usb_ehci_qh_t * usb_hstd_ehci_alloc_qh (void)
             p_qh->info.enable                = TRUE;
             p_qh->next_qtd.address           = 0x00000001;
             p_qh->alternate_next_qtd.address = 0x00000001;
+ #if 1 == BSP_LP64_SUPPORT
+            p_qh->qtd_head = USB_NULL;
+            p_qh->qtd_end  = USB_NULL;
+ #else
             p_qh->qtd_head = NULL;
             p_qh->qtd_end  = NULL;
+ #endif
 
             p_ret_qh = p_qh;
             break;
@@ -301,15 +292,15 @@ st_usb_ehci_qtd_t * usb_hstd_ehci_alloc_qtd (void)
 
     if (NULL != gsp_usb_hstd_ehci_qtd_top)
     {
- #if 0
-        p_ret_qtd = (st_usb_ehci_qtd_t *) r_usb_pa_to_va(gsp_usb_hstd_ehci_qtd_top);
-
-        gsp_usb_hstd_ehci_qtd_top = (st_usb_ehci_qtd_t *) r_usb_pa_to_va(
-            (uint32_t) gsp_usb_hstd_ehci_qtd_top->next_qtd.address);
+ #if 1 == BSP_LP64_SUPPORT
+        p_ret_qtd =
+            (st_usb_ehci_qtd_t *) (uintptr_t) (r_usb_pa_to_va((uint64_t) gsp_usb_hstd_ehci_qtd_top));
+        gsp_usb_hstd_ehci_qtd_top =
+            (st_usb_ehci_qtd_t *) (uintptr_t) (r_usb_pa_to_va((uint64_t) gsp_usb_hstd_ehci_qtd_top->next_qtd.address));
  #else
         p_ret_qtd = gsp_usb_hstd_ehci_qtd_top;
 
-        gsp_usb_hstd_ehci_qtd_top = (st_usb_ehci_qtd_t *) gsp_usb_hstd_ehci_qtd_top->next_qtd.address;
+        gsp_usb_hstd_ehci_qtd_top = (st_usb_ehci_qtd_t *) (uintptr_t) gsp_usb_hstd_ehci_qtd_top->next_qtd.address;
  #endif
     }
 
@@ -335,11 +326,12 @@ st_usb_ehci_qtd_t * usb_hstd_ehci_alloc_qtd (void)
 void usb_hstd_ehci_free_qtd (st_usb_ehci_qtd_t * p_free_qtd)
 {
     usb_hstd_hci_lock_resouce();
- #if 0
-    R_MMU_VAtoPA(gsp_usb_hstd_ehci_qtd_top, &p_free_qtd->next_qtd.address);
-    gsp_usb_hstd_ehci_qtd_top = (st_usb_ehci_qtd_t *) r_usb_pa_to_va(p_free_qtd);
+
+ #if 1 == BSP_LP64_SUPPORT
+    p_free_qtd->next_qtd.address = (uint32_t) r_usb_va_to_pa((uint64_t) gsp_usb_hstd_ehci_qtd_top);
+    gsp_usb_hstd_ehci_qtd_top    = (st_usb_ehci_qtd_t *) (r_usb_pa_to_va((uint64_t) p_free_qtd));
  #else
-    p_free_qtd->next_qtd.address = (uint32_t) gsp_usb_hstd_ehci_qtd_top;
+    p_free_qtd->next_qtd.address = (uint32_t) (uintptr_t) gsp_usb_hstd_ehci_qtd_top;
     gsp_usb_hstd_ehci_qtd_top    = p_free_qtd;
  #endif
 

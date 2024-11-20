@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************************************************//**
  * @addtogroup BSP_MCU_RZN2L
@@ -41,6 +27,7 @@
 #include "../../src/bsp/mcu/all/bsp_io.h"
 #include "../../src/bsp/mcu/all/bsp_clocks.h"
 #include "../../src/bsp/mcu/all/bsp_module_stop.h"
+#include "../../src/bsp/mcu/all/bsp_semaphore.h"
 #include "../../src/bsp/mcu/all/bsp_reset.h"
 #include "../../src/bsp/mcu/all/bsp_cache.h"
 
@@ -64,7 +51,6 @@ FSP_HEADER
  **********************************************************************************************************************/
 
 /* Define overrides required for this MPU. */
-#define BSP_OVERRIDE_ADC_MODE_T
 #define BSP_OVERRIDE_ADC_CHANNEL_T
 #define BSP_OVERRIDE_CGC_CLOCK_T
 #define BSP_OVERRIDE_CGC_PLL_CFG_T
@@ -105,16 +91,6 @@ FSP_HEADER
 /*==============================================
  * ADC API Overrides
  *==============================================*/
-
-/** ADC operation mode definitions  */
-typedef enum e_adc_mode
-{
-    ADC_MODE_SINGLE_SCAN      = 0,     ///< Single scan - one or more channels
-    ADC_MODE_GROUP_SCAN       = 1,     ///< Two trigger sources to trigger scan for two groups which contain one or more channels
-    ADC_MODE_CONTINUOUS_SCAN  = 2,     ///< Continuous scan - one or more channels
-    ADC_MODE_SYNCHRONIZE_SCAN = 3,     ///< Channel synchronization control mode
-    ADC_MODE_INDIVIDUAL_SCAN  = 4,     ///< Channel individual control mode
-} adc_mode_t;
 
 /** ADC channels */
 typedef enum e_adc_channel

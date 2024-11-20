@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -101,7 +87,7 @@ fsp_err_t R_POE3_Open (poe3_ctrl_t * const p_ctrl, poe3_cfg_t const * const p_cf
 #endif
 
     /* Save register base address. */
-    uint32_t base_address = (uint32_t) R_POE3;
+    uintptr_t base_address = (uintptr_t) R_POE3;
     p_instance_ctrl->p_reg = (R_POE3_Type *) base_address;
     p_instance_ctrl->p_cfg = p_cfg;
 
@@ -112,12 +98,28 @@ fsp_err_t R_POE3_Open (poe3_ctrl_t * const p_ctrl, poe3_cfg_t const * const p_cf
 
     p_instance_ctrl->p_reg->ICSR1 = (uint16_t) ((p_extend->poe0.interrupt_enable << 8) | p_extend->poe0.mode);
     p_instance_ctrl->p_reg->ICSR2 = (uint16_t) ((p_extend->poe4.interrupt_enable << 8) | p_extend->poe4.mode);
-    p_instance_ctrl->p_reg->ICSR3 = (uint16_t) ((p_extend->poe8.interrupt_enable << 8) | p_extend->poe8.mode);
-    p_instance_ctrl->p_reg->ICSR4 = (uint16_t) ((p_extend->poe10.interrupt_enable << 8) | p_extend->poe10.mode);
-    p_instance_ctrl->p_reg->ICSR5 = (uint16_t) ((p_extend->poe11.interrupt_enable << 8) | p_extend->poe11.mode);
+    p_instance_ctrl->p_reg->ICSR3 = (uint16_t) ((p_extend->poe8.interrupt_enable << 8) | p_extend->poe8.mode |
+                                                (p_extend->poe8.hiz_output_enable << 9));
+    p_instance_ctrl->p_reg->ICSR4 = (uint16_t) ((p_extend->poe10.interrupt_enable << 8) | p_extend->poe10.mode |
+                                                (p_extend->poe10.hiz_output_enable << 9));
+    p_instance_ctrl->p_reg->ICSR5 = (uint16_t) ((p_extend->poe11.interrupt_enable << 8) | p_extend->poe11.mode |
+                                                (p_extend->poe11.hiz_output_enable << 9));
 
     p_instance_ctrl->p_reg->ICSR6 = (uint16_t) (p_cfg->oscillation_stop_hiz_output_enable << 9);
+#if 1U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
     p_instance_ctrl->p_reg->ICSR7 = (uint16_t) ((p_extend->dsmif1_error << 7) | (p_extend->dsmif0_error << 6));
+#elif 3U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
+    p_instance_ctrl->p_reg->ICSR9 = (uint16_t) ((p_extend->dsmif8_error << 8) |                                 \
+                                                (p_extend->dsmif7_error << 7) |                                 \
+                                                (p_extend->dsmif5_error << 5) | (p_extend->dsmif4_error << 4) | \
+                                                (p_extend->dsmif3_error << 3) | (p_extend->dsmif2_error << 2) | \
+                                                (p_extend->dsmif1_error << 1) | (p_extend->dsmif0_error << 0));
+    p_instance_ctrl->p_reg->ICSR10 = (uint16_t) ((p_extend->dsmif8_error_1 << 8) |                                   \
+                                                 (p_extend->dsmif7_error_1 << 7) |                                   \
+                                                 (p_extend->dsmif5_error_1 << 5) | (p_extend->dsmif4_error_1 << 4) | \
+                                                 (p_extend->dsmif3_error_1 << 3) | (p_extend->dsmif2_error_1 << 2) | \
+                                                 (p_extend->dsmif1_error_1 << 1) | (p_extend->dsmif0_error_1 << 0));
+#endif
 
     p_instance_ctrl->p_reg->OCSR1 =
         (uint16_t) ((p_cfg->p_short_circuit_setting[0].hiz_output_enable << 9) |
@@ -193,6 +195,14 @@ fsp_err_t R_POE3_Open (poe3_ctrl_t * const p_ctrl, poe3_cfg_t const * const p_cf
     p_instance_ctrl->p_reg->POECR5 = (uint16_t) (p_extend->mtu0_control_channel_mask);
     p_instance_ctrl->p_reg->POECR4 = (uint16_t) (p_extend->mtu3_4_control_channel_mask) |
                                      (uint16_t) (p_extend->mtu6_7_control_channel_mask);
+#if 3U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
+    p_instance_ctrl->p_reg->POECR7  = (uint16_t) (p_extend->mtu0_control_channel_mask_dsmif_error0);
+    p_instance_ctrl->p_reg->POECR8  = (uint16_t) (p_extend->mtu0_control_channel_mask_dsmif_error1);
+    p_instance_ctrl->p_reg->POECR9  = (uint16_t) (p_extend->mtu3_4_control_channel_mask_dsmif_error0);
+    p_instance_ctrl->p_reg->POECR10 = (uint16_t) (p_extend->mtu3_4_control_channel_mask_dsmif_error1);
+    p_instance_ctrl->p_reg->POECR11 = (uint16_t) (p_extend->mtu6_7_control_channel_mask_dsmif_error0);
+    p_instance_ctrl->p_reg->POECR12 = (uint16_t) (p_extend->mtu6_7_control_channel_mask_dsmif_error1);
+#endif
 
     /* Make sure the module is marked open before enabling the interrupt since the interrupt could fire immediately. */
     p_instance_ctrl->open = POE3_OPEN;
@@ -200,6 +210,8 @@ fsp_err_t R_POE3_Open (poe3_ctrl_t * const p_ctrl, poe3_cfg_t const * const p_cf
     p_instance_ctrl->p_reg->ICSR1 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR2 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR3 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
+    p_instance_ctrl->p_reg->ICSR4 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
+    p_instance_ctrl->p_reg->ICSR5 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR6 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->OCSR1 &= (uint16_t) ~R_POE3_OCSR1_OSF1_Msk;
     p_instance_ctrl->p_reg->OCSR2 &= (uint16_t) ~R_POE3_OCSR2_OSF2_Msk;
@@ -276,7 +288,8 @@ fsp_err_t R_POE3_Reset (poe3_ctrl_t * const p_ctrl)
     p_instance_ctrl->p_reg->ICSR1 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR2 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR3 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
-
+    p_instance_ctrl->p_reg->ICSR4 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
+    p_instance_ctrl->p_reg->ICSR5 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->ICSR6 &= (uint16_t) ~POE3_PRV_STATUS_FLAGS;
     p_instance_ctrl->p_reg->OCSR1 &= (uint16_t) ~R_POE3_OCSR1_OSF1_Msk;
     p_instance_ctrl->p_reg->OCSR2 &= (uint16_t) ~R_POE3_OCSR2_OSF2_Msk;
@@ -307,12 +320,30 @@ fsp_err_t R_POE3_StatusGet (poe3_ctrl_t * const p_ctrl, poe3_status_t * const p_
     p_status->state  = (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR1 & R_POE3_ICSR1_POE0F_Msk) >> 12);                // 0
     p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR2 & R_POE3_ICSR2_POE4F_Msk) >> 11);                // 1
     p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR3 & R_POE3_ICSR3_POE8F_Msk) >> 10);                // 2
-
+    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR4 & R_POE3_ICSR4_POE10F_Msk) >> 9);                // 3
+    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR5 & R_POE3_ICSR5_POE11F_Msk) >> 8);                // 4
     p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR6 & R_POE3_ICSR6_OSTSTF_Msk) >> 6);                // 6
+#if 1U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
     p_status->state |=
         (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR7 & (R_POE3_ICSR7_DERR1ST_Msk | R_POE3_ICSR7_DERR0ST_Msk)) >> 6); // 7,8
-    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->OCSR1 & R_POE3_OCSR1_OSF1_Msk) >> 6);                  // 9
-    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->OCSR2 & R_POE3_OCSR2_OSF2_Msk) >> 5);                  // 10
+#elif 3U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
+    p_status->state |=
+        (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR7 & (R_POE3_ICSR7_D8ERR0ST_Msk |
+                                                          R_POE3_ICSR7_D7ERR0ST_Msk |
+                                                          R_POE3_ICSR7_D5ERR0ST_Msk | R_POE3_ICSR7_D4ERR0ST_Msk |
+                                                          R_POE3_ICSR7_D3ERR0ST_Msk | R_POE3_ICSR7_D2ERR0ST_Msk |
+                                                          R_POE3_ICSR7_D1ERR0ST_Msk | R_POE3_ICSR7_D0ERR0ST_Msk)) <<
+                        11);           // 11-20
+    p_status->state |=
+        (poe3_state_t) ((p_instance_ctrl->p_reg->ICSR8 & (R_POE3_ICSR8_D8ERR1ST_Msk |
+                                                          R_POE3_ICSR8_D7ERR1ST_Msk |
+                                                          R_POE3_ICSR8_D5ERR1ST_Msk | R_POE3_ICSR8_D4ERR1ST_Msk |
+                                                          R_POE3_ICSR8_D3ERR1ST_Msk | R_POE3_ICSR8_D2ERR1ST_Msk |
+                                                          R_POE3_ICSR8_D1ERR1ST_Msk | R_POE3_ICSR8_D0ERR1ST_Msk)) <<
+                        21);                                                                          // 21-30
+#endif
+    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->OCSR1 & R_POE3_OCSR1_OSF1_Msk) >> 6); // 9
+    p_status->state |= (poe3_state_t) ((p_instance_ctrl->p_reg->OCSR2 & R_POE3_OCSR2_OSF2_Msk) >> 5); // 10
 
     if ((p_instance_ctrl->p_reg->SPOER) != 0)
     {
@@ -346,9 +377,25 @@ fsp_err_t R_POE3_Close (poe3_ctrl_t * const p_ctrl)
     p_instance_ctrl->p_reg->ICSR3 &= (uint16_t) ~(R_POE3_ICSR3_POE8E_Msk | R_POE3_ICSR3_PIE3_Msk);
     p_instance_ctrl->p_reg->ICSR4 &= (uint16_t) ~(R_POE3_ICSR4_POE10E_Msk | R_POE3_ICSR4_PIE4_Msk);
     p_instance_ctrl->p_reg->ICSR5 &= (uint16_t) ~(R_POE3_ICSR5_POE11E_Msk | R_POE3_ICSR5_PIE5_Msk);
+#if 1U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
     p_instance_ctrl->p_reg->ICSR7 &=
         (uint16_t) ~(R_POE3_ICSR7_DERR1ST_Msk | R_POE3_ICSR7_DERR0ST_Msk | R_POE3_ICSR7_DERR1IE_Msk |
                      R_POE3_ICSR7_DERR0IE_Msk);
+#elif 3U == BSP_FEATURE_POE3_ERROR_SIGNAL_TYPE
+
+    /* ICSR7 and ICSR8 are read-only and do not need to be set to 0. */
+    p_instance_ctrl->p_reg->ICSR9 &=
+        (uint16_t) ~(R_POE3_ICSR9_D8ERR0IE_Msk | R_POE3_ICSR9_D7ERR0IE_Msk |
+                     R_POE3_ICSR9_D5ERR0IE_Msk | R_POE3_ICSR9_D4ERR0IE_Msk |
+                     R_POE3_ICSR9_D3ERR0IE_Msk | R_POE3_ICSR9_D2ERR0IE_Msk | R_POE3_ICSR9_D1ERR0IE_Msk |
+                     R_POE3_ICSR9_D0ERR0IE_Msk);
+    p_instance_ctrl->p_reg->ICSR10 &=
+        (uint16_t) ~(R_POE3_ICSR10_D8ERR1IE_Msk | R_POE3_ICSR10_D7ERR1IE_Msk |
+                     R_POE3_ICSR10_D5ERR1IE_Msk | R_POE3_ICSR10_D4ERR1IE_Msk |
+                     R_POE3_ICSR10_D3ERR1IE_Msk | R_POE3_ICSR10_D2ERR1IE_Msk | R_POE3_ICSR10_D1ERR1IE_Msk |
+                     R_POE3_ICSR10_D0ERR1IE_Msk);
+#endif
+
     p_instance_ctrl->p_reg->OCSR1 &= (uint16_t) ~(R_POE3_OCSR1_OCE1_Msk | R_POE3_OCSR1_OIE1_Msk);
     p_instance_ctrl->p_reg->OCSR2 &= (uint16_t) ~(R_POE3_OCSR2_OCE2_Msk | R_POE3_OCSR2_OIE2_Msk);
     p_instance_ctrl->p_reg->SPOER &=

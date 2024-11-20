@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -46,7 +32,11 @@ extern ethercat_ssc_port_instance_t const * gp_ethercat_ssc_port;
 #define ETHERCAT_SSC_PORT_EEPROM_ERROR_I2CBUS      (0x2800) /* rising edge-triggerd */
 
 /* ESC_RESETOUT# PFC setting */
-#define ETHERCAT_SSC_PORT_PFC_ESC_RESETOUT         (0x01U << IOPORT_PFC_OFFSET)
+#if (BSP_FEATURE_IOPORT_PIN_PFC_TYPE == 3)
+ #define ETHERCAT_SSC_PORT_PFC_ESC_RESETOUT        (0x12U << IOPORT_PFC_OFFSET)
+#else
+ #define ETHERCAT_SSC_PORT_PFC_ESC_RESETOUT        (0x01U << IOPORT_PFC_OFFSET)
+#endif
 
 /* Key code for PRCMD register */
 #define ETHERCAT_SSC_PORT_PRCMD_UNLOCK1            (0x000000A5U)
@@ -65,8 +55,10 @@ extern ethercat_ssc_port_instance_t const * gp_ethercat_ssc_port;
 #endif
 
 /* Set to 1 to support ETHSW MDIO */
-#ifndef ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT
- #define ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT      (0U)
+#if (BSP_FEATURE_ETHSW_SUPPORTED == 1)
+ #ifndef ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT
+  #define ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT    (0U)
+ #endif
 #endif
 
 /***********************************************************************************************************************
@@ -199,11 +191,13 @@ fsp_err_t RM_ETHERCAT_SSC_PORT_Open (ethercat_ssc_port_ctrl_t * const      p_ctr
     R_BSP_ModuleResetDisable(BSP_MODULE_RESET_GMAC0_PCLKM);
 #endif
 
-#if (ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT == 1)
+#if (BSP_FEATURE_ETHSW_SUPPORTED == 1)
+ #if (ETHERCAT_SSC_PORT_ETHSW_MDIO_SUPPORT == 1)
 
     /* Power on ETHSW for MDIO */
     R_BSP_MODULE_START(FSP_IP_ETHSW, 0);
     R_BSP_ModuleResetDisable(BSP_MODULE_RESET_ETHSW);
+ #endif
 #endif
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 

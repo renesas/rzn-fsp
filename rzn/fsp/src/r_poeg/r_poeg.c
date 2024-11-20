@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -29,14 +15,53 @@
  **********************************************************************************************************************/
 
 /* "POEG" in ASCII, used to determine if channel is open. */
-#define POEG_OPEN                (0x504F4547ULL)
+#define POEG_OPEN                        (0x504F4547ULL)
 
-#define POEG_PRV_STATUS_FLAGS    (R_POEG0_POEG0GA_DERR1ST_Msk | R_POEG0_POEG0GA_DERR0ST_Msk | R_POEG0_POEG0GA_ST_Msk | \
-                                  R_POEG0_POEG0GA_SSF_Msk | R_POEG0_POEG0GA_OSTPF_Msk | R_POEG0_POEG0GA_IOCF_Msk |     \
-                                  R_POEG0_POEG0GA_PIDF_Msk)
+#if 1 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
+ #define POEG_PRV_STATUS_FLAGS           (R_POEG0_POEG0GA_DERR1ST_Msk | R_POEG0_POEG0GA_DERR0ST_Msk | \
+                                          R_POEG0_POEG0GA_ST_Msk |                                    \
+                                          R_POEG0_POEG0GA_SSF_Msk | R_POEG0_POEG0GA_OSTPF_Msk |       \
+                                          R_POEG0_POEG0GA_IOCF_Msk |                                  \
+                                          R_POEG0_POEG0GA_PIDF_Msk)
 
-#define POEG_PRV_FLAG_CLEAR      (R_POEG0_POEG0GA_DERR1ST_Msk | R_POEG0_POEG0GA_DERR0ST_Msk | R_POEG0_POEG0GA_SSF_Msk | \
-                                  R_POEG0_POEG0GA_OSTPF_Msk | R_POEG0_POEG0GA_IOCF_Msk | R_POEG0_POEG0GA_PIDF_Msk)
+ #define POEG_PRV_FLAG_CLEAR             (R_POEG0_POEG0GA_DERR1ST_Msk | R_POEG0_POEG0GA_DERR0ST_Msk | \
+                                          R_POEG0_POEG0GA_SSF_Msk |                                   \
+                                          R_POEG0_POEG0GA_OSTPF_Msk | R_POEG0_POEG0GA_IOCF_Msk |      \
+                                          R_POEG0_POEG0GA_PIDF_Msk)
+
+#elif 3 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
+ #define POEG_PRV_STATUS_FLAGS           (R_POEG0_POEG0GA0_ST_Msk | R_POEG0_POEG0GA0_SSF_Msk | \
+                                          R_POEG0_POEG0GA0_OSTPF_Msk |                         \
+                                          R_POEG0_POEG0GA0_IOCF_Msk | R_POEG0_POEG0GA0_PIDF_Msk)
+ #define POEG_PRV_FLAG_CLEAR             (R_POEG0_POEG0GA0_SSF_Msk | R_POEG0_POEG0GA0_OSTPF_Msk | \
+                                          R_POEG0_POEG0GA0_IOCF_Msk | R_POEG0_POEG0GA0_PIDF_Msk)
+ #define POEG_PRV_DSMIF0_STATUS_FLAGS    (R_POEG0_POEG0GA1_D8ERR0ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D7ERR0ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D5ERR0ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D4ERR0ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D3ERR0ST_Msk | R_POEG0_POEG0GA1_D2ERR0ST_Msk | \
+                                          R_POEG0_POEG0GA1_D1ERR0ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D0ERR0ST_Msk)
+ #define POEG_PRV_DSMIF1_STATUS_FLAGS    (R_POEG0_POEG0GA1_D8ERR1ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D7ERR1ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D5ERR1ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D4ERR1ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D3ERR1ST_Msk | R_POEG0_POEG0GA1_D2ERR1ST_Msk | \
+                                          R_POEG0_POEG0GA1_D1ERR1ST_Msk |                                 \
+                                          R_POEG0_POEG0GA1_D0ERR1ST_Msk)
+ #define POEG_PRV_TRIGGER                (POEG_TRIGGER_PIN | POEG_TRIGGER_GPT_OUTPUT_LEVEL | \
+                                          POEG_TRIGGER_OSCILLATION_STOP)
+ #define POEG_PRV_DSMIF0_TRIGGER         (POEG_TRIGGER_D8ERR0E | POEG_TRIGGER_D7ERR0E |                        \
+                                          POEG_TRIGGER_D5ERR0E | POEG_TRIGGER_D4ERR0E | POEG_TRIGGER_D3ERR0E | \
+                                          POEG_TRIGGER_D2ERR0E |                                               \
+                                          POEG_TRIGGER_D1ERR0E | POEG_TRIGGER_D0ERR0E)
+ #define POEG_PRV_DSMIF1_TRIGGER         (POEG_TRIGGER_D8ERR1E | POEG_TRIGGER_D7ERR1E |                        \
+                                          POEG_TRIGGER_D5ERR1E | POEG_TRIGGER_D4ERR1E | POEG_TRIGGER_D3ERR1E | \
+                                          POEG_TRIGGER_D2ERR1E |                                               \
+                                          POEG_TRIGGER_D1ERR1E | POEG_TRIGGER_D0ERR1E)
+ #define POEG0GN1_REG_OFFSET             (0x0004U)
+ #define POEG0GN2_REG_OFFSET             (0x0008U)
+#endif
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -117,25 +142,38 @@ fsp_err_t R_POEG_Open (poeg_ctrl_t * const p_ctrl, poeg_cfg_t const * const p_cf
     {
         /* LLPP Peripheral */
         p_instance_ctrl->p_reg =
-            (R_POEG0_Type *) ((uint32_t) R_POEG0 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
+            (R_POEG0_Type *) ((uintptr_t) R_POEG0 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
     }
     else if (BSP_FEATURE_POEG_NONSAFETY_UNIT == p_cfg->unit)
     {
         /* Non-Safety Peripheral */
         p_instance_ctrl->p_reg =
-            (R_POEG0_Type *) ((uint32_t) R_POEG1 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
+            (R_POEG0_Type *) ((uintptr_t) R_POEG1 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
     }
     else
     {
         /* Safety Peripheral */
         p_instance_ctrl->p_reg =
-            (R_POEG0_Type *) ((uint32_t) R_POEG2 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
+            (R_POEG0_Type *) ((uintptr_t) R_POEG2 + (p_cfg->channel * BSP_FEATURE_POEG_GROUP_OFSSET_ADDRESS));
     }
 
-    p_instance_ctrl->p_cfg               = p_cfg;
+    p_instance_ctrl->p_cfg = p_cfg;
+#if 1 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
     *(uint32_t *) p_instance_ctrl->p_reg = ((uint32_t) p_cfg->trigger << R_POEG0_POEG0GA_PIDE_Pos) |
                                            ((uint32_t) p_cfg->polarity << R_POEG0_POEG0GA_INV_Pos) |
                                            ((uint32_t) p_cfg->noise_filter << R_POEG0_POEG0GA_NFEN_Pos);
+#elif 3 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
+    *(uint32_t *) p_instance_ctrl->p_reg =
+        ((uint32_t) (p_cfg->trigger & POEG_PRV_TRIGGER) << R_POEG0_POEG0GA0_PIDE_Pos) |
+        ((uint32_t) p_cfg->polarity << R_POEG0_POEG0GA0_INV_Pos) |
+        ((uint32_t) p_cfg->noise_filter << R_POEG0_POEG0GA0_NFEN_Pos);
+
+    /* Position of DSMIF0 in poeg_trigger_t: 19-10bit, Position of DSMIF0 of POEG0Gn2: 9-0bit */
+    /* Position of DSMIF1 in poeg_trigger_t: 29-20bit, Position of DSMIF1 of POEG0Gn2: 25-16bit */
+    *(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + POEG0GN2_REG_OFFSET) = \
+        ((uint32_t) ((p_cfg->trigger & POEG_PRV_DSMIF0_TRIGGER) >> 10U |       \
+                     (p_cfg->trigger & POEG_PRV_DSMIF1_TRIGGER) >> 4U));
+#endif
 
     /* Set callback and context pointers, if configured */
     p_instance_ctrl->p_callback        = p_cfg->p_callback;
@@ -170,7 +208,11 @@ fsp_err_t R_POEG_OutputDisable (poeg_ctrl_t * const p_ctrl)
 #endif
 
     /* Disable GPT output pins. */
+#if 1 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
     *(uint32_t *) p_instance_ctrl->p_reg |= (1U << R_POEG0_POEG0GA_SSF_Pos);
+#elif 3 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
+    *(uint32_t *) p_instance_ctrl->p_reg |= (1U << R_POEG0_POEG0GA0_SSF_Pos);
+#endif
 
     return FSP_SUCCESS;
 }
@@ -216,7 +258,23 @@ fsp_err_t R_POEG_StatusGet (poeg_ctrl_t * const p_ctrl, poeg_status_t * const p_
 #endif
 
     /* Get POEG state. */
+#if 1 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE || 2 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
     p_status->state = (poeg_state_t) (*(uint32_t *) p_instance_ctrl->p_reg & POEG_PRV_STATUS_FLAGS);
+#elif 3 == BSP_FEATURE_POEG_ERROR_SIGNAL_TYPE
+    p_status->state = (poeg_state_t) (*(uint32_t *) p_instance_ctrl->p_reg & POEG_PRV_STATUS_FLAGS);
+
+    /* Position of DSMIF0 in poeg_state_t: 13-4bit, Position of DSMIF0 of POEG0Gn1: 9-0bit */
+    p_status->state |=
+        (poeg_state_t) ((*(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + POEG0GN1_REG_OFFSET) &
+                         POEG_PRV_DSMIF0_STATUS_FLAGS) <<
+                        4U);
+
+    /* Position of DSMIF1 in poeg_state_t: 29-20bit, Position of DSMIF1 of POEG0Gn1: 25-16bit*/
+    p_status->state |=
+        (poeg_state_t) ((*(uint32_t *) ((uint8_t *) p_instance_ctrl->p_reg + POEG0GN1_REG_OFFSET) &
+                         POEG_PRV_DSMIF1_STATUS_FLAGS) <<
+                        4U);
+#endif
 
     return FSP_SUCCESS;
 }

@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * File Name    : r_usb_hHci.c
@@ -690,8 +676,8 @@ st_usb_hci_tr_req_t * usb_hstd_hci_alloc_transefer_request (void)
             memset(p_tr_req, 0, sizeof(st_usb_hci_tr_req_t));
 
             p_tr_req->bit.enable = TRUE;
- #if 0
-            R_MMU_VAtoPA((uint32_t) &usb_hci_setup_buffer[i][0], (uint32_t *) &p_tr_req->setupbuf);
+ #if 1 == BSP_LP64_SUPPORT
+            p_tr_req->setupbuf = (uint32_t *) r_usb_va_to_pa((uint64_t) &usb_hci_setup_buffer[i][0]);
  #else
             p_tr_req->setupbuf = &usb_hci_setup_buffer[i][0];
  #endif
@@ -848,23 +834,23 @@ uint16_t r_usb_hstd_hci_make_transfer_request (void   * p_utr,
         p_tr_req->bit.direction = USB_HCI_DIRECTION_IN;
     }
 
-    p_tr_req->bit.epnum = epnum & 0x0000000FU;            /* Endpoint Number */
-    p_tr_req->trsize    = tranlen;                        /* Transfer Size */
- #if 0
-    R_MMU_VAtoPA((uint32_t) tranadr, &p_tr_req->databuf); /* Transfer Data Buffer */
+    p_tr_req->bit.epnum = epnum & 0x0000000FU;                         /* Endpoint Number */
+    p_tr_req->trsize    = tranlen;                                     /* Transfer Size */
+ #if 1 == BSP_LP64_SUPPORT
+    p_tr_req->databuf = (uint32_t) r_usb_va_to_pa((uint64_t) tranadr); /* Transfer Data Buffer */
  #else
-    p_tr_req->databuf = tranadr;                          /* Transfer Data Buffer */
+    p_tr_req->databuf = tranadr;                                       /* Transfer Data Buffer */
  #endif
-    p_tr_req->utr_p = p_utr;                              /* Set UTR Pointer */
+    p_tr_req->utr_p = p_utr;                                           /* Set UTR Pointer */
 
     /* Control Transfer */
     if (USB_EP_CNTRL == eptype)
     {
         /* Setup Buffer */
         /* Because the data format is different, location is converted. */
- #if 0
-        p_dst = (uint8_t *) r_usb_pa_to_va((uint32_t) p_tr_req->setupbuf);
-        p_src = (uint8_t *) r_usb_pa_to_va((uint32_t) p_setup);
+ #if 1 == BSP_LP64_SUPPORT
+        p_dst = (uint8_t *) (r_usb_pa_to_va((uint64_t) p_tr_req->setupbuf));
+        p_src = (uint8_t *) (r_usb_pa_to_va((uint64_t) p_setup));
  #else
         p_dst = (uint8_t *) p_tr_req->setupbuf;
         p_src = (uint8_t *) p_setup;

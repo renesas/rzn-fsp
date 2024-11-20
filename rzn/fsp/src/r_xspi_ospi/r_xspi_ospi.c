@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 #include "bsp_api.h"
 
@@ -29,8 +15,6 @@
  * Macro definitions
  **********************************************************************************************************************/
 #define XSPI_OSPI_PRV_OPEN                                 (0x4F535049)
-
-#define XSPI_OSPI_DEVICE_START_ADDRESS                     (0x60000000)
 
 #define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK          (0x1FU)
 #define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK          (0x1FU)
@@ -121,12 +105,15 @@
 #define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_2    (0x00FFF700)
 #define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_3    (0xF700F708)
 
+#define XSPI_OSPI_PRV_1MB_MEMORY_SPACE                     (0xFFFFF)
+#define XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT                    (20U)
+
+#define XSPI_OSPI_PRV_UINT32_BITS                          (32U)
+#define XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES            (8U)
+
 /***********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
-
-/* Number of address bytes in 4 byte address mode. */
-#define XSPI_OSPI_4_BYTE_ADDRESS                           (4U)
 
 /***********************************************************************************************************************
  * Private function prototypes
@@ -197,13 +184,42 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
 
     xspi_ospi_extended_cfg_t * p_cfg_extend = (xspi_ospi_extended_cfg_t *) p_cfg->p_extend;
 
-    /* Enable clock to the OSPI block */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
+
+    /* Enable clock to the OSPI block */
     R_BSP_MODULE_START(FSP_IP_XSPI, p_cfg_extend->unit);
+
+    /* Release from reset */
+    if (0U == p_cfg_extend->unit)
+    {
+        R_BSP_ModuleResetDisable(BSP_MODULE_RESET_XSPI0);
+    }
+    else
+    {
+        R_BSP_ModuleResetDisable(BSP_MODULE_RESET_XSPI1);
+    }
+
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_SYSTEM);
+
+#if BSP_FEATURE_BSP_SLAVE_STOP_SUPPORTED
+
+    /* Release from slave stop. */
+    if (0U == p_cfg_extend->unit)
+    {
+        R_BSP_SlaveStopRelease(BSP_BUS_SLAVE_XSPI0);
+    }
+    else
+    {
+        R_BSP_SlaveStopRelease(BSP_BUS_SLAVE_XSPI1);
+    }
+#endif
+
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
+
     /* Set base address. */
-    uint32_t base_address = (uint32_t) R_XSPI0 + (p_cfg_extend->unit * ((uint32_t) R_XSPI1 - (uint32_t) R_XSPI0));
+    uintptr_t base_address = (uintptr_t) R_XSPI0 + (p_cfg_extend->unit * ((uintptr_t) R_XSPI1 - (uintptr_t) R_XSPI0));
     p_instance_ctrl->p_reg = (R_XSPI0_Type *) base_address;
 
     /* Initialize control block. */
@@ -212,8 +228,40 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     p_instance_ctrl->chip_select  = p_cfg_extend->chip_select;
 
     /* xSPI configuration (see RZ microprocessor User's Manual section "Flow of Configuration"). */
+
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_SYSTEM);
+
+    /* Set xSPI IO voltage */
+#if BSP_FEATURE_XSPI_VOLTAGE_SETTING_SUPPORTED
+    if (0 == p_cfg_extend->unit)
+    {
+        R_XSPI0_MISC->IOVOLCTL = p_cfg_extend->io_voltage;
+    }
+    else
+    {
+        R_XSPI1_MISC->IOVOLCTL = p_cfg_extend->io_voltage;
+    }
+#endif
+
     /* Set xSPI CSn size. */
-    if (XSPI_OSPI_CHIP_SELECT_0 == p_instance_ctrl->chip_select)
+#if XSPI_OSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+    uint32_t mirror_address_delta;
+ #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
+    mirror_address_delta = 0;
+ #else
+    mirror_address_delta = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+ #endif
+    R_XSPI0_MISC->CS0ENDAD = p_cfg_extend->p_address_space->unit0_cs0_end_address - mirror_address_delta;
+    R_XSPI0_MISC->CS1STRAD = p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta;
+    R_XSPI0_MISC->CS1ENDAD = p_cfg_extend->p_address_space->unit0_cs1_end_address - mirror_address_delta;
+    R_XSPI1_MISC->CS0ENDAD = p_cfg_extend->p_address_space->unit1_cs0_end_address - mirror_address_delta;
+    R_XSPI1_MISC->CS1STRAD = p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta;
+    R_XSPI1_MISC->CS1ENDAD = p_cfg_extend->p_address_space->unit1_cs1_end_address - mirror_address_delta;
+#else
+ #if 1 == BSP_FEATURE_XSPI_CS_ADDRESS_SPACE_SETTING_TYPE
+
+    /* Set xSPI CSn slave memory size. */
+    if (XSPI_OSPI_CHIP_SELECT_0 == p_cfg_extend->chip_select)
     {
         p_instance_ctrl->p_reg->CSSCTL_b.CS0SIZE = p_cfg_extend->memory_size;
     }
@@ -221,6 +269,56 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     {
         p_instance_ctrl->p_reg->CSSCTL_b.CS1SIZE = p_cfg_extend->memory_size;
     }
+
+ #elif 2 == BSP_FEATURE_XSPI_CS_ADDRESS_SPACE_SETTING_TYPE
+    uint32_t mirror_address_delta;
+  #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
+    mirror_address_delta = 0U;
+  #else
+    mirror_address_delta = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+  #endif
+
+    if (XSPI_OSPI_CHIP_SELECT_0 == p_cfg_extend->chip_select)
+    {
+        if (0 == p_cfg_extend->unit)
+        {
+            R_XSPI0_MISC->CS0ENDAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta +
+                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
+                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
+        }
+        else
+        {
+            R_XSPI1_MISC->CS0ENDAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta +
+                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
+                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
+        }
+    }
+    else
+    {
+        if (0 == p_cfg_extend->unit)
+        {
+            R_XSPI0_MISC->CS1STRAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS +
+                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta;
+
+            R_XSPI0_MISC->CS1ENDAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS +
+                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta +
+                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
+                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
+        }
+        else
+        {
+            R_XSPI1_MISC->CS1STRAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS +
+                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta;
+
+            R_XSPI1_MISC->CS1ENDAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS +
+                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta +
+                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
+                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
+        }
+    }
+ #endif
+#endif
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
 
     /* Set xSPI protocol mode. */
     p_instance_ctrl->p_reg->LIOCFGCS[p_cfg_extend->chip_select] = (p_cfg->spi_protocol) <<
@@ -371,7 +469,8 @@ fsp_err_t R_XSPI_OSPI_XipExit (spi_flash_ctrl_t * p_ctrl)
  * @retval FSP_ERR_NOT_OPEN            Driver is not opened.
  * @retval FSP_ERR_DEVICE_BUSY         Another Write/Erase transaction is in progress.
  *
- * @note In this API, data can be written up to 64 bytes at a time.
+ * @note In this API, the number of bytes that can be written at one time depends on the MCU :
+ * any byte within 64bytes for RZ/N2L, 8byte for RZ/N2H.
  * @note This API performs page program operations to the device. Writing across pages is not supported.
  * Please set the write address and write size according to the page size of your device.
  * @note In 8D-8D-8D(OPI) mode, written data must be even bytes in size.
@@ -387,7 +486,11 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     FSP_ASSERT(NULL != p_src);
     FSP_ASSERT(NULL != p_dest);
     FSP_ERROR_RETURN(XSPI_OSPI_PRV_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
+ #if BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
+    FSP_ASSERT(XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES >= byte_count);
+ #else
     FSP_ASSERT(XSPI_OSPI_PRV_MAX_COMBINE_SIZE >= byte_count);
+ #endif
     FSP_ASSERT(0 != byte_count);
     FSP_ASSERT((0 == byte_count % XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE) ||
                (XSPI_OSPI_BYTE_ORDER_1032 != ((xspi_ospi_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend)->byte_order) ||
@@ -400,6 +503,69 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
 
     r_xspi_ospi_write_enable(p_instance_ctrl);
 
+#if BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
+    uint32_t chip_address;
+    uint32_t chip_select = p_cfg_extend->chip_select;
+    uint32_t unit        = p_cfg_extend->unit;
+    uint32_t mirror_address_delta;
+
+ #ifdef BSP_CFG_CORE_CA55
+    uintptr_t p_dest_va = (uintptr_t) p_dest;
+    uintptr_t p_dest_pa = 0U;
+
+    R_BSP_MmuVatoPa(p_dest_va, &p_dest_pa);
+ #else
+    uintptr_t p_dest_pa = (uintptr_t) p_dest;
+ #endif
+
+    /* Get device start address. */
+ #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
+    mirror_address_delta = 0U;
+ #else
+    mirror_address_delta = (p_dest_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
+                           0U :
+                           BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+ #endif
+
+    chip_address = (0 == chip_select) ?
+                   (0 == unit) ?
+                   (uint32_t) p_dest_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
+                   (uint32_t) p_dest_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
+                   (0 == unit)
+ #if XSPI_QSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+                   ? (uint32_t) p_dest_pa -
+                   (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :         // unit0 cs1
+                   (uint32_t) p_dest_pa -
+                   (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);          // unit1 cs1
+ #else
+                   ? (uint32_t) p_dest_pa -
+                   (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                    mirror_address_delta) :                                                                  // unit0 cs1
+                   (uint32_t) p_dest_pa -
+                   (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                    mirror_address_delta);                                                                   // unit1 cs1
+ #endif
+
+    spi_flash_direct_transfer_t write_transfer;
+    write_transfer.data_u64       = *(uint64_t *) p_src;
+    write_transfer.data_length    = (uint8_t) byte_count;
+    write_transfer.address        = chip_address;
+    write_transfer.address_length = (p_instance_ctrl->p_cfg->address_bytes == SPI_FLASH_ADDRESS_BYTES_4) ? 4U : 3U;
+    write_transfer.dummy_cycles   = 0;
+
+    if (SPI_FLASH_PROTOCOL_1S_1S_1S == p_instance_ctrl->spi_protocol)
+    {
+        write_transfer.command        = p_instance_ctrl->p_cfg->page_program_command;
+        write_transfer.command_length = 1U;
+    }
+    else
+    {
+        write_transfer.command        = p_cfg_extend->p_opi_commands->page_program_command;
+        write_transfer.command_length = 2U;
+    }
+
+    r_xspi_ospi_direct_transfer(p_instance_ctrl, &write_transfer, SPI_FLASH_DIRECT_TRANSFER_DIR_WRITE);
+#else
     uint32_t i = 0;
 
     FSP_CRITICAL_SECTION_DEFINE;
@@ -467,7 +633,7 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     }
 
     /* Ensure that all write data is in the xSPI write buffer. */
-    __asm volatile ("dsb");
+    __DSB();
 
     /* Request to push the pending data */
     if (XSPI_OSPI_PRV_MAX_COMBINE_SIZE > byte_count)
@@ -480,6 +646,7 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->COMSTT_b.MEMACC, 1);
 
     FSP_CRITICAL_SECTION_EXIT;
+#endif
 
     return FSP_SUCCESS;
 }
@@ -506,11 +673,54 @@ fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device
     FSP_ASSERT(0 != byte_count);
     FSP_ERROR_RETURN(XSPI_OSPI_PRV_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
-    spi_flash_cfg_t const * p_cfg         = p_instance_ctrl->p_cfg;
-    uint16_t                erase_command = 0;
-    uint32_t                chip_address  = (uint32_t) p_device_address - XSPI_OSPI_DEVICE_START_ADDRESS;
-    bool send_address = true;
+    spi_flash_cfg_t const    * p_cfg        = p_instance_ctrl->p_cfg;
     xspi_ospi_extended_cfg_t * p_cfg_extend = (xspi_ospi_extended_cfg_t *) p_cfg->p_extend;
+
+    uint8_t unit        = p_cfg_extend->unit;
+    uint8_t chip_select = p_cfg_extend->chip_select;
+
+    uint16_t  erase_command = 0;
+    uintptr_t chip_address;
+    bool      send_address = true;
+    uint32_t  mirror_address_delta;
+
+#ifdef BSP_CFG_CORE_CA55
+    uintptr_t p_device_address_va = (uintptr_t) p_device_address;
+    uintptr_t p_device_address_pa = 0U;
+
+    R_BSP_MmuVatoPa(p_device_address_va, &p_device_address_pa);
+#else
+    uintptr_t p_device_address_pa = (uintptr_t) p_device_address;
+#endif
+
+    /* Get device start address. */
+#if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
+    mirror_address_delta = 0U;
+#else
+    mirror_address_delta = (p_device_address_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
+                           0U :
+                           BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+#endif
+
+    chip_address = (0 == chip_select) ?
+                   (0 == unit) ?
+                   p_device_address_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
+                   p_device_address_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
+                   (0 == unit)
+#if XSPI_QSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+                   ? p_device_address_pa -
+                   (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :        // unit0 cs1
+                   p_device_address_pa -
+                   (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);         // unit1 cs1
+#else
+                   ? p_device_address_pa -
+                   (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                    mirror_address_delta) :                                                                 // unit0 cs1
+                   p_device_address_pa -
+                   (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                    mirror_address_delta);                                                                  // unit1 cs1
+#endif
+
     FSP_ERROR_RETURN(false == r_xspi_ospi_status_sub(p_instance_ctrl, p_cfg->write_status_bit), FSP_ERR_DEVICE_BUSY);
 
     for (uint32_t index = 0; index < p_cfg->erase_command_list_length; index++)
@@ -537,7 +747,7 @@ fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device
 
     spi_flash_direct_transfer_t direct_command = {0};
     direct_command.command        = erase_command;
-    direct_command.address        = chip_address;
+    direct_command.address        = (uint32_t) chip_address;
     direct_command.address_length = (true == send_address) ?
                                     (XSPI_OSPI_PRV_DIRECT_ADDR_AND_DATA_MASK &
                                      (p_instance_ctrl->p_cfg->address_bytes + 1U)) : 0U;
@@ -662,8 +872,35 @@ fsp_err_t R_XSPI_OSPI_Close (spi_flash_ctrl_t * p_ctrl)
     spi_flash_cfg_t          * p_cfg        = (spi_flash_cfg_t *) p_instance_ctrl->p_cfg;
     xspi_ospi_extended_cfg_t * p_cfg_extend = (xspi_ospi_extended_cfg_t *) p_cfg->p_extend;
 
-    /* Disable clock to the OSPI block */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_SYSTEM);
+
+#if BSP_FEATURE_BSP_SLAVE_STOP_SUPPORTED
+
+    /* Slave stop request */
+    if (0U == p_cfg_extend->unit)
+    {
+        R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI0);
+    }
+    else
+    {
+        R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI1);
+    }
+#endif
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
+
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
+
+    /* Enable reset */
+    if (0U == p_cfg_extend->unit)
+    {
+        R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI0);
+    }
+    else
+    {
+        R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI1);
+    }
+
+    /* Disable clock to the OSPI block */
     R_BSP_MODULE_STOP(FSP_IP_XSPI, p_cfg_extend->unit);
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 
@@ -844,7 +1081,7 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq (xspi_ospi_instance_ctrl_
             ((p_opi_commands->dual_read_command & XSPI_OSPI_PRV_CCCTL2_CARDCMD_VALUE_MASK) <<
                 XSPI_OSPI_PRV_CCCTL2_CARDCMD_OFFSET);
         p_instance_ctrl->p_reg->CSb[chip_select].CCCTL3 =
-            (uint32_t) p_cfg_extend->p_autocalibration_preamble_pattern_addr;
+            (uint32_t) (uintptr_t) p_cfg_extend->p_autocalibration_preamble_pattern_addr;
 
         if (XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order)
         {
@@ -947,11 +1184,21 @@ static void r_xspi_ospi_direct_transfer (xspi_ospi_instance_ctrl_t         * p_i
             (SPI_FLASH_PROTOCOL_8D_8D_8D == p_instance_ctrl->spi_protocol))
         {
             /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-            p_instance_ctrl->p_reg->BUF[0].CDD0 = __REV16(p_transfer->data);
+            p_instance_ctrl->p_reg->BUF[0].CDD0 = __REV16(p_transfer->data_u64 & UINT32_MAX);
+            if (p_transfer->data_length > sizeof(uint32_t))
+            {
+                p_instance_ctrl->p_reg->BUF[0].CDD1 =
+                    __REV16((uint32_t) (p_transfer->data_u64 >> XSPI_OSPI_PRV_UINT32_BITS) & UINT32_MAX);
+            }
         }
         else
         {
-            p_instance_ctrl->p_reg->BUF[0].CDD0 = p_transfer->data;
+            p_instance_ctrl->p_reg->BUF[0].CDD0 = (uint32_t) p_transfer->data_u64 & UINT32_MAX;
+            if (p_transfer->data_length > sizeof(uint32_t))
+            {
+                p_instance_ctrl->p_reg->BUF[0].CDD1 = (uint32_t) (p_transfer->data_u64 >> XSPI_OSPI_PRV_UINT32_BITS) &
+                                                      UINT32_MAX;
+            }
         }
     }
 
@@ -965,11 +1212,20 @@ static void r_xspi_ospi_direct_transfer (xspi_ospi_instance_ctrl_t         * p_i
             (SPI_FLASH_PROTOCOL_8D_8D_8D == p_instance_ctrl->spi_protocol))
         {
             /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-            p_transfer->data = __REV16(p_instance_ctrl->p_reg->BUF[0].CDD0);
+            p_transfer->data_u64 = __REV16(p_instance_ctrl->p_reg->BUF[0].CDD0);
+            if (p_transfer->data_length > sizeof(uint32_t))
+            {
+                p_transfer->data_u64 |= (uint64_t) (__REV16(p_instance_ctrl->p_reg->BUF[0].CDD1)) <<
+                                        XSPI_OSPI_PRV_UINT32_BITS;
+            }
         }
         else
         {
-            p_transfer->data = p_instance_ctrl->p_reg->BUF[0].CDD0;
+            p_transfer->data_u64 = p_instance_ctrl->p_reg->BUF[0].CDD0;
+            if (p_transfer->data_length > sizeof(uint32_t))
+            {
+                p_transfer->data_u64 |= (uint64_t) (p_instance_ctrl->p_reg->BUF[0].CDD1) << XSPI_OSPI_PRV_UINT32_BITS;
+            }
         }
     }
 

@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 #ifndef R_DSMIF_H
 #define R_DSMIF_H
@@ -73,6 +59,7 @@ typedef enum e_dsmif_clock_edge
 
 typedef enum e_dsmif_master_clock
 {
+#if 1U == BSP_FEATURE_DSMIF_MCLK_FREQ_TYPE
     DSMIF_MASTER_CLOCK_25MHZ_PCLKH200   = 3,   ///< Master clock 25MHz, PCLKH 200MHz
     DSMIF_MASTER_CLOCK_20MHZ_PCLKH200   = 4,   ///< Master clock 20MHz, PCLKH 200MHz
     DSMIF_MASTER_CLOCK_12_5MHZ_PCLKH200 = 7,   ///< Master clock 12.5MHz, PCLKH 200MHz
@@ -86,7 +73,30 @@ typedef enum e_dsmif_master_clock
     DSMIF_MASTER_CLOCK_9_375MHZ_PCLKH150 = 7,  ///< Master clock 9.375MHz, PCLKH 150MHz
     DSMIF_MASTER_CLOCK_6_25MHZ_PCLKH150  = 11, ///< Master clock 6.25MHz, PCLKH 150MHz
     DSMIF_MASTER_CLOCK_5MHZ_PCLKH150     = 14, ///< Master clock 5MHz, PCLKH 150MHz
+#elif 2U == BSP_FEATURE_DSMIF_MCLK_FREQ_TYPE
+    DSMIF_MASTER_CLOCK_25MHZ_CLK400   = 7,     ///< Master clock 25MHz, Core Clock 400MHz
+    DSMIF_MASTER_CLOCK_20MHZ_CLK400   = 9,     ///< Master clock 20MHz, Core Clock 400MHz
+    DSMIF_MASTER_CLOCK_12_5MHZ_CLK400 = 15,    ///< Master clock 12.5MHz, Core Clock 400MHz
+    DSMIF_MASTER_CLOCK_10MHZ_CLK400   = 19,    ///< Master clock 10MHz, Core Clock 400MHz
+    DSMIF_MASTER_CLOCK_6_25MHZ_CLK400 = 31,    ///< Master clock 6.25MHz, Core Clock 400MHz
+    DSMIF_MASTER_CLOCK_5MHZ_CLK400    = 39,    ///< Master clock 5MHz, Core Clock 400MHz
+
+    DSMIF_MASTER_CLOCK_25MHZ_CLK250   = 4,     ///< Master clock 25MHz, Core Clock 250MHz
+    DSMIF_MASTER_CLOCK_20_8MHZ_CLK250 = 5,     ///< Master clock 20.8MHz, Core Clock 250MHz
+    DSMIF_MASTER_CLOCK_12_5MHZ_CLK250 = 9,     ///< Master clock 12.5MHz, Core Clock 250MHz
+    DSMIF_MASTER_CLOCK_10_4MHZ_CLK250 = 11,    ///< Master clock 10.4MHz, Core Clock 250MHz
+    DSMIF_MASTER_CLOCK_6_25MHZ_CLK250 = 19,    ///< Master clock 6.25MHz, Core Clock 250MHz
+    DSMIF_MASTER_CLOCK_5MHZ_CLK250    = 24,    ///< Master clock 5MHz, Core Clock 250MHz
+#endif
 } dsmif_master_clock_t;
+
+#if 1U == BSP_FEATURE_DSMIF_CORE_CLOCK_SELECTABLE
+typedef enum e_dsmif_core_clock_select
+{
+    DSMIF_CORE_CLOCK_SELECT_250MHZ = 0, ///< Core Clock Selection 250MHz
+    DSMIF_CORE_CLOCK_SELECT_400MHZ = 1, ///< Core Clock Selection 400MHz
+} dsmif_core_clock_select_t;
+#endif
 
 /* 39.2.2.3 DSCMFCRCHn : Current Measurement Filter Control Register Channel n (n = 0 to 2) */
 /* 39.2.2.6 DSOCFCRCHn : Overcurrent Detect Filter Control Register Channel n (n = 0 to 2) */
@@ -160,12 +170,65 @@ typedef enum e_dsmif_channel_mask
     DSMIF_CHANNEL_MASK_3   = (1U << 3U), ///< Channel 3 mask
     DSMIF_CHANNEL_MASK_4   = (1U << 4U), ///< Channel 4 mask
     DSMIF_CHANNEL_MASK_5   = (1U << 5U), ///< Channel 5 mask
+#if 10U == BSP_FEATURE_DSMIF_UNIT
+    DSMIF_CHANNEL_MASK_6  = (1U << 6U),  ///< Channel 6 mask
+    DSMIF_CHANNEL_MASK_7  = (1U << 7U),  ///< Channel 7 mask
+    DSMIF_CHANNEL_MASK_8  = (1U << 8U),  ///< Channel 8 mask
+    DSMIF_CHANNEL_MASK_9  = (1U << 9U),  ///< Channel 9 mask
+    DSMIF_CHANNEL_MASK_10 = (1U << 10U), ///< Channel 10 mask
+    DSMIF_CHANNEL_MASK_11 = (1U << 11U), ///< Channel 11 mask
+    DSMIF_CHANNEL_MASK_12 = (1U << 12U), ///< Channel 12 mask
+    DSMIF_CHANNEL_MASK_13 = (1U << 13U), ///< Channel 13 mask
+    DSMIF_CHANNEL_MASK_14 = (1U << 14U), ///< Channel 14 mask
+    DSMIF_CHANNEL_MASK_15 = (1U << 15U), ///< Channel 15 mask
+    DSMIF_CHANNEL_MASK_16 = (1U << 16U), ///< Channel 16 mask
+    DSMIF_CHANNEL_MASK_17 = (1U << 17U), ///< Channel 17 mask
+    DSMIF_CHANNEL_MASK_21 = (1U << 21U), ///< Channel 21 mask
+    DSMIF_CHANNEL_MASK_22 = (1U << 22U), ///< Channel 22 mask
+    DSMIF_CHANNEL_MASK_23 = (1U << 23U), ///< Channel 23 mask
+    DSMIF_CHANNEL_MASK_24 = (1U << 24U), ///< Channel 24 mask
+    DSMIF_CHANNEL_MASK_25 = (1U << 25U), ///< Channel 25 mask
+#endif
 } dsmif_channel_mask_t;
+
+#if (1 == BSP_FEATURE_DSMIF_DATA_FORMAT_SEL)
+
+/** DSMIF Data Format Select */
+typedef enum e_dsmif_format
+{
+    DSMIF_FORMAT_LEFT  = 0,            ///< Left justified
+    DSMIF_FORMAT_RIGHT = 1             ///< Right justified
+} dsmif_format_t;
+#endif
+
+#if (4 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_NOTIFY)
+
+/** DSMIF overcurrent detection window notification 3 mode select register */
+typedef enum e_dsmif_owwm3_mode
+{
+    DSMIF_OWNM3_MODE_0             = 0x0, ///< Overcurrent detection window notification 0
+    DSMIF_OWNM3_MODE_1             = 0x1, ///< Overcurrent detection window notification 1
+    DSMIF_OWNM3_MODE_2             = 0x2, ///< Overcurrent detection window notification 2
+    DSMIF_OWNM3_MODE_0_OR_1        = 0x3, ///< Overcurrent detection window notification 0 OR 1
+    DSMIF_OWNM3_MODE_0_AND_1       = 0x4, ///< Overcurrent detection window notification 0 AND 1
+    DSMIF_OWNM3_MODE_0_OR_2        = 0x5, ///< Overcurrent detection window notification 0 OR 2
+    DSMIF_OWNM3_MODE_0_AND_2       = 0x6, ///< Overcurrent detection window notification 0 AND 2
+    DSMIF_OWNM3_MODE_1_OR_2        = 0x7, ///< Overcurrent detection window notification 1 OR 2
+    DSMIF_OWNM3_MODE_1_AND_2       = 0x8, ///< Overcurrent detection window notification 1 AND 2
+    DSMIF_OWNM3_MODE_0_OR_1_OR_2   = 0x9, ///< Overcurrent detection window notification 0 OR 1 OR 2
+    DSMIF_OWNM3_MODE_0_AND_1_AND_2 = 0xA, ///< Overcurrent detection window notification 0 AND 1 AND 2
+} dsmif_owwm3_mode_t;
+#endif
 
 typedef struct st_dsmif_channel_cfg
 {
-    bool                 ioel;         ///< Overcurrent lower limit detection interrupt enable
-    bool                 ioeh;         ///< Overcurrent upper limit exceeded output interrupt enable
+#if (3 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_ISR)
+    bool ioel[3];                      ///< Overcurrent lower limit detection interrupt enable
+    bool ioeh[3];                      ///< Overcurrent upper limit exceeded output interrupt enable
+#else
+    bool ioel;                         ///< Overcurrent lower limit detection interrupt enable
+    bool ioeh;                         ///< Overcurrent upper limit exceeded output interrupt enable
+#endif
     bool                 ise;          ///< Short circuit detection error interrupt enable bit
     bool                 iue;          ///< Current data register update interrupt enable
     dsmif_clock_ctrl_t   ckdir;        ///< A/D conversion clock master/slave switching
@@ -178,30 +241,50 @@ typedef struct st_dsmif_channel_cfg
     dsmif_filter_order_t ocsinc;       ///< Overcurrent detection filter order setting
     uint32_t             ocdec;        ///< Decimation ratio selection for overcurrent detection
     dsmif_data_shift_t   ocsh;         ///< Data shift setting for overcurrent detection
-    uint32_t             ocmptbl;      ///< Overcurrent detection lower limit
-    uint32_t             ocmptbh;      ///< Overcurrent detection upper limit
-    uint32_t             scntl;        ///< Short circuit detection low continuous detection count
-    uint32_t             scnth;        ///< Short circuit detection high continuous detection count
-    bool                 odel;         ///< Overcurrent lower limit detection enable bit
-    bool                 odeh;         ///< Overcurrent upper limit exceeded detection enable bit
+#if (3 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_CONTROL)
+    uint32_t ocmptbl[3];               ///< Overcurrent detection lower limit
+    uint32_t ocmptbh[3];               ///< Overcurrent detection upper limit
+#else
+    uint32_t ocmptbl;                  ///< Overcurrent detection lower limit
+    uint32_t ocmptbh;                  ///< Overcurrent detection upper limit
+#endif
+    uint32_t scntl;                    ///< Short circuit detection low continuous detection count
+    uint32_t scnth;                    ///< Short circuit detection high continuous detection count
+#if (4 == BSP_FEATURE_DSMIF_OVERCURRENT_DETECT_NOTIFY)
+    bool               odel[3];        ///< Overcurrent lower limit detection enable bit
+    bool               odeh[3];        ///< Overcurrent upper limit exceeded detection enable bit
+    bool               owne[4];        ///< Overcurrent detection window notification output enable
+    bool               owfe[4];        ///< Overcurrent detection window function enable
+    bool               ownm0_2[3];     ///< Channel n overcurrent detection window notification mode select
+    dsmif_owwm3_mode_t ownm3;          ///< Channel n overcurrent detection window notification 3 mode select
+#else
+    bool odel;                         ///< Overcurrent lower limit detection enable bit
+    bool odeh;                         ///< Overcurrent upper limit exceeded detection enable bit
+#endif
 } dsmif_channel_cfg_t;
 
 /** DSMIF configuration extension. This extension is required and must be provided in dsmif_cfg_t::p_extend. */
 typedef struct st_dsmif_extended_cfg
 {
-    bool isel;                                                           ///< Overcurrent sum error lower limit detection interrupt enable bit
-    bool iseh;                                                           ///< Overcurrent sum error upper limit detection interrupt enable bit
-    dsmif_sum_err_detect_channel_t sedm;                                 ///< Overcurrent sum error detect mode setting bit
-    uint32_t                     scmptbl;                                ///< DSSELTR : Overcurrent Sum Error Detect Low Threshold Register
-    uint32_t                     scmptbh;                                ///< DSSEHTR : Overcurrent Sum Error Detect High Threshold Register
-    bool                         seel;                                   ///< DSSECR : Overcurrent Sum Error lower limit detection enable
-    bool                         seeh;                                   ///< DSSECR : Overcurrent Sum Error upper limit detection enable
-    dsmif_capture_trigger_t      cap_trig_a;                             ///< DSCMCTCRCHn.CTSELA[2:0] : Current capture trigger A selection bit
-    dsmif_capture_trigger_t      cap_trig_b;                             ///< DSCMCTCRCHn.CTSELB[2:0] : Current capture trigger B selection bit
-    dsmif_counter_init_trigger_t cnt_init_trig;                          ///< DSCMCTCRCHn.DITSEL[2:0] : Current measurement filter initialization trigger division counter for decimation.
-    dsmif_clock_edge_t           edge;                                   ///< DSCMCTCRCHn.DEDGE[2:0]  : Current measurement filter initialization trigger for division counter for decimation edge.
-    dsmif_channel_cfg_t        * p_channel_cfgs[DSMIF_MAX_NUM_CHANNELS]; ///< Configuration for each channel, set to NULL if unused
-    dsmif_channel_mask_t         channel_mask;                           ///< Channel bitmask
+    bool isel;                                                    ///< Overcurrent sum error lower limit detection interrupt enable bit
+    bool iseh;                                                    ///< Overcurrent sum error upper limit detection interrupt enable bit
+    dsmif_sum_err_detect_channel_t sedm;                          ///< Overcurrent sum error detect mode setting bit
+    uint32_t                     scmptbl;                         ///< DSSELTR : Overcurrent Sum Error Detect Low Threshold Register
+    uint32_t                     scmptbh;                         ///< DSSEHTR : Overcurrent Sum Error Detect High Threshold Register
+    bool                         seel;                            ///< DSSECR : Overcurrent Sum Error lower limit detection enable
+    bool                         seeh;                            ///< DSSECR : Overcurrent Sum Error upper limit detection enable
+    dsmif_capture_trigger_t      cap_trig_a;                      ///< DSCMCTCRCHn.CTSELA[2:0] : Current capture trigger A selection bit
+    dsmif_capture_trigger_t      cap_trig_b;                      ///< DSCMCTCRCHn.CTSELB[2:0] : Current capture trigger B selection bit
+    dsmif_counter_init_trigger_t cnt_init_trig;                   ///< DSCMCTCRCHn.DITSEL[2:0] : Current measurement filter initialization trigger division counter for decimation.
+    dsmif_clock_edge_t           edge;                            ///< DSCMCTCRCHn.DEDGE[2:0]  : Current measurement filter initialization trigger for division counter for decimation edge.
+#if (1 == BSP_FEATURE_DSMIF_DATA_FORMAT_SEL)
+    dsmif_format_t dfs;                                           ///< Data Format Select
+#endif
+#if 1U == BSP_FEATURE_DSMIF_CORE_CLOCK_SELECTABLE
+    dsmif_core_clock_select_t clksel;                             ///< Core Clock Selection
+#endif
+    dsmif_channel_cfg_t * p_channel_cfgs[DSMIF_MAX_NUM_CHANNELS]; ///< Configuration for each channel, set to NULL if unused
+    dsmif_channel_mask_t  channel_mask;                           ///< Channel bitmask
 } dsmif_extended_cfg_t;
 
 /** DSMIF instance control block. DO NOT INITIALIZE. */

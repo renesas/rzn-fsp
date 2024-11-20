@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -252,6 +238,9 @@
 /* ASI_MEM_ADDR Register Bit Definitions */
 #define ETHSW_MEM_WEN_ENABLE                  (0x80U)
 #define ETHSW_MEM_REQ_ALL_ACCESS              (0x700U)
+
+/* Nanosecond count value for 1 second */
+#define NANO_COUNT_FOR_1SEC                   (1000000000)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -4353,7 +4342,11 @@ fsp_err_t R_ETHSW_PulseGeneratorInit (ether_switch_ctrl_t * const p_ctrl, uint32
 
     p_reg_ethss->PTPMCTRL_b.PTP_PLS_RSTn = 0;
 
+#if defined(BSP_MCU_GROUP_RZN2H)
+    p_reg_ethss->PTPMCTRL_b.PTP_MODE0 = time_num & (R_ETHSS_PTPMCTRL_PTP_MODE0_Msk >> R_ETHSS_PTPMCTRL_PTP_MODE0_Pos);
+#else
     p_reg_ethss->PTPMCTRL_b.PTP_MODE = time_num & (R_ETHSS_PTPMCTRL_PTP_MODE_Msk >> R_ETHSS_PTPMCTRL_PTP_MODE_Pos);
+#endif
 
     p_reg_ethss->PTPMCTRL_b.PTP_PLS_RSTn = 1;
 
@@ -5494,6 +5487,7 @@ fsp_err_t R_ETHSW_TimeValueGet (ether_switch_ctrl_t * const p_ctrl, ethsw_timest
     volatile uint32_t * p_atime;       /* nanoseconds time value */
     volatile uint32_t * p_atime_sec;   /* seconds time value */
     uint64_t            timeout;       /* timeout */
+    int32_t             sign_time_nano;
 
     ethsw_instance_ctrl_t * p_instance_ctrl = (ethsw_instance_ctrl_t *) p_ctrl;
     R_ETHSW_Type volatile * p_switch_reg;
@@ -5530,13 +5524,120 @@ fsp_err_t R_ETHSW_TimeValueGet (ether_switch_ctrl_t * const p_ctrl, ethsw_timest
         timeout--;
     }
 
-    p_timestamp->time_sec  = *p_atime_sec;
-    p_timestamp->time_nsec = *p_atime;
+    p_timestamp->time_sec = *p_atime_sec;
+    sign_time_nano        = (int32_t) *p_atime;
 
+    if (sign_time_nano < 0)
+    {
+        p_timestamp->time_sec -= 1;
+        sign_time_nano        += NANO_COUNT_FOR_1SEC;
+    }
+    else if (sign_time_nano >= NANO_COUNT_FOR_1SEC)
+    {
+        p_timestamp->time_sec += 1;
+        sign_time_nano        -= NANO_COUNT_FOR_1SEC;
+    }
+    else
+    {
+        ;
+    }
+
+    p_timestamp->time_nsec    = (uint32_t) sign_time_nano;
     p_timestamp->timestamp_id = 0;
 
     return FSP_SUCCESS;
 }                                      /* End of R_ETHSW_TimeValueGet() */
+
+/*******************************************************************************************************************//**
+ * Gets the current time value to all timer (timer number 0 and 1).
+ *
+ * @retval  FSP_SUCCESS                 Command successfully.
+ * @retval  FSP_ERR_ASSERTION           Pointer to ETHER control block is NULL.
+ * @retval  FSP_ERR_NOT_OPEN            The control block has not been opened.
+ * @retval  FSP_ERR_INVALID_POINTER     Pointer to arguments are NULL.
+ * @retval  FSP_ERR_TIMEOUT             Timeout error
+ **********************************************************************************************************************/
+fsp_err_t R_ETHSW_TimeValueGetAll (ether_switch_ctrl_t * const p_ctrl,
+                                   ethsw_timestamp_t         * p_timer0,
+                                   ethsw_timestamp_t         * p_timer1)
+{
+    uint64_t timeout;                  /* timeout */
+    uint8_t  corr_inc0;
+    uint8_t  corr_inc1;
+    uint8_t  clk_period0;
+    uint8_t  clk_period1;
+    uint8_t  set_clk_period0 = 0;
+    uint8_t  set_clk_period1 = 0;
+
+    R_ETHSW_Type volatile * p_switch_reg;
+    ethsw_instance_ctrl_t * p_instance_ctrl = (ethsw_instance_ctrl_t *) p_ctrl;
+
+#if (ETHSW_CFG_PARAM_CHECKING_ENABLE)
+    FSP_ASSERT(p_instance_ctrl);
+    ETHSW_ERROR_RETURN(ETHSW_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
+
+    ETHSW_ERROR_RETURN((NULL != p_timer0), FSP_ERR_INVALID_POINTER);
+    ETHSW_ERROR_RETURN((NULL != p_timer1), FSP_ERR_INVALID_POINTER);
+#endif
+
+    p_switch_reg = p_instance_ctrl->p_reg_switch;
+
+    corr_inc0   = p_switch_reg->ATIME_INC0_b.CORR_INC;
+    clk_period0 = p_switch_reg->ATIME_INC0_b.CLK_PERIOD;
+
+    if (clk_period0 != corr_inc0)
+    {
+        p_switch_reg->ATIME_INC0_b.CORR_INC = clk_period0 &
+                                              (R_ETHSW_ATIME_INC0_CORR_INC_Msk >> R_ETHSW_ATIME_INC0_CORR_INC_Pos);
+        set_clk_period0 = 1;
+    }
+
+    corr_inc1   = p_switch_reg->ATIME_INC1_b.CORR_INC;
+    clk_period1 = p_switch_reg->ATIME_INC1_b.CLK_PERIOD;
+
+    if (clk_period1 != corr_inc1)
+    {
+        p_switch_reg->ATIME_INC1_b.CORR_INC = clk_period1 &
+                                              (R_ETHSW_ATIME_INC0_CORR_INC_Msk >> R_ETHSW_ATIME_INC0_CORR_INC_Pos);
+        set_clk_period1 = 1;
+    }
+
+    p_switch_reg->ATIME_CTRL0_b.CAPTURE_ALL = 1;
+
+    timeout = ETHSW_TIMEOUT_COUNT;
+
+    while (0 != p_switch_reg->ATIME_CTRL0_b.CAPTURE_ALL)
+    {
+        ETHSW_ERROR_RETURN((0 != timeout), FSP_ERR_TIMEOUT);
+        timeout--;
+    }
+
+    p_timer0->time_sec  = p_switch_reg->ATIME_SEC0;
+    p_timer0->time_nsec = p_switch_reg->ATIME0;
+
+    p_timer1->time_sec  = p_switch_reg->ATIME_SEC1;
+    p_timer1->time_nsec = p_switch_reg->ATIME1;
+
+    p_timer0->timestamp_id = 0;
+    p_timer1->timestamp_id = 0;
+
+    p_timer0->time_num = 0;
+    p_timer1->time_num = 1;
+
+    if (set_clk_period0)
+    {
+        p_switch_reg->ATIME_INC0_b.CORR_INC = corr_inc0 &
+                                              (R_ETHSW_ATIME_INC0_CORR_INC_Msk >> R_ETHSW_ATIME_INC0_CORR_INC_Pos);
+    }
+
+    if (set_clk_period1)
+    {
+        p_switch_reg->ATIME_INC1_b.CORR_INC = corr_inc1 &
+                                              (R_ETHSW_ATIME_INC1_CORR_INC_Msk >> R_ETHSW_ATIME_INC1_CORR_INC_Pos);
+    }
+
+    return FSP_SUCCESS;
+}                                      /* End of function R_ETHSW_TimeValueGetAll() */
 
 /*******************************************************************************************************************//**
  * Sets the peer delay value for the specified timer number of the specified port number.
@@ -5644,7 +5745,7 @@ fsp_err_t R_ETHSW_TimeRateSet (ether_switch_ctrl_t * const p_ctrl, ethsw_time_ra
     uint32_t clock_period;
     uint32_t atime_increment;
     uint32_t atime_correct;
-    uint16_t abs_ppb;
+    uint32_t abs_ppb;
 
 #define TS_CLK              125 * 1000 * 1000 /* 125MHz */
 #define CLOCK_CORRECTION    1                 /* Number of clocks increasing or decreasing */
@@ -5655,6 +5756,8 @@ fsp_err_t R_ETHSW_TimeRateSet (ether_switch_ctrl_t * const p_ctrl, ethsw_time_ra
 
     ETHSW_ERROR_RETURN((NULL != p_rate), FSP_ERR_INVALID_POINTER);
     ETHSW_ERROR_RETURN(ETHSW_TIME_COUNT > p_rate->time_num, FSP_ERR_INVALID_ARGUMENT);
+    ETHSW_ERROR_RETURN((+TS_CLK / 10) >= p_rate->rate, FSP_ERR_INVALID_ARGUMENT);
+    ETHSW_ERROR_RETURN((-TS_CLK / 10) <= p_rate->rate, FSP_ERR_INVALID_ARGUMENT);
 #endif
 
     p_reg_switch = p_instance_ctrl->p_reg_switch;
@@ -5679,16 +5782,16 @@ fsp_err_t R_ETHSW_TimeRateSet (ether_switch_ctrl_t * const p_ctrl, ethsw_time_ra
         {
             atime_increment = clock_period - CLOCK_CORRECTION;
 
-            abs_ppb = (uint16_t) (p_rate->rate * -1);
+            abs_ppb = (uint32_t) (p_rate->rate * -1);
         }
         else
         {
             atime_increment = clock_period + CLOCK_CORRECTION;
 
-            abs_ppb = (uint16_t) p_rate->rate;
+            abs_ppb = (uint32_t) p_rate->rate;
         }
 
-        atime_correct = (uint32_t) ((TS_CLK / CLOCK_CORRECTION) / abs_ppb) - 1;
+        atime_correct = (uint32_t) ((TS_CLK * CLOCK_CORRECTION) / abs_ppb) - 1;
     }
 
     if (0 == p_rate->time_num)         // timer 0
@@ -6118,6 +6221,7 @@ static void ethsw_isr_tsm (ethsw_instance_ctrl_t * p_instance_ctrl)
     uint32_t          irq_stat_ack;
     R_ETHSW_Type    * p_switch_reg;
     uint32_t          ts_fifo_read_ctrl;
+    int32_t           sign_time_nano;
 
     p_switch_reg = p_instance_ctrl->p_reg_switch;
 
@@ -6151,7 +6255,22 @@ static void ethsw_isr_tsm (ethsw_instance_ctrl_t * p_instance_ctrl)
                 timestamp.timestamp_id = ((ts_fifo_read_ctrl & R_ETHSW_TS_FIFO_READ_CTRL_TS_ID_Msk) >>
                                           R_ETHSW_TS_FIFO_READ_CTRL_TS_ID_Pos);
 
-                timestamp.time_nsec = p_switch_reg->TS_FIFO_READ_TIMESTAMP;
+                sign_time_nano = (int32_t) p_switch_reg->TS_FIFO_READ_TIMESTAMP;
+
+                if (sign_time_nano < 0)
+                {
+                    sign_time_nano += NANO_COUNT_FOR_1SEC;
+                }
+                else if (sign_time_nano >= NANO_COUNT_FOR_1SEC)
+                {
+                    sign_time_nano -= NANO_COUNT_FOR_1SEC;
+                }
+                else
+                {
+                    ;
+                }
+
+                timestamp.time_nsec = (uint32_t) sign_time_nano;
 
                 if (gp_ethsw_time_callback)
                 {

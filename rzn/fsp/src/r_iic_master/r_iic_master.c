@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -81,11 +67,13 @@
 #define IIC_MASTER_ICCR2_SP_BIT_MASK                (0x08)
 #define IIC_MASTER_ICCR2_RS_BIT_MASK                (0x04)
 #define IIC_MASTER_ICCR2_ST_BIT_MASK                (0x02)
-#define IIC_MASTER_SCKCR2_CPU0CLK_MASK              (0x00000001U)
+#define IIC_MASTER_SCKCR2_CPU0CLK_MASK              (0x00000003U)
+#define IIC_MASTER_SCKCR2_CPU1CLK_MASK              (0x0000000CU)
+#define IIC_MASTER_SCKCR2_CPU1CLK_OFFSET            (2U)
 
-/* Worst case ratio of (CPUnCLK/PCLKL) = 8 approximately.
+/* Worst case ratio of (CPUnCLK/PCLKL) = 16 approximately.
  */
-#define IIC_MASTER_PERIPHERAL_REG_MAX_WAIT          (0x08U)
+#define IIC_MASTER_PERIPHERAL_REG_MAX_WAIT          (0x10U)
 
 #define IIC_MASTER_HARDWARE_REGISTER_WAIT(reg, required_value, timeout) \
     while ((timeout))                                                   \
@@ -237,7 +225,7 @@ fsp_err_t R_IIC_MASTER_Open (i2c_master_ctrl_t * const p_ctrl, i2c_master_cfg_t 
     {
         /* Non-Safety Peripheral */
         p_instance_ctrl->p_reg =
-            (R_IIC0_Type *) ((uint32_t) R_IIC0 + (p_cfg->channel * ((uint32_t) R_IIC1 - (uint32_t) R_IIC0)));
+            (R_IIC0_Type *) ((uintptr_t) R_IIC0 + (p_cfg->channel * ((uintptr_t) R_IIC1 - (uintptr_t) R_IIC0)));
     }
     else
     {
@@ -794,19 +782,73 @@ static void iic_master_open_hw_master (iic_master_instance_ctrl_t * const p_inst
  **********************************************************************************************************************/
 static fsp_err_t iic_master_run_hw_master (iic_master_instance_ctrl_t * const p_instance_ctrl)
 {
+    uint32_t timeout_count = 0;
+    uint32_t cpufsel       = 0;
+
+#if (2U == BSP_FEATURE_CGC_SCKCR_TYPE)
+ #if defined(BSP_CFG_CORE_CA55)
+
+    /* IICn operates using PCLKL. The ratio CPUnCLK (System Clock)/PCLKL gives the CPU cycles for 1 ICBRL count.
+     * (CPUnCLK/PCLKL)*ICBRL gives the CPU cycles for entire ICBRL count.
+     * Since each time we loop the timeout count will be decremented by 1 this would require at least 4 CPU clocks,
+     * making the final timeout count as:
+     * Timeout = ((CPUnCLK/PCLKL)*ICBRL)/4.
+     * CPUnCLK * ICBRL * 1/PCLKL * 1/4
+     *
+     * When CA55 is operating, cpufsel becomes 0U or 1U.
+     * When cpufsel is 0U, CA55CLK/PCLKL is 9.6. Similarly, 1U is 19.2.
+     * Compute the bus free time using the following equation.
+     * Note that CPU0CLK/PCLKL is rounded up so that bus free time obtained by the computation is not smaller than the original bus free time.
+     */
+  #if (0 == BSP_CFG_CORE_CA55)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CA55CORE0_Msk) >> R_SYSC_S_SCKCR2_CA55CORE0_Pos);
+  #elif (1 == BSP_CFG_CORE_CA55)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CA55CORE1_Msk) >> R_SYSC_S_SCKCR2_CA55CORE1_Pos);
+  #elif (2 == BSP_CFG_CORE_CA55)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CA55CORE2_Msk) >> R_SYSC_S_SCKCR2_CA55CORE2_Pos);
+  #elif (3 == BSP_CFG_CORE_CA55)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CA55CORE3_Msk) >> R_SYSC_S_SCKCR2_CA55CORE3_Pos);
+  #endif
+
+    /*When CR52 is operating, cpufsel becomes 0U or 1U.
+     * When cpufsel is 0U, CR52CLK/PCLKL is 8. Similarly, 1U is 16.
+     * Compute the bus free time using the following equation.
+     * Note that CPU0CLK/PCLKL is rounded up so that bus free time obtained by the computation is not smaller than the original bus free time.
+     */
+ #elif defined(BSP_CFG_CORE_CR52)
+  #if (0 == BSP_CFG_CORE_CR52)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CR52CPU0_Msk) >> R_SYSC_S_SCKCR2_CR52CPU0_Pos);
+  #elif (1 == BSP_CFG_CORE_CR52)
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & R_SYSC_S_SCKCR2_CR52CPU1_Msk) >> R_SYSC_S_SCKCR2_CR52CPU1_Pos);
+  #endif
+ #endif
+    timeout_count = ((10U << cpufsel) * p_instance_ctrl->p_reg->ICBRL) >> 2U;
+#elif (1U == BSP_FEATURE_CGC_SCKCR_TYPE)
+
     /* IICn operates using PCLKL. The ratio CPUnCLK (System Clock)/PCLKL gives the CPU cycles for 1 ICBRL count.
      * (CPUnCLK/PCLKL)*ICBRL gives the CPU cycles for entire ICBRL count.
      * Since each time we loop the timeout count will be decremented by 1 this would require at least 4 CPU clocks,
      * making the final timeout count as:
      * Timeout = ((CPUnCLK/PCLKL)*ICBRL)/4.
      */
-    uint32_t cpu0fsel = (uint32_t) (R_SYSC_S->SCKCR2 & IIC_MASTER_SCKCR2_CPU0CLK_MASK);
+ #if (0 == BSP_CFG_CPU)
+    cpufsel = (uint32_t) (R_SYSC_S->SCKCR2 & IIC_MASTER_SCKCR2_CPU0CLK_MASK);
+ #else
+    cpufsel =
+        (uint32_t) ((R_SYSC_S->SCKCR2 & IIC_MASTER_SCKCR2_CPU1CLK_MASK) >> IIC_MASTER_SCKCR2_CPU1CLK_OFFSET);
+ #endif
 
-    /* With this masking, cpu0fsel becomes 0U or 1U.
-     * When cpu0fsel is 0U, CPU0CLK/PCLKL is 4U. Similarly, 1U is 8U.
+    /* With this masking, cpu0fsel becomes 0U, 1U, 2U or 3U.
+     * When cpu0fsel is 0U, CPU0CLK/PCLKL is 16U. Similarly, 1U is 8U, 2U is 4U, and 3U is 2U.
      */
-
-    uint32_t timeout_count = ((4U << cpu0fsel) * p_instance_ctrl->p_reg->ICBRL) >> 2U;
+    timeout_count = ((1U << (4U - cpufsel)) * p_instance_ctrl->p_reg->ICBRL) >> 2U;
+#endif
 
     /* Bus free time is counted by the Internal reference clock, so consider the division ratio. */
     timeout_count <<= p_instance_ctrl->p_reg->ICMR1_b.CKS;
@@ -1543,9 +1585,15 @@ void iic_master_rxi_isr (void)
 {
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_ENABLE;
 
+    /* Save context if RTOS is used */
+    FSP_CONTEXT_SAVE;
+
     IRQn_Type irq = R_FSP_CurrentIrqGet();
     iic_master_instance_ctrl_t * p_instance_ctrl = (iic_master_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
     iic_master_rxi_master(p_instance_ctrl);
+
+    /* Restore context if RTOS is used */
+    FSP_CONTEXT_RESTORE;
 
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }
@@ -1577,9 +1625,15 @@ void iic_master_txi_isr (void)
 {
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_ENABLE;
 
+    /* Save context if RTOS is used */
+    FSP_CONTEXT_SAVE;
+
     IRQn_Type irq = R_FSP_CurrentIrqGet();
     iic_master_instance_ctrl_t * p_instance_ctrl = (iic_master_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
     iic_master_txi_master(p_instance_ctrl);
+
+    /* Restore context if RTOS is used */
+    FSP_CONTEXT_RESTORE;
 
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }
@@ -1611,9 +1665,15 @@ void iic_master_tei_isr (void)
 {
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_ENABLE;
 
+    /* Save context if RTOS is used */
+    FSP_CONTEXT_SAVE;
+
     IRQn_Type irq = R_FSP_CurrentIrqGet();
     iic_master_instance_ctrl_t * p_instance_ctrl = (iic_master_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
     iic_master_tei_master(p_instance_ctrl);
+
+    /* Restore context if RTOS is used */
+    FSP_CONTEXT_RESTORE;
 
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }
@@ -1628,9 +1688,15 @@ void iic_master_eri_isr (void)
 {
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_ENABLE;
 
+    /* Save context if RTOS is used */
+    FSP_CONTEXT_SAVE;
+
     IRQn_Type irq = R_FSP_CurrentIrqGet();
     iic_master_instance_ctrl_t * p_instance_ctrl = (iic_master_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
     iic_master_err_master(p_instance_ctrl);
+
+    /* Restore context if RTOS is used */
+    FSP_CONTEXT_RESTORE;
 
     IIC_MASTER_CFG_MULTIPLEX_INTERRUPT_DISABLE;
 }

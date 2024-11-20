@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************************************************//**
  * @addtogroup DMAC
@@ -79,6 +65,30 @@ typedef enum e_dmac_link_interrupt_mask
 } dmac_link_interrupt_mask_t;
 
 /** Descriptor structure used in DMAC link mode, and variables of dmac_link_cfg_t must be allocated in the memory area. */
+#if defined(BSP_CFG_CORE_CA55)
+typedef struct st_dmac_link_cfg
+{
+    union
+    {
+        uint32_t header_u32;                                   ///< Descriptor header
+        struct
+        {
+            dmac_link_valid_t          link_valid         : 1; ///< The descriptor is valid or not.
+            dmac_link_end_t            link_end           : 1; ///< The descriptor is end or not.
+            dmac_link_write_back_t     write_back_disable : 1; ///< Write back enable or not.
+            dmac_link_interrupt_mask_t interrupt_mask     : 1; ///< Interrupt mask is enable or not.
+            uint32_t                                      : 28;
+        } header;
+    };
+    volatile uint32_t src_addr;                                ///< Source address.
+    volatile uint32_t dest_addr;                               ///< Destination address.
+    volatile uint32_t transaction_byte;                        ///< Transaction byte.
+    volatile uint32_t channel_cfg;                             ///< Channel configuration (Set value for CHCFG_n register).
+    volatile uint32_t channel_interval;                        ///< Channel interval (Set value for CHITVL register).
+    volatile uint32_t channel_extension_cfg;                   ///< Channel extension configuration (Set value for CHEXT_n register).
+    volatile uint32_t next_link_addr;                          ///< Next link address.
+} dmac_link_cfg_t;
+#else
 typedef struct st_dmac_link_cfg
 {
     union
@@ -101,6 +111,7 @@ typedef struct st_dmac_link_cfg
     volatile uint32_t     channel_extension_cfg;               ///< Channel extension configuration (Set value for CHEXT_n register).
     void * volatile       p_next_link_addr;                    ///< Next link address.
 } dmac_link_cfg_t;
+#endif
 
 /** Select the Next register set to be executed next. */
 typedef enum e_dmac_register_select_reverse

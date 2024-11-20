@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * File Name    : r_usb_hOhciMemory.c
@@ -64,7 +50,7 @@ BSP_ALIGN_VARIABLE(16) st_usb_ohci_hcd_device_data_t gs_usb_hstd_ohci_device_dat
 USB_BUFFER_PLACE_IN_SECTION;
 BSP_ALIGN_VARIABLE(16) st_usb_ohci_hcd_endpoint_t gs_usb_hstd_ohci_endpoint_memory[USB_OHCI_NUM_ENDPOINT]
 USB_BUFFER_PLACE_IN_SECTION;
-BSP_ALIGN_VARIABLE(16) st_usb_ohci_hcd_endpoint_p_t gs_usb_hstd_ohci_enable_endpoint[USB_OHCI_MAXDEVICE][
+BSP_ALIGN_VARIABLE(16) st_usb_ohci_hcd_endpoint_p_t gs_usb_hstd_ohci_enable_endpoint[USB_OHCI_MAXDEVICE + 1][
     USB_OHCI_MAXENDPOINT][2] USB_BUFFER_PLACE_IN_SECTION;
 BSP_ALIGN_VARIABLE(16) st_usb_ohci_iso_info_t gs_usb_hstd_ohci_iso_endpoint[USB_OHCI_ISO_MAXDEVICE]
 USB_BUFFER_PLACE_IN_SECTION;
@@ -359,12 +345,10 @@ st_usb_ohci_iso_info_p_t usb_hstd_ohci_alloc_endpoint_iso (void)
             memset(iso_info, 0, sizeof(st_usb_ohci_iso_info_t));
             for (i = 0; i < USB_OHCI_ISO_MAX_FRAME; i++)
             {
- #if 0
-                iso_info->transfer_info[i].buffer = (uint8_t *) usb_hstd_ohci_physical_address_of(
+ #if 1 == BSP_LP64_SUPPORT
+                iso_info->transfer_info[i].buffer = (uint32_t) usb_hstd_ohci_physical_address_of(
                     &gs_usb_hstd_ohci_iso_buffer[n][i][0]);
  #else
-
-// iso_info->transfer_info[i].buffer = (uint8_t *) &gs_usb_hstd_ohci_iso_buffer[n][i][0];
                 iso_info->transfer_info[i].buffer = &gs_usb_hstd_ohci_iso_buffer[n][i][0];
  #endif
             }
@@ -415,15 +399,34 @@ void usb_hstd_ohci_free_transfer_descriptor (st_usb_ohci_hcd_transfer_descriptor
     }
 
     usb_hstd_hci_lock_resouce();
- #if 0
-    tmp_usb_drequest    = (st_usb_ohci_request_p_t) r_usb_pa_to_va((uint32_t) td->usb_drequest);
-    tmp_hcd_list_f_link = (st_usb_ohci_list_entry_p_t) r_usb_pa_to_va((uint32_t) tmp_usb_drequest->hcd_list.f_link);
-    tmp_hcd_list_b_link = (st_usb_ohci_list_entry_p_t) r_usb_pa_to_va((uint32_t) tmp_usb_drequest->hcd_list.b_link);
+ #if 1 == BSP_LP64_SUPPORT
+    tmp_usb_drequest = (st_usb_ohci_request_p_t) (uintptr_t) (r_usb_pa_to_va((uint64_t) td->usb_drequest));
+    if (tmp_usb_drequest != NULL)
+    {
+        tmp_hcd_list_f_link =
+            (st_usb_ohci_list_entry_p_t) (uintptr_t) (r_usb_pa_to_va((uint64_t) tmp_usb_drequest->hcd_list.f_link));
+        tmp_hcd_list_b_link =
+            (st_usb_ohci_list_entry_p_t) (uintptr_t) (r_usb_pa_to_va((uint64_t) tmp_usb_drequest->hcd_list.b_link));
+
+        if (tmp_usb_drequest->hcd_list.f_link == (uint32_t) (uintptr_t) &td->request_list)
+        {
+            /* Removing TD is located in head of the HcdList */
+            tmp_hcd_list_f_link = (st_usb_ohci_list_entry_p_t) (uintptr_t) tmp_hcd_list_f_link->f_link;
+        }
+        else if (tmp_usb_drequest->hcd_list.b_link == (uint32_t) (uintptr_t) &td->request_list)
+        {
+            /* Removing TD is located in tail of the HcdList */
+            tmp_hcd_list_b_link = (st_usb_ohci_list_entry_p_t) (uintptr_t) tmp_hcd_list_b_link->b_link;
+        }
+        else
+        {
+        }
+    }
+
  #else
     tmp_usb_drequest    = (st_usb_ohci_request_p_t) td->usb_drequest;
     tmp_hcd_list_f_link = (st_usb_ohci_list_entry_p_t) tmp_usb_drequest->hcd_list.f_link;
     tmp_hcd_list_b_link = (st_usb_ohci_list_entry_p_t) tmp_usb_drequest->hcd_list.b_link;
- #endif
 
     if (tmp_usb_drequest->hcd_list.f_link == &td->request_list)
     {
@@ -438,16 +441,16 @@ void usb_hstd_ohci_free_transfer_descriptor (st_usb_ohci_hcd_transfer_descriptor
     else
     {
     }
+ #endif
 
     /* clear */
 
-    /* td = r_usb_pa_to_va((uint32_t)td); */
- #if 0
-    td = (st_usb_ohci_hcd_transfer_descriptor_p_t) r_usb_pa_to_va((uint32_t) td);
+ #if 1 == BSP_LP64_SUPPORT
+    td = (st_usb_ohci_hcd_transfer_descriptor_p_t) (r_usb_pa_to_va((uint64_t) td));
  #endif
 
     /* memset(td, 0, sizeof(st_usb_ohci_hcd_transfer_descriptor_t)); */
-    memset(td, (int) NULL, sizeof(st_usb_ohci_hcd_transfer_descriptor_t));
+    memset(td, USB_NULL, sizeof(st_usb_ohci_hcd_transfer_descriptor_t));
 
     gs_usb_hstd_ohci_remain_td++;
 
@@ -466,11 +469,23 @@ void usb_hstd_ohci_free_transfer_descriptor (st_usb_ohci_hcd_transfer_descriptor
  ***********************************************************************************************************************/
 void usb_hstd_ohci_free_endpoint (st_usb_ohci_hcd_endpoint_p_t endpoint)
 {
+ #if 1 == BSP_LP64_SUPPORT
+    st_usb_ohci_iso_info_p_t temp;
+ #endif                                /* #if 1 == BSP_LP64_SUPPORT */
  #if 1
+  #if 1 == BSP_LP64_SUPPORT
+    if ((NULL != endpoint) && (USB_NULL != endpoint->hcd_head_p) && (endpoint->hcd_tail_p == endpoint->hcd_head_p))
+  #else
     if ((NULL != endpoint) && (NULL != endpoint->hcd_head_p) && (endpoint->hcd_tail_p == endpoint->hcd_head_p))
+  #endif
     {
         /* Remove NullTD (if remained) */
+  #if 1 == BSP_LP64_SUPPORT
+        usb_hstd_ohci_free_transfer_descriptor(
+            (st_usb_ohci_hcd_transfer_descriptor_p_t) (uintptr_t) endpoint->hcd_head_p);
+  #else
         usb_hstd_ohci_free_transfer_descriptor(endpoint->hcd_head_p);
+  #endif
     }
 
  #else
@@ -503,16 +518,24 @@ void usb_hstd_ohci_free_endpoint (st_usb_ohci_hcd_endpoint_p_t endpoint)
  #endif
 
     usb_hstd_hci_lock_resouce();
-
+ #if 1 == BSP_LP64_SUPPORT
+    if ((NULL != endpoint) && (USB_NULL != endpoint->iso_info))
+ #else
     if ((NULL != endpoint) && (NULL != endpoint->iso_info))
+ #endif
     {
+ #if 1 == BSP_LP64_SUPPORT
+        temp             = (st_usb_ohci_iso_info_p_t) (uintptr_t) endpoint->iso_info;
+        temp->using_flag = FALSE;
+ #else
         endpoint->iso_info->using_flag = FALSE;
+ #endif
     }
 
     if ((NULL != endpoint) && (TRUE == endpoint->using_flag))
     {
         /* memset(endpoint, 0, sizeof(st_usb_ohci_hcd_endpoint_t)); */
-        memset(endpoint, (int) NULL, sizeof(st_usb_ohci_hcd_endpoint_t));
+        memset(endpoint, (int) (uintptr_t) NULL, sizeof(st_usb_ohci_hcd_endpoint_t));
 
         gs_usb_hstd_ohci_remain_ep++;
     }
@@ -529,9 +552,8 @@ void usb_hstd_ohci_free_endpoint (st_usb_ohci_hcd_endpoint_p_t endpoint)
  ***********************************************************************************************************************/
 void usb_hstd_ohci_free_endpoint_descriptor (st_usb_ohci_hcd_endpoint_descriptor_p_t ed)
 {
-    /* usb_hstd_ohci_free_endpoint(ed->endpoint); */
- #if 0
-    usb_hstd_ohci_free_endpoint((st_usb_ohci_hcd_endpoint_p_t) r_usb_pa_to_va(ed->endpoint));
+ #if 1 == BSP_LP64_SUPPORT
+    usb_hstd_ohci_free_endpoint((st_usb_ohci_hcd_endpoint_p_t) (r_usb_pa_to_va((uint64_t) ed->endpoint)));
  #else
     usb_hstd_ohci_free_endpoint(ed->endpoint);
  #endif
@@ -539,7 +561,7 @@ void usb_hstd_ohci_free_endpoint_descriptor (st_usb_ohci_hcd_endpoint_descriptor
     usb_hstd_hci_lock_resouce();
 
     /* memset(ed, 0 , sizeof(st_usb_ohci_hcd_endpoint_descriptor_t)); */
-    memset(ed, (int) NULL, sizeof(st_usb_ohci_hcd_endpoint_descriptor_t));
+    memset(ed, (int) (uintptr_t) NULL, sizeof(st_usb_ohci_hcd_endpoint_descriptor_t));
 
     gs_usb_hstd_ohci_remain_ed++;
     usb_hstd_hci_unlock_resouce();
@@ -608,7 +630,7 @@ uint32_t usb_hstd_ohci_scan_containing_record (st_usb_ohci_list_entry_p_t list, 
             {
                 if ((TRUE == td->using_flag) && (&td->request_list == list))
                 {
-                    return (uint32_t) td;
+                    return (uint32_t) (uintptr_t) td;
                 }
             }
         }
@@ -622,7 +644,7 @@ uint32_t usb_hstd_ohci_scan_containing_record (st_usb_ohci_list_entry_p_t list, 
             {
                 if ((TRUE == ed->using_flag) && (&ed->link == list))
                 {
-                    return (uint32_t) ed;
+                    return (uint32_t) (uintptr_t) ed;
                 }
             }
         }
@@ -633,7 +655,7 @@ uint32_t usb_hstd_ohci_scan_containing_record (st_usb_ohci_list_entry_p_t list, 
             {
                 if ((TRUE == ed->using_flag) && (&ed->paused_link == list))
                 {
-                    return (uint32_t) ed;
+                    return (uint32_t) (uintptr_t) ed;
                 }
             }
         }

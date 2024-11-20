@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -320,15 +306,26 @@
 #endif
 
 /* Region template */
-#define EL1_MPU_REGION_COUNT    (24)
+#define EL1_MPU_REGION_ADDRESS_MASK                         (0xFFFFFFC0)
 
-#define EL1_MPU_REGIONXX_BASE(n)     ((BSP_CFG_EL1_MPU_REGION ## n ## _BASE & 0xFFFFFFC0) | \
-                                      BSP_CFG_EL1_MPU_REGION ## n ## _SH |                  \
-                                      BSP_CFG_EL1_MPU_REGION ## n ## _AP |                  \
+#if (1 != _RZN_ORDINAL) && (0 == BSP_FEATURE_BSP_HAS_SYSTEMRAM_MIRROR_AREA)
+ #define EL1_MPU_REGION_ATTRIBUTE_MASK                      (0x3F)
+ #define EL1_MPU_REGION_SYSTEMRAM_CACHE_ADDRESS_START       (0x10000000)
+ #define EL1_MPU_REGION_SYSTEMRAM_CACHE_ADDRESS_END         (0x100FFFC0)
+ #define EL1_MPU_REGION_SYSTEMRAM_NONCACHE_ADDRESS_START    (0x10100000)
+ #define EL1_MPU_REGION_SYSTEMRAM_NONCACHE_ADDRESS_END      (0x101FFFC0)
+
+#endif
+
+#define EL1_MPU_REGION_COUNT                                (24)
+
+#define EL1_MPU_REGIONXX_BASE(n)     ((BSP_CFG_EL1_MPU_REGION ## n ## _BASE & EL1_MPU_REGION_ADDRESS_MASK) | \
+                                      BSP_CFG_EL1_MPU_REGION ## n ## _SH |                                   \
+                                      BSP_CFG_EL1_MPU_REGION ## n ## _AP |                                   \
                                       BSP_CFG_EL1_MPU_REGION ## n ## _XN)
 
-#define EL1_MPU_REGIONXX_LIMIT(n)    ((BSP_CFG_EL1_MPU_REGION ## n ## _LIMIT & 0xFFFFFFC0) | \
-                                      BSP_CFG_EL1_MPU_REGION ## n ## _ATTRINDEX |            \
+#define EL1_MPU_REGIONXX_LIMIT(n)    ((BSP_CFG_EL1_MPU_REGION ## n ## _LIMIT & EL1_MPU_REGION_ADDRESS_MASK) | \
+                                      BSP_CFG_EL1_MPU_REGION ## n ## _ATTRINDEX |                             \
                                       BSP_CFG_EL1_MPU_REGION ## n ## _ENABLE)
 
 /* region 0 */
@@ -437,6 +434,47 @@ typedef struct st_bsp_mpu_config
 } bsp_mpu_config_t;
 
 /***********************************************************************************************************************
+ * Global Variables
+ **********************************************************************************************************************/
+
+/* This vector table is for SGI and PPI interrupts. */
+BSP_DONT_REMOVE fsp_vector_t g_sgi_ppi_vector_table[BSP_CORTEX_VECTOR_TABLE_ENTRIES] =
+{
+    NULL,                              /* INTID0    : SOFTWARE_GENERATE_INT0                   */
+    NULL,                              /* INTID1    : SOFTWARE_GENERATE_INT1                   */
+    NULL,                              /* INTID2    : SOFTWARE_GENERATE_INT2                   */
+    NULL,                              /* INTID3    : SOFTWARE_GENERATE_INT3                   */
+    NULL,                              /* INTID4    : SOFTWARE_GENERATE_INT4                   */
+    NULL,                              /* INTID5    : SOFTWARE_GENERATE_INT5                   */
+    NULL,                              /* INTID6    : SOFTWARE_GENERATE_INT6                   */
+    NULL,                              /* INTID7    : SOFTWARE_GENERATE_INT7                   */
+    NULL,                              /* INTID8    : SOFTWARE_GENERATE_INT8                   */
+    NULL,                              /* INTID9    : SOFTWARE_GENERATE_INT9                   */
+    NULL,                              /* INTID10   : SOFTWARE_GENERATE_INT10                  */
+    NULL,                              /* INTID11   : SOFTWARE_GENERATE_INT11                  */
+    NULL,                              /* INTID12   : SOFTWARE_GENERATE_INT12                  */
+    NULL,                              /* INTID13   : SOFTWARE_GENERATE_INT13                  */
+    NULL,                              /* INTID14   : SOFTWARE_GENERATE_INT14                  */
+    NULL,                              /* INTID15   : SOFTWARE_GENERATE_INT15                  */
+    NULL,                              /* INTID16   : RESERVED                                 */
+    NULL,                              /* INTID17   : RESERVED                                 */
+    NULL,                              /* INTID18   : RESERVED                                 */
+    NULL,                              /* INTID19   : RESERVED                                 */
+    NULL,                              /* INTID20   : RESERVED                                 */
+    NULL,                              /* INTID21   : RESERVED                                 */
+    NULL,                              /* INTID22   : DEBUG_COMMUNICATIONS_CHANNEL_INT         */
+    NULL,                              /* INTID23   : PERFORMANCE_MONITOR_COUNTER_OVERFLOW_INT */
+    NULL,                              /* INTID24   : CROSS_TRIGGER_INTERFACE_INT              */
+    NULL,                              /* INTID25   : VIRTUAL_CPU_INTERFACE_MAINTENANCE_INT    */
+    NULL,                              /* INTID26   : HYPERVISOR_TIMER_INT                     */
+    NULL,                              /* INTID27   : VIRTUAL_TIMER_INT                        */
+    NULL,                              /* INTID28   : RESERVED                                 */
+    NULL,                              /* INTID29   : RESERVED                                 */
+    NULL,                              /* INTID30   : NON-SECURE_PHYSICAL_TIMER_INT            */
+    NULL,                              /* INTID31   : RESERVED                                 */
+};
+
+/***********************************************************************************************************************
  * Exported global variables (to be accessed by other files)
  **********************************************************************************************************************/
 
@@ -480,7 +518,11 @@ void bsp_fpu_advancedsimd_init(void);
 
 #endif
 
+#if (0 == BSP_CFG_CORE_CR52)
 void bsp_slavetcm_enable(void);
+
+#endif
+
 void bsp_memory_protect_setting(void);
 void bsp_mpu_init(uint32_t region, uint32_t base, uint32_t limit);
 void bsp_irq_cfg_common(void);
@@ -510,6 +552,8 @@ void bsp_fpu_advancedsimd_init (void)
 
 #endif
 
+#if (0 == BSP_CFG_CORE_CR52)
+
 /*******************************************************************************************************************//**
  * Settings the privilege level required for the AXIS to access the TCM.
  **********************************************************************************************************************/
@@ -526,6 +570,8 @@ void bsp_slavetcm_enable (void)
     __ISB();
 }
 
+#endif
+
 /*******************************************************************************************************************//**
  * Initialize memory protection settings.
  **********************************************************************************************************************/
@@ -535,6 +581,20 @@ void bsp_memory_protect_setting (void)
     uint32_t mair0;
     uint32_t mair1;
     uint32_t region;
+    uint32_t base_address;
+    uint32_t limit_address;
+
+#if (1 != _RZN_ORDINAL) && (0 == BSP_FEATURE_BSP_HAS_SYSTEMRAM_MIRROR_AREA)
+ #if defined(__ICCARM__)
+  #pragma section="USER_DATA_NONCACHE_WBLOCK"
+    uint32_t cache_end      = (uint32_t) __section_begin("USER_DATA_NONCACHE_WBLOCK") - 1;
+    uint32_t noncache_start = (uint32_t) __section_begin("USER_DATA_NONCACHE_WBLOCK");
+ #elif defined(__GNUC__)
+    extern void * _data_noncache_start;
+    uint32_t      cache_end      = (uint32_t) &_data_noncache_start - 1;
+    uint32_t      noncache_start = (uint32_t) &_data_noncache_start;
+ #endif
+#endif
 
     /* Adopt EL1 default memory map as background map */
     sctlr  = __get_SCTLR();
@@ -553,7 +613,29 @@ void bsp_memory_protect_setting (void)
     /* Setup region. */
     for (region = 0; region < EL1_MPU_REGION_COUNT; region++)
     {
-        bsp_mpu_init(region, g_bsp_el1_mpu[region].base, g_bsp_el1_mpu[region].limit);
+        base_address  = g_bsp_el1_mpu[region].base;
+        limit_address = g_bsp_el1_mpu[region].limit;
+
+#if (1 != _RZN_ORDINAL) && (0 == BSP_FEATURE_BSP_HAS_SYSTEMRAM_MIRROR_AREA)
+        if ((EL1_MPU_REGION_SYSTEMRAM_CACHE_ADDRESS_START == (base_address & EL1_MPU_REGION_ADDRESS_MASK)) &&
+            (EL1_MPU_REGION_SYSTEMRAM_CACHE_ADDRESS_END == (limit_address & EL1_MPU_REGION_ADDRESS_MASK)))
+        {
+            limit_address = (cache_end & EL1_MPU_REGION_ADDRESS_MASK) |
+                            (g_bsp_el1_mpu[region].limit & EL1_MPU_REGION_ATTRIBUTE_MASK);
+        }
+        else if ((EL1_MPU_REGION_SYSTEMRAM_NONCACHE_ADDRESS_START == (base_address & EL1_MPU_REGION_ADDRESS_MASK)) &&
+                 (EL1_MPU_REGION_SYSTEMRAM_NONCACHE_ADDRESS_END == (limit_address & EL1_MPU_REGION_ADDRESS_MASK)))
+        {
+            base_address = (noncache_start & EL1_MPU_REGION_ADDRESS_MASK) |
+                           (g_bsp_el1_mpu[region].base & EL1_MPU_REGION_ATTRIBUTE_MASK);
+        }
+        else
+        {
+            // Do Nothing
+        }
+#endif
+
+        bsp_mpu_init(region, base_address, limit_address);
     }
 
     R_BSP_CacheInvalidateAll();

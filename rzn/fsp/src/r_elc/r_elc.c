@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * Includes
@@ -57,6 +43,12 @@ static const uint32_t gs_elc_event_source_msk_table[BSP_FEATURE_ELC_EVENT_MASK_N
     BSP_FEATURE_ELC_PERIPHERAL_1_MASK,
     BSP_FEATURE_ELC_PERIPHERAL_2_MASK,
     BSP_FEATURE_ELC_PERIPHERAL_3_MASK,
+#if BSP_FEATURE_ELC_EVENT_MASK_NUM > 4
+    BSP_FEATURE_ELC_PERIPHERAL_4_MASK,
+    BSP_FEATURE_ELC_PERIPHERAL_5_MASK,
+    BSP_FEATURE_ELC_PERIPHERAL_6_MASK,
+    BSP_FEATURE_ELC_PERIPHERAL_7_MASK,
+#endif
 };
 
 /***********************************************************************************************************************
@@ -89,7 +81,7 @@ const elc_api_t g_elc_on_elc =
     .linkSet               = R_ELC_LinkSet,
     .linkBreak             = R_ELC_LinkBreak,
     .enable                = R_ELC_Enable,
-    .disable               = R_ELC_Disable
+    .disable               = R_ELC_Disable,
 };
 
 /*******************************************************************************************************************//**
@@ -123,6 +115,10 @@ fsp_err_t R_ELC_Open (elc_ctrl_t * const p_ctrl, elc_cfg_t const * const p_cfg)
 #endif
 
     uint32_t i_shift = 1;
+#if (1 == ELC_CFG_EXTEND_SUPPORTED)
+    elc_extended_cfg_t const * p_cfg_extend     = (elc_extended_cfg_t const *) p_cfg->p_extend;
+    __IOM uint32_t           * p_elc_gpt_intmsk = &R_ICU_NS->ELC_GPT_INTMSK[0];
+#endif
 
     /* All links and set or clear them in the ELC block.
      * Use 'ELC_DISABLE_ELC_FUNCTION' because "ELC_EVENT_NONE" cannot disable the ELC function.
@@ -166,6 +162,19 @@ fsp_err_t R_ELC_Open (elc_ctrl_t * const p_ctrl, elc_cfg_t const * const p_cfg)
 
         R_ELC->ELC_SSEL[ssel_register_num] = elc_ssel;
     }
+
+#if (1 == ELC_CFG_EXTEND_SUPPORTED)
+    if (NULL != p_cfg_extend)
+    {
+        for (uint32_t elc_gpt_intmsk_num = 0;
+             elc_gpt_intmsk_num < BSP_FEATURE_ELC_GPT_EVENT_MASK_NUM;
+             elc_gpt_intmsk_num++)
+        {
+            p_elc_gpt_intmsk[elc_gpt_intmsk_num] = ELC_GPT_EVENT_MASK_OFF &
+                                                   ~(p_cfg_extend->elc_gpt_event_mask[elc_gpt_intmsk_num]);
+        }
+    }
+#endif
 
     /* Set driver status to open */
     p_instance_ctrl->open = ELC_OPEN;

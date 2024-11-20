@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2024] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics Corporation and/or its affiliates and may only
- * be used with products of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.
- * Renesas products are sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for
- * the selection and use of Renesas products and Renesas assumes no liability.  No license, express or implied, to any
- * intellectual property right is granted by Renesas.  This software is protected under all applicable laws, including
- * copyright laws. Renesas reserves the right to change or discontinue this software and/or this documentation.
- * THE SOFTWARE AND DOCUMENTATION IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND
- * TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY,
- * INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE
- * SOFTWARE OR DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR
- * DOCUMENTATION (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER,
- * INCLUDING, WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY
- * LOST PROFITS, OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE
- * POSSIBILITY OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
  * File Name    : r_usb_hOhciExtern.c
@@ -68,14 +54,16 @@ void                       usb_hstd_ohci_insert_head_list(st_usb_ohci_list_entry
                                                           st_usb_ohci_list_entry_p_t link);
 void usb_hstd_ohci_insert_tail_list(st_usb_ohci_list_entry_p_t list_head,
                                     st_usb_ohci_list_entry_p_t link);
-uint32_t usb_hstd_ohci_physical_address_of(void * data);
-void     usb_hstd_ohci_pause_ed(usb_utr_t * ptr, st_usb_ohci_hcd_endpoint_p_t endpoint);
-void     usb_hstd_ohci_unschedule_isochronous_or_interrupt_endpoint(
-    st_usb_ohci_hcd_endpoint_p_t endpoint,
-    boolean_t                    free_ed,
-    boolean_t                    endpoint_processing_required);
-uint32_t usb_hstd_ohci_set_frame_interval(st_usb_ohci_hcd_device_data_p_t device_data,
-                                          boolean_t                       up_not_down);
+
+#if 1 == BSP_LP64_SUPPORT
+uint64_t usb_hstd_ohci_physical_address_of(void * p_data);
+
+#endif
+void usb_hstd_ohci_pause_ed(usb_utr_t * ptr, st_usb_ohci_hcd_endpoint_p_t endpoint);
+void usb_hstd_ohci_unschedule_isochronous_or_interrupt_endpoint(st_usb_ohci_hcd_endpoint_p_t endpoint,
+                                                                boolean_t                    free_ed,
+                                                                boolean_t                    endpoint_processing_required);
+uint32_t usb_hstd_ohci_set_frame_interval(st_usb_ohci_hcd_device_data_p_t device_data, boolean_t up_not_down);
 uint32_t usb_hstd_ohci_get_32bit_frame_number(st_usb_ohci_hcd_device_data_p_t device_data);
 uint32_t usb_hstd_ohci_check_bandwidth(st_usb_ohci_hcd_device_data_p_t device_data,
                                        uint32_t                        list,
