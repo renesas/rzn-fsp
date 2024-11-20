@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZN Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v2.0.0</span>
+   &#160;<span id="projectnumber">Release v2.1.0</span>
    </div>
   </td>
    <td>        <br /><div id="MSearchBox" class="MSearchBoxInactive">
@@ -304,7 +304,7 @@ When using DTC, this structure must not be allocated in a temporary location. An
 </div><table class="fieldtable">
 <tr><th colspan="3">Data Fields</th></tr>
 <tr><td class="fieldtype">
-<a id="a83f689d8f43b1fadc6e8dd60a417daa0"></a>union <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#uniontransfer__info__t_8____unnamed____">transfer_info_t</a></td>
+<a id="a65fcc42edf27e46327511217fd406c9f"></a>union <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#uniontransfer__info__t_8____unnamed____">transfer_info_t</a></td>
 <td class="fieldname">
 __unnamed__</td>
 <td class="fielddoc">
@@ -331,11 +331,12 @@ num_blocks</td>
 <p>Number of blocks to transfer when using <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a> (both DTC an DMAC) or <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a> (DMAC only) or <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a> (DMAC only), unused in other modes. </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a id="aa92c5d06d07e7d13c16f9704a431c7cb"></a>volatile uint16_t</td>
+<a id="a5aba602d71a6ba4e6be056a90b5ed9e8"></a>volatile uint16_t</td>
 <td class="fieldname">
 length</td>
 <td class="fielddoc">
-<p>Length of each transfer. Range limited for <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a>, <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a>, and <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a> see HAL driver for details. </p>
+<p>Length of each transfer. Range limited for <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a>, <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a>, and <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a> see HAL driver for details.</p>
+<p>Length of each transfer. </p>
 </td></tr>
 <tr><td class="fieldtype">
 <a id="a9e39c449b5d1f8a957b833833c7da06b"></a><a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadce62e6c2407d6ffd5a94636736f7c51">transfer_addr_mode_t</a></td>
@@ -380,14 +381,14 @@ dest_size</td>
 <p>Select number of destination bytes to transfer at once. </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a734801ea95ceaeb0e943b08e84b95e3b"></a>void const  *</td>
+<a id="a07ff7ab703d6c6e5f3e2fdeabce7519a"></a>void const  *</td>
 <td class="fieldname">
 p_next1_src</td>
 <td class="fielddoc">
 <p>Next1 Register set settings </p>
 </td></tr>
 <tr><td class="fieldtype">
-<a id="aee20bcb26a5758ae6ef9870e561d1a5e"></a>void *</td>
+<a id="a53fff59e6204660c9c1e7870f44c1e27"></a>void *</td>
 <td class="fieldname">
 p_next1_dest</td>
 <td class="fielddoc">
@@ -792,9 +793,13 @@ Pointer to the API structure for this instance. </td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b"></a>TRANSFER_MODE_REPEAT&#160;</td><td class="fielddoc"><p>Repeat mode is like normal mode, except that when the transfer length reaches 0, the pointer to the repeat area and the transfer length will be reset to their initial values. If DMAC is used, the transfer repeats only <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> times. After the transfer repeats <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> times, transfer requests will not cause any further transfers. If DTC is used, the transfer repeats continuously (no limit to the number of repeat transfers). </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55"></a>TRANSFER_MODE_BLOCK&#160;</td><td class="fielddoc"><p>In block mode, each transfer request causes <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#aa92c5d06d07e7d13c16f9704a431c7cb">transfer_info_t::length</a> transfers of <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#ga6c224e5afb174f3f6ea9eddbb9da8b12">transfer_size_t</a>. After each individual transfer, the source and destination pointers are updated according to <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadce62e6c2407d6ffd5a94636736f7c51">transfer_addr_mode_t</a>. After the block transfer is complete, <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> is decremented. After the <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> reaches 0, transfer requests will not cause any further transfers. </p>
+<tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55"></a>TRANSFER_MODE_BLOCK&#160;</td><td class="fielddoc"><p>In block mode, each transfer request causes <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a5aba602d71a6ba4e6be056a90b5ed9e8">transfer_info_t::length</a> transfers of <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#ga6c224e5afb174f3f6ea9eddbb9da8b12">transfer_size_t</a>. After each individual transfer, the source and destination pointers are updated according to <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadce62e6c2407d6ffd5a94636736f7c51">transfer_addr_mode_t</a>. After the block transfer is complete, <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> is decremented. After the <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a9781e58bb7cb2ee40de446936d523814">transfer_info_t::num_blocks</a> reaches 0, transfer requests will not cause any further transfers. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2"></a>TRANSFER_MODE_REPEAT_BLOCK&#160;</td><td class="fielddoc"><p>In addition to block mode features, repeat-block mode supports a ring buffer of blocks and offsets within a block (to split blocks into arrays of their first data, second data, etc.) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992fada90d8a89f98ff82475383b14141b08d"></a>TRANSFER_MODE_NORMAL&#160;</td><td class="fielddoc"><p>Normal mode. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55"></a>TRANSFER_MODE_BLOCK&#160;</td><td class="fielddoc"><p>Block mode. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gadfb7c2a6a73bfdf993e50505aa92992fada90d8a89f98ff82475383b14141b08d"></a>TRANSFER_MODE_NORMAL&#160;</td><td class="fielddoc"><p>Normal mode. </p>
 </td></tr>
@@ -822,6 +827,20 @@ Pointer to the API structure for this instance. </td></tr>
 <tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a8b6b33a085b51ea2eeed1ef119de562f"></a>TRANSFER_SIZE_2_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 16-bit value. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a18482bfa86e737cde78042be4db54412"></a>TRANSFER_SIZE_4_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 32-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12accfeb24892ec24e42ccf14e4d4896c21"></a>TRANSFER_SIZE_1_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 8-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a8b6b33a085b51ea2eeed1ef119de562f"></a>TRANSFER_SIZE_2_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 16-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a18482bfa86e737cde78042be4db54412"></a>TRANSFER_SIZE_4_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 32-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a5bb02177f10ea6a06f9fdf3d8f353d6f"></a>TRANSFER_SIZE_8_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 64-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a12fac298210b545231c2c38dfafd07a0"></a>TRANSFER_SIZE_16_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 128-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a7568398002399c1e898dab6f8e8a0418"></a>TRANSFER_SIZE_32_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 256-bit value. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12a4284e820735faa08a0702f0d430f2924"></a>TRANSFER_SIZE_64_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 512-bit value. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ga6c224e5afb174f3f6ea9eddbb9da8b12accfeb24892ec24e42ccf14e4d4896c21"></a>TRANSFER_SIZE_1_BYTE&#160;</td><td class="fielddoc"><p>Each transfer transfers a 8-bit value. </p>
 </td></tr>
@@ -866,6 +885,10 @@ Pointer to the API structure for this instance. </td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gadce62e6c2407d6ffd5a94636736f7c51abf18f9b3701e9e91f44055ee47d0ca47"></a>TRANSFER_ADDR_MODE_FIXED&#160;</td><td class="fielddoc"><p>Address pointer remains fixed after each transfer. </p>
 </td></tr>
+<tr><td class="fieldname"><a id="gadce62e6c2407d6ffd5a94636736f7c51a7665741e25c4cc78fd24745efbd2eaad"></a>TRANSFER_ADDR_MODE_INCREMENTED&#160;</td><td class="fielddoc"><p>Address pointer is incremented by associated <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#ga6c224e5afb174f3f6ea9eddbb9da8b12">transfer_size_t</a> after each transfer. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gadce62e6c2407d6ffd5a94636736f7c51abf18f9b3701e9e91f44055ee47d0ca47"></a>TRANSFER_ADDR_MODE_FIXED&#160;</td><td class="fielddoc"><p>Address pointer remains fixed after each transfer. </p>
+</td></tr>
 </table>
 
 </div>
@@ -881,7 +904,7 @@ Pointer to the API structure for this instance. </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Repeat area options (source or destination). In <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a>, the selected pointer returns to its original value after <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#aa92c5d06d07e7d13c16f9704a431c7cb">transfer_info_t::length</a> transfers. In <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a> and <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a>, the selected pointer returns to its original value after each transfer. </p>
+<p>Repeat area options (source or destination). In <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a>, the selected pointer returns to its original value after <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#a5aba602d71a6ba4e6be056a90b5ed9e8">transfer_info_t::length</a> transfers. In <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a> and <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a>, the selected pointer returns to its original value after each transfer. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga769464d2068881ccb44573c96167812ba77aeeab30b003de23742e40a57f19239"></a>TRANSFER_REPEAT_AREA_DESTINATION&#160;</td><td class="fielddoc"><p>Destination area repeated in <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fa607c41bfd08797c08a5ee9bd4dfb9c8b">TRANSFER_MODE_REPEAT</a> or <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992faa4f65de2d9454af406f60172ff858d55">TRANSFER_MODE_BLOCK</a> or <a class="el" href="group___t_r_a_n_s_f_e_r___a_p_i.html#gadfb7c2a6a73bfdf993e50505aa92992fafb43c6e62b61f0dbb9a5bcd5575e79e2">TRANSFER_MODE_REPEAT_BLOCK</a>. </p>
 </td></tr>
@@ -962,7 +985,7 @@ Pointer to the API structure for this instance. </td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v2.0.0 User's Manual Copyright © (2024) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v2.1.0 User's Manual Copyright © (2024) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>
