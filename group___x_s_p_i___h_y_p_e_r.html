@@ -37,7 +37,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_scaled.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">RZN Flexible Software Package Documentation
-   &#160;<span id="projectnumber">Release v2.1.0</span>
+   &#160;<span id="projectnumber">Release v2.2.0</span>
    </div>
   </td>
    <td>        <br /><div id="MSearchBox" class="MSearchBoxInactive">
@@ -308,7 +308,7 @@ Register Space (AS = 1)</li>
 </ul>
 </td><td>Memory Space (AS = 0) </td><td>Set the Hyper device access address when starting the driver. </td></tr>
 <tr>
-<td>Auto Calibration &gt; Data latching delay</td><td>Must be a valid non-negative integer</td><td>0x08 </td><td>Set this to 0 to enable auto-calibration. 0x08 is the default value </td></tr>
+<td>Auto Calibration &gt; Data latching delay</td><td>Value must be an integer between 0 and 31</td><td>0x08 </td><td>Set this to 0 to enable auto-calibration. 0x08 is the default value </td></tr>
 <tr>
 <td>Auto Calibration &gt; Auto-Calibration Address</td><td>Must be a valid non-negative integer</td><td>0x00 </td><td>Set the address of the read/write destination to be performed for auto-calibration. </td></tr>
 <tr>
@@ -714,10 +714,11 @@ Enumerations</h2></td></tr>
   <table class="retval">
     <tr><td class="paramname">FSP_SUCCESS</td><td>Configuration was successful. </td></tr>
     <tr><td class="paramname">FSP_ERR_ASSERTION</td><td>p_instance_ctrl is NULL. </td></tr>
-    <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>Driver is not opened. </td></tr>
+    <tr><td class="paramname">FSP_ERR_NOT_OPEN</td><td>Driver is not opened.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section note"><dt>Note</dt><dd>If another chip select of the same unit is used by other drivers, the other chip select operation will also stop when this function is executed. </dd></dl>
 
 </div>
 </div>
@@ -953,7 +954,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-        <li class="footer">FSP Release v2.1.0 User's Manual Copyright © (2024) Renesas Electronics Corporation. All Rights Reserved.</li>
+        <li class="footer">FSP Release v2.2.0 User's Manual Copyright © (2025) Renesas Electronics Corporation. All Rights Reserved.</li>
   </ul>
 </div>
 </body>
