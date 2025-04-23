@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -119,11 +119,14 @@ fsp_err_t R_ETHER_SELECTOR_Open (ether_selector_ctrl_t * const p_ctrl, ether_sel
     uint32_t            convrst;
     uint8_t             port;
 
-    port = p_cfg->channel;
-
 #if ETHER_SELECTOR_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_instance_ctrl);
     FSP_ASSERT(NULL != p_cfg);
+#endif
+
+    port = p_cfg->channel;
+
+#if ETHER_SELECTOR_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN((BSP_FEATURE_ETHSS_MAX_PORTS > port), FSP_ERR_INVALID_CHANNEL);
     if (ETHER_SELECTOR_SPEED_1000_MBPS == p_instance_ctrl->p_cfg->speed)
     {

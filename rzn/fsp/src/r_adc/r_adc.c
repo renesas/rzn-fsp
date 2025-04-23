@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -1014,6 +1014,9 @@ static fsp_err_t r_adc_open_sub (adc_instance_ctrl_t * const p_instance_ctrl, ad
 
     /* Write ADCALCTL.CAL bit to 0 */
     p_instance_ctrl->p_reg->ADCALCTL_b.CAL = 0U;
+
+    /* Poll ADCALCTL.CAL_RDY bit until it is changed to 1. */
+    FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->ADCALCTL_b.CAL_RDY, 1U);
 #endif
 
     /* Set the predetermined values for ADCSR, ADSTRGR, ADGCTRGR, ADCER, and ADADC without setting ADCSR.ADST or ADCSR.TRGE.

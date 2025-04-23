@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -100,9 +100,8 @@ void usb_pstd_detach_process (usb_utr_t * p_utr)
 {
     uint16_t i;
 
- #if defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H)
     hw_usb_clear_cnen(p_utr);
- #endif                                /* defined(BSP_MCU_GROUP_RA6M3) || defined(BSP_MCU_GROUP_RZN2L) || defined(BSP_MCU_GROUP_RZN2H) */
+
     /* Pull-up disable */
     hw_usb_pclear_dprpu(p_utr->ip);
 

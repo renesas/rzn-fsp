@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -45,7 +45,6 @@
 #if (1 == BSP_FEATURE_BSP_IRQ_GPT_SEL_SUPPORTED)
 
 /* Macro definition of GPT_INT4 */
- #define GPT_INT_NUM                                     (5)
  #define GPT_INT4                                        (4)
 
 /* Define the GPT_INTERRUPT_SELECT_ENABLE macro */
@@ -150,7 +149,11 @@ static void r_gpt_call_callback(gpt_instance_ctrl_t * p_ctrl, timer_event_t even
  * ISR prototypes
  **********************************************************************************************************************/
 void gpt_counter_overflow_isr(void);
+
+#if GPT_PRV_EXTRA_FEATURES_ENABLED == GPT_CFG_OUTPUT_SUPPORT_ENABLE
 void gpt_counter_underflow_isr(void);
+
+#endif
 void gpt_dead_time_isr(void);
 void gpt_capture_a_isr(void);
 void gpt_capture_b_isr(void);
@@ -430,7 +433,7 @@ fsp_err_t R_GPT_PeriodSet (timer_ctrl_t * const p_ctrl, uint32_t const period_co
     r_gpt_write_protect_disable(p_instance_ctrl);
 
     /* Update period buffer register. The actual period is one cycle longer than the register value for saw waves
-     * and twice the register value for triangle waves. Reference section 19.2.21 "General PWM Timer Cycle Setting
+     * and twice the register value for triangle waves. Reference section "General PWM Timer Cycle Setting
      * Register (GTPR)". The setting passed to the configuration is expected to be half the desired period for
      * triangle waves. */
     uint32_t new_gtpr = period_counts - 1U;
@@ -482,7 +485,8 @@ fsp_err_t R_GPT_PeriodSet (timer_ctrl_t * const p_ctrl, uint32_t const period_co
  *
  * @param[in] p_ctrl                   Pointer to instance control block.
  * @param[in] duty_cycle_counts        Duty cycle to set in counts.
- * @param[in] pin                      Use gpt_io_pin_t to select GPT_IO_PIN_GTIOCA or GPT_IO_PIN_GTIOCB
+ * @param[in] pin                      Use gpt_io_pin_t to select GPT_IO_PIN_GTIOCA, GPT_IO_PIN_GTIOCB, or
+ *                                     GPT_IO_PIN_GTIOCA_AND_GTIOCB.
  *
  * @retval FSP_SUCCESS                 Duty cycle updated successfully.
  * @retval FSP_ERR_ASSERTION           p_ctrl was NULL or the pin is not one of gpt_io_pin_t
@@ -493,12 +497,13 @@ fsp_err_t R_GPT_PeriodSet (timer_ctrl_t * const p_ctrl, uint32_t const period_co
 fsp_err_t R_GPT_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin)
 {
 #if GPT_CFG_OUTPUT_SUPPORT_ENABLE
+    uint32_t              tmp_pin         = pin & 3U;
     gpt_instance_ctrl_t * p_instance_ctrl = (gpt_instance_ctrl_t *) p_ctrl;
  #if GPT_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_instance_ctrl);
-    FSP_ASSERT(pin <= GPT_IO_PIN_GTIOCA_AND_GTIOCB);
+    FSP_ASSERT(tmp_pin <= GPT_IO_PIN_GTIOCA_AND_GTIOCB);
     FSP_ERROR_RETURN(GPT_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
-    FSP_ERROR_RETURN(duty_cycle_counts <= (p_instance_ctrl->p_reg->GTPR + 1), FSP_ERR_INVALID_ARGUMENT);
+    FSP_ERROR_RETURN(duty_cycle_counts <= (p_instance_ctrl->p_reg->GTPBR + 1), FSP_ERR_INVALID_ARGUMENT);
  #endif
 
     /* Set duty cycle. */
@@ -507,35 +512,18 @@ fsp_err_t R_GPT_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_c
 
     r_gpt_write_protect_disable(p_instance_ctrl);
 
-    switch (pin + GPT_PRV_GTCCRC)
+    /* Only update GTCCR if 0% or 100% duty is not requested */
+    if (!duty_regs.omdty)
     {
-        case GPT_PRV_GTCCRC:
+        uint32_t reg_offset = 2U;
+        if (0 != (pin & GPT_IO_PIN_GTIOCA_AND_GTIOCB))
         {
-            p_instance_ctrl->p_reg->GTCCR[GPT_PRV_GTCCRC] = duty_regs.gtccr_buffer;
-            break;
+            p_instance_ctrl->p_reg->GTCCR[reg_offset]     = duty_regs.gtccr_buffer;
+            p_instance_ctrl->p_reg->GTCCR[reg_offset + 1] = duty_regs.gtccr_buffer;
         }
-
-        case GPT_PRV_GTCCRE:
+        else
         {
-            p_instance_ctrl->p_reg->GTCCR[GPT_PRV_GTCCRE] = duty_regs.gtccr_buffer;
-            break;
-        }
-
-        case GPT_PRV_GTCCRD:
-        {
-            p_instance_ctrl->p_reg->GTCCR[GPT_PRV_GTCCRD] = duty_regs.gtccr_buffer;
-            break;
-        }
-
-        case GPT_PRV_GTCCRF:
-        {
-            p_instance_ctrl->p_reg->GTCCR[GPT_PRV_GTCCRF] = duty_regs.gtccr_buffer;
-            break;
-        }
-
-        default:
-        {
-            break;
+            p_instance_ctrl->p_reg->GTCCR[tmp_pin + reg_offset] = duty_regs.gtccr_buffer;
         }
     }
 
@@ -543,7 +531,7 @@ fsp_err_t R_GPT_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_c
      * other pin. */
 
     uint32_t gtuddtyc = p_instance_ctrl->p_reg->GTUDDTYC;
-    if (GPT_IO_PIN_GTIOCB != pin)
+    if (GPT_IO_PIN_GTIOCB != tmp_pin)
     {
         /* GTIOCA or both GTIOCA and GTIOCB. */
  #if 1U == BSP_FEATURE_GPT_REGISTER_MASK_TYPE
@@ -555,7 +543,7 @@ fsp_err_t R_GPT_DutyCycleSet (timer_ctrl_t * const p_ctrl, uint32_t const duty_c
  #endif
     }
 
-    if (GPT_IO_PIN_GTIOCA != pin)
+    if (GPT_IO_PIN_GTIOCA != tmp_pin)
     {
         /* GTIOCB or both GTIOCA and GTIOCB. */
  #if 1U == BSP_FEATURE_GPT_REGISTER_MASK_TYPE
@@ -1298,7 +1286,7 @@ static void gpt_counter_initialize (gpt_instance_ctrl_t * const p_instance_ctrl,
 #endif
 
     /* Store period register setting. The actual period and is one cycle longer than the register value for saw waves
-     * and twice the register value for triangle waves. Reference section 19.2.21 "General PWM Timer Cycle Setting
+     * and twice the register value for triangle waves. Reference section "General PWM Timer Cycle Setting
      * Register (GTPR)". The setting passed to the configuration is expected to be half the desired period for
      * triangle waves. */
     uint32_t gtpr = p_cfg->period_counts - 1U;
@@ -1537,7 +1525,7 @@ static void gpt_enable_interrupt (gpt_instance_ctrl_t * const p_instance_ctrl)
 #if GPT_CFG_OUTPUT_SUPPORT_ENABLE
 
 /*******************************************************************************************************************//**
- * Calculates duty cycle register values.  GTPR must be set before entering this function.
+ * Calculates duty cycle register values.  GTPBR must be set before entering this function.
  *
  * @param[in]  p_instance_ctrl         Instance control structure
  * @param[in]  duty_cycle_counts       Duty cycle to set
@@ -1548,10 +1536,10 @@ static void gpt_calculate_duty_cycle (gpt_instance_ctrl_t * const p_instance_ctr
                                       gpt_prv_duty_registers_t  * p_duty_reg)
 {
     /* Determine the current period. The actual period is one cycle longer than the register value for saw waves
-     * and twice the register value for triangle waves. Reference section 19.2.21 "General PWM Timer Cycle Setting
-     * Register (GTPR)". The setting passed to the configuration is expected to be half the desired duty cycle for
+     * and twice the register value for triangle waves. Reference section "General PWM Timer Cycle Setting Buffer
+     * Register (GTPBR)". The setting passed to the configuration is expected to be half the desired duty cycle for
      * triangle waves. */
-    uint32_t current_period = p_instance_ctrl->p_reg->GTPR;
+    uint32_t current_period = p_instance_ctrl->p_reg->GTPBR;
  #if GPT_PRV_EXTRA_FEATURES_ENABLED == GPT_CFG_OUTPUT_SUPPORT_ENABLE
     if (p_instance_ctrl->p_cfg->mode < TIMER_MODE_TRIANGLE_WAVE_SYMMETRIC_PWM)
  #endif
@@ -1909,8 +1897,10 @@ void gpt_int_select_isr (void)
     gpt_instance_ctrl_t * p_instance_ctrl = (gpt_instance_ctrl_t *) R_FSP_IsrContextGet(irq);
 
     /* Save pointer to extended configuration structure. */
-    gpt_extended_cfg_t           * p_extend  = (gpt_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+    gpt_extended_cfg_t * p_extend = (gpt_extended_cfg_t *) p_instance_ctrl->p_cfg->p_extend;
+ #if GPT_PRV_EXTRA_FEATURES_ENABLED == GPT_CFG_OUTPUT_SUPPORT_ENABLE
     gpt_extended_pwm_cfg_t const * p_pwm_cfg = p_extend->p_pwm_cfg;
+ #endif
 
     /* Clearing event state and executing ISR function. */
     if (irq == p_extend->capture_a_irq)
@@ -1929,10 +1919,13 @@ void gpt_int_select_isr (void)
     {
         gpt_dead_time_isr();
     }
+
+ #if GPT_PRV_EXTRA_FEATURES_ENABLED == GPT_CFG_OUTPUT_SUPPORT_ENABLE
     else if (irq == p_pwm_cfg->trough_irq)
     {
         gpt_counter_underflow_isr();
     }
+ #endif
     else
     {
         /* Do Nothing */

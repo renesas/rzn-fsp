@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -236,7 +236,7 @@ fsp_err_t R_POEG_Reset (poeg_ctrl_t * const p_ctrl)
 #endif
 
     /* Reset POEG status flags. */
-    *(uint32_t *) p_instance_ctrl->p_reg &= ~POEG_PRV_STATUS_FLAGS;
+    *(uintptr_t *) p_instance_ctrl->p_reg &= ~POEG_PRV_STATUS_FLAGS;
 
     return FSP_SUCCESS;
 }

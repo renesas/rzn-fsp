@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
 * SPDX-License-Identifier: BSD-3-Clause
 */
@@ -10,6 +10,11 @@
  * Includes
  **********************************************************************************************************************/
 #include "r_xspi_ospi.h"
+
+#if XSPI_OSPI_CFG_DMAC_SUPPORT_ENABLE
+ #include "r_transfer_api.h"
+ #include "r_dmac.h"
+#endif
 
 /***********************************************************************************************************************
  * Macro definitions
@@ -100,16 +105,20 @@
 #define XSPI_OSPI_PRV_DIRECT_ADDR_AND_DATA_MASK            (7U)
 #define XSPI_OSPI_PRV_PAGE_SIZE_BYTES                      (256U)
 
-#define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_0    (0xFFFF0000)
-#define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_1    (0x000800FF)
-#define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_2    (0x00FFF700)
-#define XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_3    (0xF700F708)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0   (0xFFFF0000)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1   (0x000800FF)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2   (0x00FFF700)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3   (0xF700F708)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_TIMEOUT_US           (500U)
 
 #define XSPI_OSPI_PRV_1MB_MEMORY_SPACE                     (0xFFFFF)
 #define XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT                    (20U)
 
 #define XSPI_OSPI_PRV_UINT32_BITS                          (32U)
 #define XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES            (8U)
+#define XSPI_OSPI_UNIT_FLAG_MASK                           (3U)
+
+#define XSPI_OSPI_BUFFER_WRITE_WAIT_CYCLE                  (5U)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -130,6 +139,13 @@ static void r_xspi_ospi_direct_transfer(xspi_ospi_instance_ctrl_t         * p_in
 /***********************************************************************************************************************
  * Private global variables
  **********************************************************************************************************************/
+
+/* Bit-flags specifying which channels are open so the module can be stopped when all are closed. */
+static uint32_t g_xspi_ospi_channels_open_flags = 0;
+
+#if XSPI_OSPI_CFG_DMAC_SUPPORT_ENABLE
+static uint8_t src_data[XSPI_OSPI_PRV_MAX_COMBINE_SIZE] BSP_PLACE_IN_SECTION(".noncache_buffer.ospi");
+#endif
 
 /*******************************************************************************************************************//**
  * @addtogroup XSPI_OSPI
@@ -184,6 +200,12 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
 
     xspi_ospi_extended_cfg_t * p_cfg_extend = (xspi_ospi_extended_cfg_t *) p_cfg->p_extend;
 
+#if XSPI_OSPI_CFG_PARAM_CHECKING_ENABLE
+    FSP_ERROR_RETURN(
+        (g_xspi_ospi_channels_open_flags & (1U << ((p_cfg_extend->unit << 1U) + p_cfg_extend->chip_select))) == 0,
+        FSP_ERR_ALREADY_OPEN);
+#endif
+
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
 
     /* Enable clock to the OSPI block */
@@ -217,6 +239,16 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
 #endif
 
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
+
+#if XSPI_OSPI_CFG_DMAC_SUPPORT_ENABLE
+    transfer_instance_t const * p_transfer = p_cfg_extend->p_lower_lvl_transfer;
+ #if XSPI_OSPI_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(NULL != p_transfer);
+ #endif
+
+    /* Initialize transfer instance */
+    p_transfer->p_api->open(p_transfer->p_ctrl, p_transfer->p_cfg);
+#endif
 
     /* Set base address. */
     uintptr_t base_address = (uintptr_t) R_XSPI0 + (p_cfg_extend->unit * ((uintptr_t) R_XSPI1 - (uintptr_t) R_XSPI0));
@@ -364,7 +396,16 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
 
     if (FSP_SUCCESS == ret)
     {
-        p_instance_ctrl->open = XSPI_OSPI_PRV_OPEN;
+        p_instance_ctrl->open            = XSPI_OSPI_PRV_OPEN;
+        g_xspi_ospi_channels_open_flags |= (1U << ((p_cfg_extend->unit << 1U) + p_cfg_extend->chip_select));
+    }
+    else if ((g_xspi_ospi_channels_open_flags & (XSPI_OSPI_UNIT_FLAG_MASK << (p_cfg_extend->unit << 1U))) == 0)
+    {
+        /* If the open fails and no other channels are open, stop the module. */
+        R_BSP_MODULE_STOP(FSP_IP_XSPI, 0U);
+    }
+    else
+    {
     }
 
     return ret;
@@ -469,8 +510,9 @@ fsp_err_t R_XSPI_OSPI_XipExit (spi_flash_ctrl_t * p_ctrl)
  * @retval FSP_ERR_NOT_OPEN            Driver is not opened.
  * @retval FSP_ERR_DEVICE_BUSY         Another Write/Erase transaction is in progress.
  *
- * @note In this API, the number of bytes that can be written at one time depends on the MCU :
- * any byte within 64bytes for RZ/N2L, 8byte for RZ/N2H.
+ * @note In this API, data can be written up to 64 bytes at a time if DMAC support is enabled.
+ * Otherwise, the number of bytes that can be written at one time depends on the MCU :
+ * 64 bytes for RZ/N2L, 8 bytes for RZ/N2H.
  * @note This API performs page program operations to the device. Writing across pages is not supported.
  * Please set the write address and write size according to the page size of your device.
  * @note In 8D-8D-8D(OPI) mode, written data must be even bytes in size.
@@ -486,7 +528,7 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     FSP_ASSERT(NULL != p_src);
     FSP_ASSERT(NULL != p_dest);
     FSP_ERROR_RETURN(XSPI_OSPI_PRV_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
- #if BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
+ #if !XSPI_OSPI_CFG_DMAC_SUPPORT_ENABLE && BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
     FSP_ASSERT(XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES >= byte_count);
  #else
     FSP_ASSERT(XSPI_OSPI_PRV_MAX_COMBINE_SIZE >= byte_count);
@@ -503,47 +545,117 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
 
     r_xspi_ospi_write_enable(p_instance_ctrl);
 
-#if BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
+#if XSPI_OSPI_CFG_DMAC_SUPPORT_ENABLE
+    uint32_t byte = 0;
+
+    if ((XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order) &&
+        (SPI_FLASH_PROTOCOL_8D_8D_8D == p_instance_ctrl->spi_protocol))
+    {
+        do
+        {
+            if (byte_count - byte >= XSPI_OSPI_PRV_WORD_ACCESS_SIZE)
+            {
+                *(uint32_t *) (src_data + byte) = __REV16(*(uint32_t *) (p_src + byte));
+                byte += XSPI_OSPI_PRV_WORD_ACCESS_SIZE;
+            }
+            else if (byte_count - byte >= XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE)
+            {
+                *(uint16_t *) (src_data + byte) = (uint16_t) __REV16(*(uint16_t *) (p_src + byte));
+                byte += XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE;
+            }
+            else
+            {
+                *(src_data + byte) = *(uint8_t *) (p_src + byte);
+                byte++;
+            }
+        } while (byte < byte_count);
+    }
+    else
+    {
+        do
+        {
+            *(src_data + byte) = *(uint8_t *) (p_src + byte);
+            byte++;
+        } while (byte < byte_count);
+    }
+
+    /* Setup and start DMAC transfer. */
+    transfer_instance_t const * p_transfer = p_cfg_extend->p_lower_lvl_transfer;
+
+    p_transfer->p_cfg->p_info->src_size       = TRANSFER_SIZE_1_BYTE;
+    p_transfer->p_cfg->p_info->dest_size      = TRANSFER_SIZE_1_BYTE;
+    p_transfer->p_cfg->p_info->src_addr_mode  = TRANSFER_ADDR_MODE_INCREMENTED;
+    p_transfer->p_cfg->p_info->dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED;
+    p_transfer->p_cfg->p_info->p_src          = &src_data;
+    p_transfer->p_cfg->p_info->p_dest         = p_dest;
+    p_transfer->p_cfg->p_info->length         = byte_count;
+    fsp_err_t err = p_transfer->p_api->reconfigure(p_transfer->p_ctrl, p_transfer->p_cfg->p_info);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+
+    /* Start DMA */
+    err = p_transfer->p_api->softwareStart(p_transfer->p_ctrl, TRANSFER_START_MODE_SINGLE);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+
+    /* Wait for DMAC to complete to maintain deterministic processing and backward compatability */
+    volatile transfer_properties_t transfer_properties = {0U};
+    err = p_transfer->p_api->infoGet(p_transfer->p_ctrl, (transfer_properties_t *) &transfer_properties);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+    while (FSP_SUCCESS == err && transfer_properties.transfer_length_remaining > 0)
+    {
+        err = p_transfer->p_api->infoGet(p_transfer->p_ctrl, (transfer_properties_t *) &transfer_properties);
+        FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+    }
+
+    /* Request to push the pending data */
+    if (XSPI_OSPI_PRV_MAX_COMBINE_SIZE > byte_count)
+    {
+        /* Push the pending data. */
+        p_instance_ctrl->p_reg->BMCTL1_b.MWRPUSH = 1;
+    }
+
+#elif BSP_FEATURE_XSPI_HAS_AXI_BRIDGE
     uint32_t chip_address;
     uint32_t chip_select = p_cfg_extend->chip_select;
     uint32_t unit        = p_cfg_extend->unit;
     uint32_t mirror_address_delta;
 
  #ifdef BSP_CFG_CORE_CA55
-    uintptr_t p_dest_va = (uintptr_t) p_dest;
-    uintptr_t p_dest_pa = 0U;
+    uintptr_t dest_va = (uintptr_t) p_dest;
+    uintptr_t dest_pa = 0U;
 
-    R_BSP_MmuVatoPa(p_dest_va, &p_dest_pa);
+    fsp_err_t mmu_err;
+    mmu_err = R_BSP_MmuVatoPa(dest_va, &dest_pa);
+    FSP_ERROR_RETURN(FSP_SUCCESS == mmu_err, mmu_err);
  #else
-    uintptr_t p_dest_pa = (uintptr_t) p_dest;
+    uintptr_t dest_pa = (uintptr_t) p_dest;
  #endif
 
     /* Get device start address. */
  #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
     mirror_address_delta = 0U;
  #else
-    mirror_address_delta = (p_dest_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
+    mirror_address_delta = (dest_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
                            0U :
                            BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
  #endif
 
     chip_address = (0 == chip_select) ?
                    (0 == unit) ?
-                   (uint32_t) p_dest_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
-                   (uint32_t) p_dest_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
+                   (uint32_t) dest_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
+                   (uint32_t) dest_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
                    (0 == unit)
- #if XSPI_QSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
-                   ? (uint32_t) p_dest_pa -
-                   (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :         // unit0 cs1
-                   (uint32_t) p_dest_pa -
-                   (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);          // unit1 cs1
+ #if XSPI_OSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+                   ? (uint32_t) dest_pa -
+                   (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :       // unit0 cs1
+                   (uint32_t) dest_pa -
+                   (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);        // unit1 cs1
  #else
-                   ? (uint32_t) p_dest_pa -
+                   ? (uint32_t) dest_pa -
                    (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
-                    mirror_address_delta) :                                                                  // unit0 cs1
-                   (uint32_t) p_dest_pa -
+                    mirror_address_delta) :                                                                // unit0 cs1
+                   (uint32_t) dest_pa -
                    (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
-                    mirror_address_delta);                                                                   // unit1 cs1
+                    mirror_address_delta);                                                                 // unit1 cs1
  #endif
 
     spi_flash_direct_transfer_t write_transfer;
@@ -565,6 +677,14 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     }
 
     r_xspi_ospi_direct_transfer(p_instance_ctrl, &write_transfer, SPI_FLASH_DIRECT_TRANSFER_DIR_WRITE);
+
+    /* If prefetch is enabled, make sure the banks aren't being used and flush the prefetch caches after an erase. */
+    if (p_cfg_extend->prefetch_en == XSPI_OSPI_PREFETCH_FUNCTION_ENABLE)
+    {
+        FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->COMSTT_b.MEMACC, 0);
+        p_instance_ctrl->p_reg->BMCTL1_b.PBUFCLR = 1;
+    }
+
 #else
     uint32_t i = 0;
 
@@ -632,12 +752,22 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         }
     }
 
-    /* Ensure that all write data is in the xSPI write buffer. */
+    /* Protect the order between access to the xSPI external memory space and the xSPI peripheral space. */
     __DSB();
 
     /* Request to push the pending data */
     if (XSPI_OSPI_PRV_MAX_COMBINE_SIZE > byte_count)
     {
+        /* Do dummy read for wait.
+         * To ensure that all write data is stored in the xSPI internal write buffer before issuing a push request,
+         * it is necessary to wait a few cycles. */
+        volatile uint32_t dummy;
+        for (uint32_t wait_cycle = 0; wait_cycle < XSPI_OSPI_BUFFER_WRITE_WAIT_CYCLE; wait_cycle++)
+        {
+            dummy = p_instance_ctrl->p_reg->COMCFG;
+            FSP_PARAMETER_NOT_USED(dummy);
+        }
+
         /* Push the pending data. */
         p_instance_ctrl->p_reg->BMCTL1_b.MWRPUSH = 1;
     }
@@ -680,46 +810,52 @@ fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device
     uint8_t chip_select = p_cfg_extend->chip_select;
 
     uint16_t  erase_command = 0;
-    uintptr_t chip_address;
-    bool      send_address = true;
-    uint32_t  mirror_address_delta;
+    uintptr_t chip_address  = 0;
+    bool      send_address  = true;
+
+    if (SPI_FLASH_ERASE_SIZE_CHIP_ERASE != byte_count)
+    {
+        uint32_t mirror_address_delta;
 
 #ifdef BSP_CFG_CORE_CA55
-    uintptr_t p_device_address_va = (uintptr_t) p_device_address;
-    uintptr_t p_device_address_pa = 0U;
+        uintptr_t device_address_va = (uintptr_t) p_device_address;
+        uintptr_t device_address_pa = 0U;
 
-    R_BSP_MmuVatoPa(p_device_address_va, &p_device_address_pa);
+        fsp_err_t mmu_err;
+        mmu_err = R_BSP_MmuVatoPa(device_address_va, &device_address_pa);
+        FSP_ERROR_RETURN(FSP_SUCCESS == mmu_err, mmu_err);
 #else
-    uintptr_t p_device_address_pa = (uintptr_t) p_device_address;
+        uintptr_t device_address_pa = (uintptr_t) p_device_address;
 #endif
 
-    /* Get device start address. */
+        /* Get device start address. */
 #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
-    mirror_address_delta = 0U;
+        mirror_address_delta = 0U;
 #else
-    mirror_address_delta = (p_device_address_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
-                           0U :
-                           BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+        mirror_address_delta = (device_address_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
+                               0U :
+                               BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
 #endif
 
-    chip_address = (0 == chip_select) ?
-                   (0 == unit) ?
-                   p_device_address_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
-                   p_device_address_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
-                   (0 == unit)
-#if XSPI_QSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
-                   ? p_device_address_pa -
-                   (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :        // unit0 cs1
-                   p_device_address_pa -
-                   (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);         // unit1 cs1
+        chip_address = (0 == chip_select) ?
+                       (0 == unit) ?
+                       device_address_pa - (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta) : // unit0 cs0
+                       device_address_pa - (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta) : // unit1 cs0
+                       (0 == unit)
+#if XSPI_OSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+                       ? device_address_pa -
+                       (p_cfg_extend->p_address_space->unit0_cs1_start_address - mirror_address_delta) :      // unit0 cs1
+                       device_address_pa -
+                       (p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta);       // unit1 cs1
 #else
-                   ? p_device_address_pa -
-                   (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
-                    mirror_address_delta) :                                                                 // unit0 cs1
-                   p_device_address_pa -
-                   (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
-                    mirror_address_delta);                                                                  // unit1 cs1
+                       ? device_address_pa -
+                       (BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                        mirror_address_delta) :                                                               // unit0 cs1
+                       device_address_pa -
+                       (BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS + BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2 -
+                        mirror_address_delta);                                                                // unit1 cs1
 #endif
+    }
 
     FSP_ERROR_RETURN(false == r_xspi_ospi_status_sub(p_instance_ctrl, p_cfg->write_status_bit), FSP_ERR_DEVICE_BUSY);
 
@@ -755,6 +891,13 @@ fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device
                                     1U : (p_cfg_extend->p_opi_commands->command_bytes);
 
     r_xspi_ospi_direct_transfer(p_instance_ctrl, &direct_command, SPI_FLASH_DIRECT_TRANSFER_DIR_WRITE);
+
+    /* If prefetch is enabled, make sure the banks aren't being used and flush the prefetch caches after an erase. */
+    if (p_cfg_extend->prefetch_en == XSPI_OSPI_PREFETCH_FUNCTION_ENABLE)
+    {
+        FSP_HARDWARE_REGISTER_WAIT(p_instance_ctrl->p_reg->COMSTT_b.MEMACC, 0);
+        p_instance_ctrl->p_reg->BMCTL1_b.PBUFCLR = 1;
+    }
 
     return FSP_SUCCESS;
 }
@@ -859,6 +1002,10 @@ fsp_err_t R_XSPI_OSPI_AutoCalibrate (spi_flash_ctrl_t * p_ctrl)
  * @retval FSP_SUCCESS             Configuration was successful.
  * @retval FSP_ERR_ASSERTION       p_instance_ctrl is NULL.
  * @retval FSP_ERR_NOT_OPEN        Driver is not opened.
+ *
+ *
+ * @note If another chip select of the same unit is used by other drivers,
+ * the other chip select operation will also stop when this function is executed.
  **********************************************************************************************************************/
 fsp_err_t R_XSPI_OSPI_Close (spi_flash_ctrl_t * p_ctrl)
 {
@@ -872,37 +1019,42 @@ fsp_err_t R_XSPI_OSPI_Close (spi_flash_ctrl_t * p_ctrl)
     spi_flash_cfg_t          * p_cfg        = (spi_flash_cfg_t *) p_instance_ctrl->p_cfg;
     xspi_ospi_extended_cfg_t * p_cfg_extend = (xspi_ospi_extended_cfg_t *) p_cfg->p_extend;
 
-    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_SYSTEM);
+    g_xspi_ospi_channels_open_flags &= ~(1U << ((p_cfg_extend->unit << 1U) + p_cfg_extend->chip_select));
+
+    if ((g_xspi_ospi_channels_open_flags & (XSPI_OSPI_UNIT_FLAG_MASK << (p_cfg_extend->unit << 1U))) == 0)
+    {
+        R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_SYSTEM);
 
 #if BSP_FEATURE_BSP_SLAVE_STOP_SUPPORTED
 
-    /* Slave stop request */
-    if (0U == p_cfg_extend->unit)
-    {
-        R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI0);
-    }
-    else
-    {
-        R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI1);
-    }
+        /* Slave stop request */
+        if (0U == p_cfg_extend->unit)
+        {
+            R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI0);
+        }
+        else
+        {
+            R_BSP_SlaveStop(BSP_BUS_SLAVE_XSPI1);
+        }
 #endif
-    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
+        R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
 
-    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
+        R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_RESET);
 
-    /* Enable reset */
-    if (0U == p_cfg_extend->unit)
-    {
-        R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI0);
+        /* Enable reset */
+        if (0U == p_cfg_extend->unit)
+        {
+            R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI0);
+        }
+        else
+        {
+            R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI1);
+        }
+
+        /* Disable clock to the OSPI block */
+        R_BSP_MODULE_STOP(FSP_IP_XSPI, p_cfg_extend->unit);
+        R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
     }
-    else
-    {
-        R_BSP_ModuleResetEnable(BSP_MODULE_RESET_XSPI1);
-    }
-
-    /* Disable clock to the OSPI block */
-    R_BSP_MODULE_STOP(FSP_IP_XSPI, p_cfg_extend->unit);
-    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_RESET);
 
     p_instance_ctrl->open = 0U;
 
@@ -1057,6 +1209,8 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq (xspi_ospi_instance_ctrl_
 
     xspi_ospi_chip_select_t chip_select = p_instance_ctrl->chip_select;
 
+    uint32_t timeout = XSPI_OSPI_PRV_AUTOCALIBRATION_TIMEOUT_US;
+
     /* Perform Automatic Calibration
      * (see RZ microprocessor User's Manual section "Flow of Automatic Calibration") */
 
@@ -1086,17 +1240,17 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq (xspi_ospi_instance_ctrl_
         if (XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order)
         {
             /* Apply __REV16 to match the preamble pattern with the data to be read in the auto calibration sequence. */
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = __REV16(XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_0);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = __REV16(XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_1);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = __REV16(XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_2);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = __REV16(XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_3);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3);
         }
         else
         {
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_0;
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_1;
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_2;
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = XSPI_OSPI_PRV_AUTOCALIBARION_PREAMBLE_PATTERN_3;
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0;
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1;
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2;
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3;
         }
 
         p_instance_ctrl->p_reg->CSb[chip_select].CCCTL0 = (1 << XSPI_OSPI_PRV_CCCTL0_CANOWR_OFFSET) |
@@ -1108,16 +1262,26 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq (xspi_ospi_instance_ctrl_
         p_instance_ctrl->p_reg->CSb[chip_select].CCCTL0_b.CAEN = 1;
 
         /* Check calibration success or failure. */
-        while ((0 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CASUCCS0_Pos + chip_select)) & 0x01)) &&
-               (0 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CAFAILCS0_Pos + chip_select)) & 0x01)))
+        while (timeout)
         {
-            /* Do nothing. */
+            if ((1 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CASUCCS0_Pos + chip_select)) & 0x01)) ||
+                (1 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CAFAILCS0_Pos + chip_select)) & 0x01)))
+            {
+                break;
+            }
+
+            timeout--;
+            R_BSP_SoftwareDelay(1U, BSP_DELAY_UNITS_MICROSECONDS);
         }
 
         /* Disable automatic calibration */
         p_instance_ctrl->p_reg->CSb[chip_select].CCCTL0_b.CAEN = 0;
 
-        if (1 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CASUCCS0_Pos + chip_select)) & 0x01))
+        if (0 == timeout)
+        {
+            ret = FSP_ERR_CALIBRATE_FAILED;
+        }
+        else if (1 == ((p_instance_ctrl->p_reg->INTS >> (R_XSPI0_INTS_CASUCCS0_Pos + chip_select)) & 0x01))
         {
             /* Clear automatic calibration success status */
             p_instance_ctrl->p_reg->INTC = (uint32_t) 1 << (R_XSPI0_INTC_CASUCCS0C_Pos + chip_select);
