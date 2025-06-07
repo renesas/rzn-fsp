@@ -139,7 +139,7 @@ void HW_SetLed(BOOL RunLed, BOOL ErrLed);
 UINT16 HW_Init(void);
 void   HW_Release(void);
 
-#define     HW_GetALEventRegister()                     ((((UINT16 ESCMEM *) pEsc)[((ESC_AL_EVENT_OFFSET) >> 1)]))
+#define     HW_GetALEventRegister()                     ((((volatile UINT16 ESCMEM *) pEsc)[((ESC_AL_EVENT_OFFSET) >> 1)]))
 #define     HW_GetALEventRegister_Isr    HW_GetALEventRegister
 
 #define     HW_EscRead(pData, Address, Len)             ESCMEMCPY((MEM_ADDR *) (pData),                             \
@@ -147,11 +147,11 @@ void   HW_Release(void);
                                                                                                    ESC_MEM_SHIFT)], \
                                                                   (Len))
 #define     HW_EscReadIsr                HW_EscRead
-#define     HW_EscReadDWord(DWordValue, Address)        ((DWordValue) = (UINT32) (((UINT32 *) pEsc)[(Address >> 2)]))
-#define     HW_EscReadDWordIsr(DWordValue, Address)     ((DWordValue) = (UINT32) (((UINT32 *) pEsc)[(Address >> 2)]))
-#define     HW_EscReadWord(WordValue, Address)          ((WordValue) = (((UINT16 *) pEsc)[((Address) >> 1)])) // the esc pointer is handled as a word pointer so the address must be devided by 2
+#define     HW_EscReadDWord(DWordValue, Address)        ((DWordValue) = (UINT32) (((volatile UINT32 *) pEsc)[(Address >> 2)]))
+#define     HW_EscReadDWordIsr(DWordValue, Address)     ((DWordValue) = (UINT32) (((volatile UINT32 *) pEsc)[(Address >> 2)]))
+#define     HW_EscReadWord(WordValue, Address)          ((WordValue) = (((volatile UINT16 *) pEsc)[((Address) >> 1)])) // the esc pointer is handled as a word pointer so the address must be devided by 2
 #define     HW_EscReadWordIsr(WordValue, Address)       HW_EscReadWord(WordValue, Address)                    // the esc pointer is handled as a word pointer so the address must be devided by 2
-#define     HW_EscReadByte(ByteValue, Address)          ((ByteValue) = (((UINT8 *) pEsc)[(Address)]))
+#define     HW_EscReadByte(ByteValue, Address)          ((ByteValue) = (((volatile UINT8 *) pEsc)[(Address)]))
 #define     HW_EscReadByteIsr(ByteValue, Address)       HW_EscReadByte(ByteValue, Address)
 
 /* ECATCHANGE_START(V5.01) HW2*/
