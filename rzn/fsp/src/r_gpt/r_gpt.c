@@ -586,13 +586,13 @@ fsp_err_t R_GPT_InfoGet (timer_ctrl_t * const p_ctrl, timer_info_t * const p_inf
     FSP_ERROR_RETURN(GPT_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
 
-    /* Get and store period */
-    uint32_t gtpr          = p_instance_ctrl->p_reg->GTPR;
-    uint32_t period_counts = gtpr + 1;
+    /* Get and store period counts */
+    uint32_t gtcnt          = p_instance_ctrl->p_reg->GTCNT;
+    uint32_t period_counts = gtcnt + 1;
 #if GPT_PRV_EXTRA_FEATURES_ENABLED == GPT_CFG_OUTPUT_SUPPORT_ENABLE
     if (p_instance_ctrl->p_cfg->mode >= TIMER_MODE_TRIANGLE_WAVE_SYMMETRIC_PWM)
     {
-        period_counts = gtpr;
+        period_counts = gtcnt;
     }
 #endif
     p_info->period_counts = period_counts;
