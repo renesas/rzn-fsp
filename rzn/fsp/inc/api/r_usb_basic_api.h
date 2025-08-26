@@ -228,6 +228,7 @@ typedef enum e_usb_class
     USB_CLASS_PMSC,                    ///< PMSC Class
     USB_CLASS_HPRN,                    ///< HPRN Class
     USB_CLASS_HUVC,                    ///< HUVC Class
+    USB_CLASS_HAUD,                    ///< HAUD Class
     USB_CLASS_REQUEST,                 ///< USB Class Request
     USB_CLASS_HUB,                     ///< HUB Class
     USB_CLASS_END,                     ///< USB Class End Code
@@ -645,6 +646,7 @@ typedef struct st_usb_api
      * @param[in]  p_ctrl           USB control structure.
      */
     fsp_err_t (* otgSRP)(usb_ctrl_t * const p_ctrl);
+
 } usb_api_t;
 
 /** This structure encompasses everything that is needed to use an instance of this interface. */

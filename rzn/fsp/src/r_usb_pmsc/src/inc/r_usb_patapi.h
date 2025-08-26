@@ -16,14 +16,14 @@
  ***********************************************************************************************************************/
 
 /* Storage sector size */
-#define USB_ATAPI_BLOCK_UNIT      (0x0200UL)
+#define USB_CFG_PMSC_ATAPI_BLOCK_UNIT    (0x0200UL)
 
 /* Operation when responding with a short packet to a command */
 
 /*  0: Respond to 0x00 with CSW with setting PIPE to STALL
  *  1: Respond to 0x00 with CSW without setting PIPE to STALL
  */
-#define USB_ATAPI_SHT_RESPONSE    1
+#define USB_ATAPI_SHT_RESPONSE           1
 
 /***********************************************************************************************************************
  * Typedef definitions

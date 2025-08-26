@@ -19,106 +19,120 @@
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#define XSPI_OSPI_PRV_OPEN                                 (0x4F535049)
+#define XSPI_OSPI_PRV_OPEN                                  (0x4F535049)
 
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK          (0x1FU)
-#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK          (0x1FU)
+#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS0_VALUE_MASK           (0x1FU)
+#define XSPI_OSPI_PRV_WRAPCFG_DSSFTCS1_VALUE_MASK           (0x1FU)
 
-#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_OFFSET                (0U)
-#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_VALUE_MASK            (0x3FFU)
-#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_MASK                  (0x3FFU << XSPI_OSPI_PRV_LIOCFGCS_PRTMD_OFFSET)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSMIN_OFFSET                (16U)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSMIN_VALUE_MASK            (0x0FU)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSASTEX_OFFSET              (20U)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSASTEX_VALUE_MASK          (0x01U)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSENGEX_OFFSET              (21U)
-#define XSPI_OSPI_PRV_LIOCFGCS_CSENGEX_VALUE_MASK          (0x01U)
+#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_OFFSET                 (0U)
+#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_VALUE_MASK             (0x3FFU)
+#define XSPI_OSPI_PRV_LIOCFGCS_PRTMD_MASK                   (0x3FFU << XSPI_OSPI_PRV_LIOCFGCS_PRTMD_OFFSET)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSMIN_OFFSET                 (16U)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSMIN_VALUE_MASK             (0x0FU)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSASTEX_OFFSET               (20U)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSASTEX_VALUE_MASK           (0x01U)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSENGEX_OFFSET               (21U)
+#define XSPI_OSPI_PRV_LIOCFGCS_CSENGEX_VALUE_MASK           (0x01U)
 
-#define XSPI_OSPI_PRV_CMCFG0_FFMT_OFFSET                   (0U)
-#define XSPI_OSPI_PRV_CMCFG0_ADDSIZE_OFFSET                (2U)
-#define XSPI_OSPI_PRV_CMCFG0_ADDSIZE_VALUE_MASK            (0x03U)
-#define XSPI_OSPI_PRV_CMCFG1_RDCMD_OFFSET                  (0U)
-#define XSPI_OSPI_PRV_CMCFG1_RDCMD_UPPER_OFFSET            (8U)
-#define XSPI_OSPI_PRV_CMCFG1_RDCMD_1B_VALUE_MASK           (0xFFU)
-#define XSPI_OSPI_PRV_CMCFG1_RDCMD_2B_VALUE_MASK           (0xFFFFU)
-#define XSPI_OSPI_PRV_CMCFG1_RDLATE_OFFSET                 (16U)
-#define XSPI_OSPI_PRV_CMCFG1_RDLATE_VALUE_MASK             (0x1FU)
+#define XSPI_OSPI_PRV_CMCFG0_FFMT_OFFSET                    (0U)
+#define XSPI_OSPI_PRV_CMCFG0_ADDSIZE_OFFSET                 (2U)
+#define XSPI_OSPI_PRV_CMCFG0_ADDSIZE_VALUE_MASK             (0x03U)
+#define XSPI_OSPI_PRV_CMCFG1_RDCMD_OFFSET                   (0U)
+#define XSPI_OSPI_PRV_CMCFG1_RDCMD_UPPER_OFFSET             (8U)
+#define XSPI_OSPI_PRV_CMCFG1_RDCMD_1B_VALUE_MASK            (0xFFU)
+#define XSPI_OSPI_PRV_CMCFG1_RDCMD_2B_VALUE_MASK            (0xFFFFU)
+#define XSPI_OSPI_PRV_CMCFG1_RDLATE_OFFSET                  (16U)
+#define XSPI_OSPI_PRV_CMCFG1_RDLATE_VALUE_MASK              (0x1FU)
 
-#define XSPI_OSPI_PRV_CMCFG2_WRCMD_OFFSET                  (0U)
-#define XSPI_OSPI_PRV_CMCFG2_WRCMD_UPPER_OFFSET            (8U)
-#define XSPI_OSPI_PRV_CMCFG2_WRCMD_1B_VALUE_MASK           (0xFFU)
-#define XSPI_OSPI_PRV_CMCFG2_WRCMD_2B_VALUE_MASK           (0xFFFFU)
-#define XSPI_OSPI_PRV_CMCFG2_WRLATE_OFFSET                 (16U)
+#define XSPI_OSPI_PRV_CMCFG2_WRCMD_OFFSET                   (0U)
+#define XSPI_OSPI_PRV_CMCFG2_WRCMD_UPPER_OFFSET             (8U)
+#define XSPI_OSPI_PRV_CMCFG2_WRCMD_1B_VALUE_MASK            (0xFFU)
+#define XSPI_OSPI_PRV_CMCFG2_WRCMD_2B_VALUE_MASK            (0xFFFFU)
+#define XSPI_OSPI_PRV_CMCFG2_WRLATE_OFFSET                  (16U)
 
-#define XSPI_OSPI_PRV_BMCFG_WRMD_OFFSET                    (0U)
-#define XSPI_OSPI_PRV_BMCFG_MWRCOMB_OFFSET                 (7U)
-#define XSPI_OSPI_PRV_BMCFG_MWRSIZE_OFFSET                 (8U)
-#define XSPI_OSPI_PRV_BMCFG_PREEN_OFFSET                   (16U)
-#define XSPI_OSPI_PRV_BMCFG_PREEN_VALUE_MASK               (0x01U)
+#define XSPI_OSPI_PRV_BMCFG_WRMD_OFFSET                     (0U)
+#define XSPI_OSPI_PRV_BMCFG_MWRCOMB_OFFSET                  (7U)
+#define XSPI_OSPI_PRV_BMCFG_MWRSIZE_OFFSET                  (8U)
+#define XSPI_OSPI_PRV_BMCFG_PREEN_OFFSET                    (16U)
+#define XSPI_OSPI_PRV_BMCFG_PREEN_VALUE_MASK                (0x01U)
 
-#define XSPI_OSPI_PRV_BMCTL_DEFAULT_VALUE                  (0xFF)
+#define XSPI_OSPI_PRV_BMCTL_DEFAULT_VALUE                   (0xFF)
 
-#define XSPI_OSPI_PRV_CDTBUF_CMDSIZE_OFFSET                (0U)
-#define XSPI_OSPI_PRV_CDTBUF_CMDSIZE_VALUE_MASK            (0x03U)
-#define XSPI_OSPI_PRV_CDTBUF_ADDSIZE_OFFSET                (2U)
-#define XSPI_OSPI_PRV_CDTBUF_ADDSIZE_VALUE_MASK            (0x07U)
-#define XSPI_OSPI_PRV_CDTBUF_DATASIZE_OFFSET               (5U)
-#define XSPI_OSPI_PRV_CDTBUF_DATASIZE_VALUE_MASK           (0x0FU)
-#define XSPI_OSPI_PRV_CDTBUF_LATE_OFFSET                   (9U)
-#define XSPI_OSPI_PRV_CDTBUF_LATE_VALUE_MASK               (0x1FU)
-#define XSPI_OSPI_PRV_CDTBUF_TRTYPE_OFFSET                 (15U)
-#define XSPI_OSPI_PRV_CDTBUF_TRTYPE_VALUE_MASK             (0x01U)
-#define XSPI_OSPI_PRV_CDTBUF_CMD_OFFSET                    (16U)
-#define XSPI_OSPI_PRV_CDTBUF_CMD_UPPER_OFFSET              (24U)
-#define XSPI_OSPI_PRV_CDTBUF_CMD_1B_VALUE_MASK             (0xFFU)
-#define XSPI_OSPI_PRV_CDTBUF_CMD_2B_VALUE_MASK             (0xFFFFU)
+#define XSPI_OSPI_PRV_CDTBUF_CMDSIZE_OFFSET                 (0U)
+#define XSPI_OSPI_PRV_CDTBUF_CMDSIZE_VALUE_MASK             (0x03U)
+#define XSPI_OSPI_PRV_CDTBUF_ADDSIZE_OFFSET                 (2U)
+#define XSPI_OSPI_PRV_CDTBUF_ADDSIZE_VALUE_MASK             (0x07U)
+#define XSPI_OSPI_PRV_CDTBUF_DATASIZE_OFFSET                (5U)
+#define XSPI_OSPI_PRV_CDTBUF_DATASIZE_VALUE_MASK            (0x0FU)
+#define XSPI_OSPI_PRV_CDTBUF_LATE_OFFSET                    (9U)
+#define XSPI_OSPI_PRV_CDTBUF_LATE_VALUE_MASK                (0x1FU)
+#define XSPI_OSPI_PRV_CDTBUF_TRTYPE_OFFSET                  (15U)
+#define XSPI_OSPI_PRV_CDTBUF_TRTYPE_VALUE_MASK              (0x01U)
+#define XSPI_OSPI_PRV_CDTBUF_CMD_OFFSET                     (16U)
+#define XSPI_OSPI_PRV_CDTBUF_CMD_UPPER_OFFSET               (24U)
+#define XSPI_OSPI_PRV_CDTBUF_CMD_1B_VALUE_MASK              (0xFFU)
+#define XSPI_OSPI_PRV_CDTBUF_CMD_2B_VALUE_MASK              (0xFFFFU)
 
-#define XSPI_OSPI_PRV_CCCTL0_CANOWR_OFFSET                 (1U)
-#define XSPI_OSPI_PRV_CCCTL0_CAITV_OFFSET                  (8U)
-#define XSPI_OSPI_PRV_CCCTL0_CASFTSTA_OFFSET               (16U)
-#define XSPI_OSPI_PRV_CCCTL0_CASFTEND_OFFSET               (24U)
+#define XSPI_OSPI_PRV_CCCTL0_CANOWR_OFFSET                  (1U)
+#define XSPI_OSPI_PRV_CCCTL0_CAITV_OFFSET                   (8U)
+#define XSPI_OSPI_PRV_CCCTL0_CASFTSTA_OFFSET                (16U)
+#define XSPI_OSPI_PRV_CCCTL0_CASFTEND_OFFSET                (24U)
 
-#define XSPI_OSPI_PRV_CCCTL1_CACMDSIZE_OFFSET              (0U)
-#define XSPI_OSPI_PRV_CCCTL1_CACMDSIZE_VALUE_MASK          (0x3U)
-#define XSPI_OSPI_PRV_CCCTL1_CAADDSIZE_OFFSET              (2U)
-#define XSPI_OSPI_PRV_CCCTL1_CAADDSIZE_VALUE_MASK          (0xFU)
-#define XSPI_OSPI_PRV_CCCTL1_CADATASIZE_OFFSET             (5U)
-#define XSPI_OSPI_PRV_CCCTL1_CAWRLATE_OFFSET               (16U)
-#define XSPI_OSPI_PRV_CCCTL1_CARDLATE_OFFSET               (24U)
-#define XSPI_OSPI_PRV_CCCTL1_CARDLATE_VALUE_MASK           (0x1FU)
+#define XSPI_OSPI_PRV_CCCTL1_CACMDSIZE_OFFSET               (0U)
+#define XSPI_OSPI_PRV_CCCTL1_CACMDSIZE_VALUE_MASK           (0x3U)
+#define XSPI_OSPI_PRV_CCCTL1_CAADDSIZE_OFFSET               (2U)
+#define XSPI_OSPI_PRV_CCCTL1_CAADDSIZE_VALUE_MASK           (0xFU)
+#define XSPI_OSPI_PRV_CCCTL1_CADATASIZE_OFFSET              (5U)
+#define XSPI_OSPI_PRV_CCCTL1_CAWRLATE_OFFSET                (16U)
+#define XSPI_OSPI_PRV_CCCTL1_CARDLATE_OFFSET                (24U)
+#define XSPI_OSPI_PRV_CCCTL1_CARDLATE_VALUE_MASK            (0x1FU)
 
-#define XSPI_OSPI_PRV_CCCTL2_CARDCMD_OFFSET                (16U)
-#define XSPI_OSPI_PRV_CCCTL2_CARDCMD_VALUE_MASK            (0xFFFFU)
+#define XSPI_OSPI_PRV_CCCTL2_CARDCMD_OFFSET                 (16U)
+#define XSPI_OSPI_PRV_CCCTL2_CARDCMD_VALUE_MASK             (0xFFFFU)
 
-#define XSPI_OSPI_PRV_COMSTT_MEMACC_OFFSET                 (0U)
-#define XSPI_OSPI_PRV_COMSTT_MEMACC_VALUE_MASK             (0x01U)
-#define XSPI_OSPI_PRV_COMSTT_WRBUFNE_OFFSET                (6U)
-#define XSPI_OSPI_PRV_COMSTT_WRBUFNE_VALUE_MASK            (0x01U)
+#define XSPI_OSPI_PRV_COMSTT_MEMACC_OFFSET                  (0U)
+#define XSPI_OSPI_PRV_COMSTT_MEMACC_VALUE_MASK              (0x01U)
+#define XSPI_OSPI_PRV_COMSTT_WRBUFNE_OFFSET                 (6U)
+#define XSPI_OSPI_PRV_COMSTT_WRBUFNE_VALUE_MASK             (0x01U)
 
-#define XSPI_OSPI_PRV_INTC_CMDCMPC_OFFSET                  (0U)
+#define XSPI_OSPI_PRV_INTC_CMDCMPC_OFFSET                   (0U)
 
-#define XSPI_OSPI_PRV_MAX_COMBINE_SIZE                     (64U)
+#define XSPI_OSPI_PRV_MAX_COMBINE_SIZE                      (64U)
 
-#define XSPI_OSPI_PRV_WORD_ACCESS_SIZE                     (4U)
-#define XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE                (2U)
+#define XSPI_OSPI_PRV_WORD_ACCESS_SIZE                      (4U)
+#define XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE                 (2U)
 
-#define XSPI_OSPI_PRV_DIRECT_ADDR_AND_DATA_MASK            (7U)
-#define XSPI_OSPI_PRV_PAGE_SIZE_BYTES                      (256U)
+#define XSPI_OSPI_PRV_DIRECT_ADDR_AND_DATA_MASK             (7U)
+#define XSPI_OSPI_PRV_PAGE_SIZE_BYTES                       (256U)
 
-#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0   (0xFFFF0000)
-#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1   (0x000800FF)
-#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2   (0x00FFF700)
-#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3   (0xF700F708)
-#define XSPI_OSPI_PRV_AUTOCALIBRATION_TIMEOUT_US           (500U)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0    (0xFFFF0000)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1    (0x000800FF)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2    (0x00FFF700)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3    (0xF700F708)
+#define XSPI_OSPI_PRV_AUTOCALIBRATION_TIMEOUT_US            (500U)
 
-#define XSPI_OSPI_PRV_1MB_MEMORY_SPACE                     (0xFFFFF)
-#define XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT                    (20U)
+#define XSPI_OSPI_PRV_1MB_MEMORY_SIZE                       (0x100000)
+#define XSPI_OSPI_PRV_2MB_MEMORY_SIZE                       (0x200000)
+#define XSPI_OSPI_PRV_4MB_MEMORY_SIZE                       (0x400000)
+#define XSPI_OSPI_PRV_8MB_MEMORY_SIZE                       (0x800000)
+#define XSPI_OSPI_PRV_16MB_MEMORY_SIZE                      (0x1000000)
+#define XSPI_OSPI_PRV_32MB_MEMORY_SIZE                      (0x2000000)
+#define XSPI_OSPI_PRV_64MB_MEMORY_SIZE                      (0x4000000)
 
-#define XSPI_OSPI_PRV_UINT32_BITS                          (32U)
-#define XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES            (8U)
-#define XSPI_OSPI_UNIT_FLAG_MASK                           (3U)
+#define XSPI_OSPI_PRV_UINT32_BITS                           (32U)
+#define XSPI_OSPI_PRV_DIRECT_TRANSFER_MAX_BYTES             (8U)
+#define XSPI_OSPI_PRV_BYTE_SIZE_SHIFT                       (8U)
+#define XSPI_OSPI_UNIT_FLAG_MASK                            (3U)
 
-#define XSPI_OSPI_BUFFER_WRITE_WAIT_CYCLE                  (5U)
+#define XSPI_OSPI_BUFFER_WRITE_WAIT_CYCLE                   (5U)
+
+#ifndef XSPI_OSPI_MAX_WRITE_ENABLE_LOOPS
+ #define XSPI_OSPI_MAX_WRITE_ENABLE_LOOPS                   (5U)
+#endif
+
+#define XSPI_OSPI_PRV_REV16_BYTES_SHIFT                     (8U)
+#define XSPI_OSPI_PRV_REV16_INCREMENT_BYTES_MASK            (0x00FF00FFU)
+#define XSPI_OSPI_PRV_REV16_DECREMENT_BYTES_MASK            (0xFF00FF00U)
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -131,10 +145,11 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq(xspi_ospi_instance_ctrl_t
 static bool      r_xspi_ospi_status_sub(xspi_ospi_instance_ctrl_t * p_instance_ctrl, uint8_t bit_pos);
 static fsp_err_t r_xspi_ospi_spi_protocol_specific_settings(xspi_ospi_instance_ctrl_t * p_instance_ctrl,
                                                             spi_flash_protocol_t        spi_protocol);
-static void r_xspi_ospi_write_enable(xspi_ospi_instance_ctrl_t * p_instance_ctrl);
-static void r_xspi_ospi_direct_transfer(xspi_ospi_instance_ctrl_t         * p_instance_ctrl,
-                                        spi_flash_direct_transfer_t * const p_transfer,
-                                        spi_flash_direct_transfer_dir_t     direction);
+static fsp_err_t r_xspi_ospi_write_enable(xspi_ospi_instance_ctrl_t * p_instance_ctrl);
+static void      r_xspi_ospi_direct_transfer(xspi_ospi_instance_ctrl_t         * p_instance_ctrl,
+                                             spi_flash_direct_transfer_t * const p_transfer,
+                                             spi_flash_direct_transfer_dir_t     direction);
+static uint32_t byte_order_rev(uint32_t value);
 
 /***********************************************************************************************************************
  * Private global variables
@@ -275,8 +290,70 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     }
 #endif
 
-    /* Set xSPI CSn size. */
-#if XSPI_OSPI_CFG_CUSTOM_ADDR_SPACE_ENABLE
+    /* Set xSPI CSn address space. */
+#if 1 == BSP_FEATURE_XSPI_CS_ADDRESS_SPACE_SETTING_TYPE
+    xspi_ospi_memory_size_t memory_size_reg = XSPI_OSPI_MEMORY_SIZE_1MB;
+
+    switch (p_cfg_extend->memory_size)
+    {
+        case XSPI_OSPI_PRV_1MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_1MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_2MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_2MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_4MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_4MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_8MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_8MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_16MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_16MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_32MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_32MB;
+            break;
+        }
+
+        case XSPI_OSPI_PRV_64MB_MEMORY_SIZE:
+        {
+            memory_size_reg = XSPI_OSPI_MEMORY_SIZE_64MB;
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+
+    if (XSPI_OSPI_CHIP_SELECT_0 == p_cfg_extend->chip_select)
+    {
+        p_instance_ctrl->p_reg->CSSCTL_b.CS0SIZE = memory_size_reg;
+    }
+    else
+    {
+        p_instance_ctrl->p_reg->CSSCTL_b.CS1SIZE = memory_size_reg;
+    }
+
+#else
     uint32_t mirror_address_delta;
  #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
     mirror_address_delta = 0;
@@ -289,66 +366,6 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     R_XSPI1_MISC->CS0ENDAD = p_cfg_extend->p_address_space->unit1_cs0_end_address - mirror_address_delta;
     R_XSPI1_MISC->CS1STRAD = p_cfg_extend->p_address_space->unit1_cs1_start_address - mirror_address_delta;
     R_XSPI1_MISC->CS1ENDAD = p_cfg_extend->p_address_space->unit1_cs1_end_address - mirror_address_delta;
-#else
- #if 1 == BSP_FEATURE_XSPI_CS_ADDRESS_SPACE_SETTING_TYPE
-
-    /* Set xSPI CSn slave memory size. */
-    if (XSPI_OSPI_CHIP_SELECT_0 == p_cfg_extend->chip_select)
-    {
-        p_instance_ctrl->p_reg->CSSCTL_b.CS0SIZE = p_cfg_extend->memory_size;
-    }
-    else
-    {
-        p_instance_ctrl->p_reg->CSSCTL_b.CS1SIZE = p_cfg_extend->memory_size;
-    }
-
- #elif 2 == BSP_FEATURE_XSPI_CS_ADDRESS_SPACE_SETTING_TYPE
-    uint32_t mirror_address_delta;
-  #if 0 == BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS
-    mirror_address_delta = 0U;
-  #else
-    mirror_address_delta = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
-  #endif
-
-    if (XSPI_OSPI_CHIP_SELECT_0 == p_cfg_extend->chip_select)
-    {
-        if (0 == p_cfg_extend->unit)
-        {
-            R_XSPI0_MISC->CS0ENDAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - mirror_address_delta +
-                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
-                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
-        }
-        else
-        {
-            R_XSPI1_MISC->CS0ENDAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS - mirror_address_delta +
-                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
-                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
-        }
-    }
-    else
-    {
-        if (0 == p_cfg_extend->unit)
-        {
-            R_XSPI0_MISC->CS1STRAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS +
-                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta;
-
-            R_XSPI0_MISC->CS1ENDAD = BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS +
-                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta +
-                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
-                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
-        }
-        else
-        {
-            R_XSPI1_MISC->CS1STRAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS +
-                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta;
-
-            R_XSPI1_MISC->CS1ENDAD = BSP_FEATURE_XSPI_DEVICE_1_START_ADDRESS +
-                                     BSP_FEATURE_XSPI_DEVICE_ADDRESS_SPACE_SIZE / 2U - mirror_address_delta +
-                                     (uint32_t) (p_cfg_extend->memory_size << XSPI_OSPI_PRV_MEMORY_SIZE_SHIFT) +
-                                     XSPI_OSPI_PRV_1MB_MEMORY_SPACE;
-        }
-    }
- #endif
 #endif
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_SYSTEM);
 
@@ -402,10 +419,11 @@ fsp_err_t R_XSPI_OSPI_Open (spi_flash_ctrl_t * p_ctrl, spi_flash_cfg_t const * c
     else if ((g_xspi_ospi_channels_open_flags & (XSPI_OSPI_UNIT_FLAG_MASK << (p_cfg_extend->unit << 1U))) == 0)
     {
         /* If the open fails and no other channels are open, stop the module. */
-        R_BSP_MODULE_STOP(FSP_IP_XSPI, 0U);
+        R_BSP_MODULE_STOP(FSP_IP_XSPI, p_cfg_extend->unit);
     }
     else
     {
+        /* Do nothing */
     }
 
     return ret;
@@ -509,6 +527,7 @@ fsp_err_t R_XSPI_OSPI_XipExit (spi_flash_ctrl_t * p_ctrl)
  * @retval FSP_ERR_ASSERTION           p_instance_ctrl, p_dest or p_src is NULL, or byte_count crosses a page boundary.
  * @retval FSP_ERR_NOT_OPEN            Driver is not opened.
  * @retval FSP_ERR_DEVICE_BUSY         Another Write/Erase transaction is in progress.
+ * @retval FSP_ERR_WRITE_FAILED        Write operation failed.
  *
  * @note In this API, data can be written up to 64 bytes at a time if DMAC support is enabled.
  * Otherwise, the number of bytes that can be written at one time depends on the MCU :
@@ -555,12 +574,12 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         {
             if (byte_count - byte >= XSPI_OSPI_PRV_WORD_ACCESS_SIZE)
             {
-                *(uint32_t *) (src_data + byte) = __REV16(*(uint32_t *) (p_src + byte));
+                *(uint32_t *) (src_data + byte) = byte_order_rev(*(uint32_t *) (p_src + byte));
                 byte += XSPI_OSPI_PRV_WORD_ACCESS_SIZE;
             }
             else if (byte_count - byte >= XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE)
             {
-                *(uint16_t *) (src_data + byte) = (uint16_t) __REV16(*(uint16_t *) (p_src + byte));
+                *(uint16_t *) (src_data + byte) = (uint16_t) byte_order_rev(*(uint16_t *) (p_src + byte));
                 byte += XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE;
             }
             else
@@ -635,8 +654,8 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
     mirror_address_delta = 0U;
  #else
     mirror_address_delta = (dest_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
-                           0U :
-                           BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+                           BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS -
+                           BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS : 0U;
  #endif
 
     chip_address = (0 == chip_select) ?
@@ -659,7 +678,13 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
  #endif
 
     spi_flash_direct_transfer_t write_transfer;
-    write_transfer.data_u64       = *(uint64_t *) p_src;
+
+    write_transfer.data_u64 = 0;
+    for (uint32_t bytes = 0; bytes < byte_count; bytes++)
+    {
+        write_transfer.data_u64 |= ((uint64_t) *(uint8_t *) (p_src + bytes)) << (bytes * XSPI_OSPI_PRV_BYTE_SIZE_SHIFT);
+    }
+
     write_transfer.data_length    = (uint8_t) byte_count;
     write_transfer.address        = chip_address;
     write_transfer.address_length = (p_instance_ctrl->p_cfg->address_bytes == SPI_FLASH_ADDRESS_BYTES_4) ? 4U : 3U;
@@ -701,8 +726,8 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         {
             for (i = 0; i < byte_count / XSPI_OSPI_PRV_WORD_ACCESS_SIZE; i++)
             {
-                /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-                *p_word_aligned_dest = __REV16(*p_word_aligned_src);
+                /* Apply byte_order_rev to convert the data to match the OctaFlash byte order. */
+                *p_word_aligned_dest = byte_order_rev(*p_word_aligned_src);
                 p_word_aligned_dest++;
                 p_word_aligned_src++;
             }
@@ -727,8 +752,9 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
         {
             for (i = 0; i < byte_count / XSPI_OSPI_PRV_HALF_WORD_ACCESS_SIZE; i++)
             {
-                /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-                *p_half_word_aligned_dest = (uint16_t) __REV16((uint32_t) (*p_half_word_aligned_src & UINT16_MAX));
+                /* Apply byte_order_rev to convert the data to match the OctaFlash byte order. */
+                *p_half_word_aligned_dest =
+                    (uint16_t) byte_order_rev((uint32_t) (*p_half_word_aligned_src & UINT16_MAX));
                 p_half_word_aligned_dest++;
                 p_half_word_aligned_src++;
             }
@@ -792,6 +818,7 @@ fsp_err_t R_XSPI_OSPI_Write (spi_flash_ctrl_t    * p_ctrl,
  *                                     size defined in spi_flash_cfg_t, or byte_count is set to 0.
  * @retval FSP_ERR_NOT_OPEN            Driver is not opened.
  * @retval FSP_ERR_DEVICE_BUSY         The device is busy.
+ * @retval FSP_ERR_WRITE_FAILED        Write operation failed.
  **********************************************************************************************************************/
 fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device_address, uint32_t byte_count)
 {
@@ -833,8 +860,9 @@ fsp_err_t R_XSPI_OSPI_Erase (spi_flash_ctrl_t * p_ctrl, uint8_t * const p_device
         mirror_address_delta = 0U;
 #else
         mirror_address_delta = (device_address_pa < BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS) ?
-                               0U :
-                               BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS - BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS;
+                               BSP_FEATURE_XSPI_DEVICE_0_START_ADDRESS -
+                               BSP_FEATURE_XSPI_DEVICE_0_MIRROR_START_ADDRESS :
+                               0U;
 #endif
 
         chip_address = (0 == chip_select) ?
@@ -1171,11 +1199,15 @@ static bool r_xspi_ospi_status_sub (xspi_ospi_instance_ctrl_t * p_instance_ctrl,
  * Send Write enable command to the OctaFlash
  *
  * @param[in]   p_instance_ctrl    Pointer to OSPI specific control structure
+ *
+ * @retval      FSP_SUCCESS                Write operation completed.
+ * @retval      FSP_ERR_WRITE_FAILED       Write operation failed.
  **********************************************************************************************************************/
-static void r_xspi_ospi_write_enable (xspi_ospi_instance_ctrl_t * p_instance_ctrl)
+static fsp_err_t r_xspi_ospi_write_enable (xspi_ospi_instance_ctrl_t * p_instance_ctrl)
 {
     spi_flash_direct_transfer_t direct_command = {0};
     spi_flash_cfg_t const     * p_cfg          = p_instance_ctrl->p_cfg;
+
     if ((SPI_FLASH_PROTOCOL_1S_1S_1S == p_instance_ctrl->spi_protocol))
     {
         direct_command.command        = p_cfg->write_enable_command;
@@ -1189,7 +1221,33 @@ static void r_xspi_ospi_write_enable (xspi_ospi_instance_ctrl_t * p_instance_ctr
         direct_command.command_length = p_opi_commands->command_bytes;
     }
 
+    /* If the command is 0x00, then skip sending the write enable. */
+    if (0 == p_cfg->write_enable_command)
+    {
+        return FSP_SUCCESS;
+    }
+
     r_xspi_ospi_direct_transfer(p_instance_ctrl, &direct_command, SPI_FLASH_DIRECT_TRANSFER_DIR_WRITE);
+
+    /* In case write enable is not checked, assume write is enabled. */
+    bool write_enabled = true;
+
+#if XSPI_OSPI_MAX_WRITE_ENABLE_LOOPS > 0U
+
+    /* Verify write is enabled. */
+    for (uint32_t i = 0U; i < XSPI_OSPI_MAX_WRITE_ENABLE_LOOPS; i++)
+    {
+        write_enabled = r_xspi_ospi_status_sub(p_instance_ctrl, p_instance_ctrl->p_cfg->write_enable_bit);
+        if (write_enabled)
+        {
+            break;
+        }
+    }
+#endif
+
+    FSP_ERROR_RETURN(write_enabled, FSP_ERR_WRITE_FAILED);
+
+    return FSP_SUCCESS;
 }
 
 /*******************************************************************************************************************//**
@@ -1239,11 +1297,15 @@ static fsp_err_t r_xspi_ospi_automatic_calibration_seq (xspi_ospi_instance_ctrl_
 
         if (XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order)
         {
-            /* Apply __REV16 to match the preamble pattern with the data to be read in the auto calibration sequence. */
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2);
-            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = __REV16(XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3);
+            /* Apply byte_order_rev to match the preamble pattern with the data to be read in the auto calibration sequence. */
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL4 = byte_order_rev(
+                XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_0);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL5 = byte_order_rev(
+                XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_1);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL6 = byte_order_rev(
+                XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_2);
+            p_instance_ctrl->p_reg->CSb[chip_select].CCCTL7 = byte_order_rev(
+                XSPI_OSPI_PRV_AUTOCALIBRATION_PREAMBLE_PATTERN_3);
         }
         else
         {
@@ -1347,12 +1409,12 @@ static void r_xspi_ospi_direct_transfer (xspi_ospi_instance_ctrl_t         * p_i
             (XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order) &&
             (SPI_FLASH_PROTOCOL_8D_8D_8D == p_instance_ctrl->spi_protocol))
         {
-            /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-            p_instance_ctrl->p_reg->BUF[0].CDD0 = __REV16(p_transfer->data_u64 & UINT32_MAX);
+            /* Apply byte_order_rev to convert the data to match the OctaFlash byte order. */
+            p_instance_ctrl->p_reg->BUF[0].CDD0 = byte_order_rev(p_transfer->data_u64 & UINT32_MAX);
             if (p_transfer->data_length > sizeof(uint32_t))
             {
                 p_instance_ctrl->p_reg->BUF[0].CDD1 =
-                    __REV16((uint32_t) (p_transfer->data_u64 >> XSPI_OSPI_PRV_UINT32_BITS) & UINT32_MAX);
+                    byte_order_rev((uint32_t) (p_transfer->data_u64 >> XSPI_OSPI_PRV_UINT32_BITS) & UINT32_MAX);
             }
         }
         else
@@ -1375,11 +1437,11 @@ static void r_xspi_ospi_direct_transfer (xspi_ospi_instance_ctrl_t         * p_i
             (XSPI_OSPI_BYTE_ORDER_1032 == p_cfg_extend->byte_order) &&
             (SPI_FLASH_PROTOCOL_8D_8D_8D == p_instance_ctrl->spi_protocol))
         {
-            /* Apply __REV16 to convert the data to match the OctaFlash byte order. */
-            p_transfer->data_u64 = __REV16(p_instance_ctrl->p_reg->BUF[0].CDD0);
+            /* Apply byte_order_rev to convert the data to match the OctaFlash byte order. */
+            p_transfer->data_u64 = byte_order_rev(p_instance_ctrl->p_reg->BUF[0].CDD0);
             if (p_transfer->data_length > sizeof(uint32_t))
             {
-                p_transfer->data_u64 |= (uint64_t) (__REV16(p_instance_ctrl->p_reg->BUF[0].CDD1)) <<
+                p_transfer->data_u64 |= (uint64_t) (byte_order_rev(p_instance_ctrl->p_reg->BUF[0].CDD1)) <<
                                         XSPI_OSPI_PRV_UINT32_BITS;
             }
         }
@@ -1394,4 +1456,17 @@ static void r_xspi_ospi_direct_transfer (xspi_ospi_instance_ctrl_t         * p_i
     }
 
     p_instance_ctrl->p_reg->INTC = 1 << XSPI_OSPI_PRV_INTC_CMDCMPC_OFFSET;
+}
+
+/*******************************************************************************************************************//**
+ * Reverse byte order (16bit) to fit slave devices which byte order is byte1, byte0, byte3, byte2.
+ *
+ * @param[in]   value            32-bit data to be sent to or received from the slave device.
+ *
+ * @return      Byte order reversed value.
+ **********************************************************************************************************************/
+static uint32_t byte_order_rev (uint32_t value)
+{
+    return ((value & XSPI_OSPI_PRV_REV16_DECREMENT_BYTES_MASK) >> XSPI_OSPI_PRV_REV16_BYTES_SHIFT) |
+           ((value & XSPI_OSPI_PRV_REV16_INCREMENT_BYTES_MASK) << XSPI_OSPI_PRV_REV16_BYTES_SHIFT);
 }

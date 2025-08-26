@@ -137,6 +137,9 @@ typedef enum e_adc_sample_state_reg
 /** ADC comparison settings */
 typedef enum e_adc_compare_cfg
 {
+    ADC_COMPARE_CFG_EVENT_OUTPUT_OR  = 0,                                                     ///< Compound condition OR setting
+    ADC_COMPARE_CFG_EVENT_OUTPUT_XOR = 1,                                                     ///< Compound condition XOR setting
+    ADC_COMPARE_CFG_EVENT_OUTPUT_AND = 2,                                                     ///< Compound condition AND setting
 #if 1U == BSP_FEATURE_ADC_REGISTER_MASK_TYPE
     ADC_COMPARE_CFG_A_ENABLE      = R_ADC121_ADCMPCR_CMPAE_Msk | R_ADC121_ADCMPCR_CMPAIE_Msk, ///< Window A operation enabled
     ADC_COMPARE_CFG_B_ENABLE      = R_ADC121_ADCMPCR_CMPBE_Msk | R_ADC121_ADCMPCR_CMPBIE_Msk, ///< Window B operation enabled
@@ -167,6 +170,7 @@ typedef enum e_adc_window_b_channel
     ADC_WINDOW_B_CHANNEL_13,           ///< Window B channel 13
     ADC_WINDOW_B_CHANNEL_14,           ///< Window B channel 14
     ADC_WINDOW_B_CHANNEL_15,           ///< Window B channel 15
+    ADC_WINDOW_B_CHANNEL_NONE = 63,    ///< No channel is selected
 } adc_window_b_channel_t;
 
 /** ADC Window B comparison mode */
@@ -217,7 +221,7 @@ typedef enum e_adc_active_trigger
 
     ADC_ACTIVE_TRIGGER_ELC_TRIGGER         = (0x11U), ///< A/D Startup source A from ELC
     ADC_ACTIVE_TRIGGER_ELC_TRIGGER_GROUP_B = (0x12U), ///< A/D Startup source B from ELC
-    ADC_ACTIVE_TRIGGER_DISABLED            = (0x3FU)  ///< A/D Start trigger disabled
+    ADC_ACTIVE_TRIGGER_DISABLED            = (0x3FU), ///< A/D Start trigger disabled
 } adc_active_trigger_t;
 
 /** ADC double-trigger mode definitions */
@@ -308,6 +312,7 @@ typedef struct
 #endif
     adc_cfg_t const * p_cfg;
     uint32_t          opened;                   // Boolean to verify that the Unit has been initialized
+    uint32_t          initialized;              // Initialized status of ADC
     uint32_t          scan_mask;                // Scan mask used for Normal scan.
     uint16_t          scan_start_adcsr;
 

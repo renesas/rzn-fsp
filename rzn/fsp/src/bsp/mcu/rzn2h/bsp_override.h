@@ -32,6 +32,11 @@
 #include "../../src/bsp/mcu/all/bsp_cache.h"
 #include "../../src/bsp/mcu/all/bsp_slave_stop.h"
 
+/*BSP MPU Includes*/
+#ifdef BSP_CFG_CORE_CR52
+ #include "../../src/bsp/mcu/all/cr/bsp_mpu_core.h"
+#endif
+
 /*BSP MMU Includes*/
 #ifdef BSP_CFG_CORE_CA55
  #include "../../src/bsp/mcu/all/ca/bsp_mmu_core.h"
@@ -87,11 +92,12 @@ FSP_HEADER
 #define BSP_OVERRIDE_ETHER_EVENT_T
 #define BSP_OVERRIDE_ETHER_CALLBACK_ARGS_T
 #define BSP_OVERRIDE_ETHER_PHY_LSI_TYPE_T
+#define BSP_OVERRIDE_ETHER_SWITCH_EVENT_T
 #define BSP_OVERRIDE_ETHER_SWITCH_CALLBACK_ARGS_T
 #define BSP_OVERRIDE_POEG_STATE_T
 #define BSP_OVERRIDE_POEG_TRIGGER_T
 #define BSP_OVERRIDE_POE3_STATE_T
-
+#define BSP_OVERRIDE_POE3_ACTIVE_LEVEL_T
 #define BSP_OVERRIDE_TRANSFER_MODE_T
 #define BSP_OVERRIDE_TRANSFER_SIZE_T
 #define BSP_OVERRIDE_TRANSFER_ADDR_MODE_T
@@ -2750,6 +2756,14 @@ typedef enum e_ether_phy_lsi_type
     ETHER_PHY_LSI_TYPE_KSZ8041 = 5,     ///< Select configuration forKSZ8041
     ETHER_PHY_LSI_TYPE_CUSTOM  = 0xFFU, ///< Select configuration for User custom.
 } ether_phy_lsi_type_t;
+
+/** POE3 active level for short circuit detection. */
+typedef enum e_poe3_active_level
+{
+    POE3_ACTIVE_LEVEL_HIGH         = 1U,    ///< High level is set as the active level to detect a short circuit.
+    POE3_ACTIVE_LEVEL_LOW          = 0U,    ///< Low level is set as the active level to detect a short circuit.
+    POE3_ACTIVE_LEVEL_SETTING_NONE = 0xFFU, ///< The active level of the pin is set by the timer peripheral side, not by POE3.
+} poe3_active_level_t;
 
 /*==============================================
  * POEG API Overrides

@@ -68,9 +68,15 @@ usb_event_t g_usb_cstd_event;
 uint16_t    g_usb_change_device_state[USB_NUM_USBIP];
 #else                                  /*(BSP_CFG_RTOS == 0)*/
 usb_instance_ctrl_t g_usb_cstd_event[USB_EVENT_MAX];
-usb_callback_t    * g_usb_apl_callback[USB_NUM_USBIP];
-
 #endif                                 /*(BSP_CFG_RTOS == 0)*/
+usb_callback_t      * g_usb_apl_callback[USB_NUM_USBIP];
+usb_callback_args_t * g_usb_apl_callback_memory[USB_NUM_USBIP] =
+{
+    NULL,
+#if 2 == USB_NUM_USBIP
+    NULL,
+#endif                                 /* 2 == USB_NUM_USBIP */
+};
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 usb_utr_t g_usb_hdata[USB_NUM_USBIP][USB_MAXPIPE_NUM + 1] USB_BUFFER_PLACE_IN_SECTION;
@@ -81,7 +87,7 @@ usb_utr_t g_usb_pdata[USB_MAXPIPE_NUM + 1] USB_BUFFER_PLACE_IN_SECTION;
 
 #endif                                 /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
-volatile uint16_t g_usb_usbmode[USB_NUM_USBIP];
+volatile uint16_t g_usb_usbmode[USB_NUM_USBIP + 1];
 volatile uint16_t g_usb_open_class[USB_NUM_USBIP];
 
 #if defined(USB_CFG_PMSC_USE)
@@ -156,6 +162,8 @@ const usb_api_t g_usb_on_usb =
     .periControlDataSet   = R_USB_PeriControlDataSet,
     .periControlStatusSet = R_USB_PeriControlStatusSet,
     .remoteWakeup         = R_USB_RemoteWakeup,
+    .driverActivate       = R_USB_DriverActivate,
+    .callbackMemorySet    = R_USB_CallbackMemorySet,
     .moduleNumberGet      = R_USB_ModuleNumberGet,
     .classTypeGet         = R_USB_ClassTypeGet,
     .deviceAddressGet     = R_USB_DeviceAddressGet,
@@ -163,6 +171,8 @@ const usb_api_t g_usb_on_usb =
     .deviceStateGet       = R_USB_DeviceStateGet,
     .dataSizeGet          = R_USB_DataSizeGet,
     .setupGet             = R_USB_SetupGet,
+    .otgCallbackSet       = R_USB_OtgCallbackSet,
+    .otgSRP               = R_USB_OtgSRP,
 };
 
 /***********************************************************************************************************************
@@ -359,6 +369,7 @@ fsp_err_t R_USB_Open (usb_ctrl_t * const p_ctrl, usb_cfg_t const * const p_cfg)
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     g_usb_hstd_use_pipe[p_instance_ctrl->module_number] = 0;
     memset((void *) &g_usb_hdata[p_instance_ctrl->module_number], 0, sizeof(usb_utr_t));
+    memset((void *) &g_usb_hstd_pipe, 0, ((USB_MAXPIPE + 1) * sizeof(st_usb_pipe_t)));
 #endif                                 /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -2379,6 +2390,70 @@ fsp_err_t R_USB_RemoteWakeup (usb_ctrl_t * const p_ctrl)
 }
 
 /**************************************************************************//**
+ * @brief Activate USB Driver for USB Peripheral BareMetal.
+ *
+ * @retval FSP_SUCCESS              Successful completion.
+ * @retval FSP_ERR_USB_FAILED       The function could not be completed successfully.
+ * @retval FSP_ERR_ASSERTION        Parameter is NULL error.
+ * @note Call this API in the in the infinite loop of the application program or a timer interrupt.
+ ******************************************************************************/
+fsp_err_t R_USB_DriverActivate (usb_ctrl_t * const p_api_ctrl)
+{
+    fsp_err_t err = FSP_ERR_USB_FAILED;
+#if USB_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(p_api_ctrl)
+#endif                                 /* USB_CFG_PARAM_CHECKING_ENABLE */
+
+#if (BSP_CFG_RTOS == 0)
+    usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
+
+    if (USB_MODE_PERI == g_usb_usbmode[p_ctrl->module_number])
+    {
+        usb_cstd_usb_task();
+        err = FSP_SUCCESS;
+    }
+
+#else                                  /* (BSP_CFG_RTOS == 0) */
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    err = FSP_ERR_USB_FAILED;
+#endif /* (BSP_CFG_RTOS == 0) */
+    return err;
+}
+
+/**************************************************************************//**
+ * @brief Set callback memory to USB Driver for USB Peripheral BareMetal.
+ *
+ * @retval FSP_SUCCESS              Successful completion.
+ * @retval FSP_ERR_USB_FAILED       The function could not be completed successfully.
+ * @retval FSP_ERR_ASSERTION        Parameter is NULL error.
+ * @note Call this API after calling R_USB_Open function.
+ ******************************************************************************/
+fsp_err_t R_USB_CallbackMemorySet (usb_ctrl_t * const p_api_ctrl, usb_callback_args_t * p_callback_memory)
+{
+    fsp_err_t err = FSP_ERR_USB_FAILED;
+
+#if USB_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(p_api_ctrl)
+    FSP_ASSERT(p_callback_memory)
+#endif                                 /* USB_CFG_PARAM_CHECKING_ENABLE */
+
+#if (BSP_CFG_RTOS == 0)
+    usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
+
+    if (USB_MODE_PERI == g_usb_usbmode[p_ctrl->module_number])
+    {
+        g_usb_apl_callback_memory[p_ctrl->module_number] = p_callback_memory;
+        err = FSP_SUCCESS;
+    }
+
+#else                                  /* (BSP_CFG_RTOS == 0) */
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_callback_memory);
+#endif  /* (BSP_CFG_RTOS == 0) */
+    return err;
+}
+
+/**************************************************************************//**
  * @brief This API gets the module number.
  *
  * @retval FSP_SUCCESS              Successful completion.
@@ -2474,6 +2549,97 @@ fsp_err_t R_USB_SetupGet (usb_ctrl_t * const p_ctrl, usb_setup_t * setup)
     *setup = p_instance_ctrl->setup;
 
     return FSP_SUCCESS;
+}
+
+/**************************************************************************//**
+ * @brief Set callback function to be called when the OTG role swap was completed on Azure RTOS
+ *
+ * @retval FSP_SUCCESS              Successful completion.
+ * @retval FSP_ERR_USB_FAILED       The function could not be completed successfully.
+ * @retval FSP_ERR_ASSERTION        Parameter is NULL error.
+ ******************************************************************************/
+fsp_err_t R_USB_OtgCallbackSet (usb_ctrl_t * const p_api_ctrl, usb_otg_callback_t * p_callback)
+{
+    usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
+
+    FSP_ASSERT(NULL != p_api_ctrl);
+    FSP_ASSERT(NULL != p_callback);
+
+#if (BSP_CFG_RTOS == 1)
+ #if defined(USB_CFG_OTG_USE)
+    g_p_otg_callback[p_ctrl->module_number] = p_callback;
+
+    return FSP_SUCCESS;
+ #else                                 /* defined(USB_CFG_OTG_USE) */
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_callback);
+
+    return FSP_ERR_USB_FAILED;
+ #endif                                /* defined(USB_CFG_OTG_USE) */
+#else                                  /* (BSP_CFG_RTOS == 1) */
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    FSP_PARAMETER_NOT_USED(p_callback);
+
+    return FSP_ERR_USB_FAILED;
+#endif                                 /* (BSP_CFG_RTOS == 1) */
+}
+
+/**************************************************************************//**
+ * @brief  Start the SRP processing for OTG on Azure RTOS
+ *
+ * @retval FSP_SUCCESS              Successful completion.
+ * @retval FSP_ERR_USB_FAILED       The function could not be completed successfully.
+ * @retval FSP_ERR_ASSERTION        Parameter is NULL error.
+ * @note Do not support the VBUS Pulsing since OTG 2.0 does not support the VBUS Pulsing..
+ ******************************************************************************/
+fsp_err_t R_USB_OtgSRP (usb_ctrl_t * const p_api_ctrl)
+{
+    usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
+
+    FSP_ASSERT(NULL != p_api_ctrl)
+
+#if (BSP_CFG_RTOS == 1)
+ #if defined(USB_CFG_OTG_USE)
+    usb_utr_t utr;
+    uint16_t syssts;
+    uint16_t intsts;
+
+    if ((USB_MODE_PERI != g_usb_usbmode[p_ctrl->module_number]) || (USB_YES == g_is_A_device[p_ctrl->module_number]))
+    {
+        return FSP_ERR_USB_FAILED;
+    }
+    else
+    {
+        utr.ip = p_ctrl->module_number;
+        syssts = hw_usb_read_syssts(&utr);
+        intsts = hw_usb_read_intsts(utr.ip);
+
+        if ((USB_SE0 == (syssts & USB_LNST)) && (0 == (intsts & USB_VBSTS)))
+        {
+            /* Data Pulsing Processing */
+            hw_usb_pset_dprpu(utr.ip);   // D+ PullUp ON
+
+            usb_cpu_delay_xms((uint16_t) 5);
+
+            hw_usb_pclear_dprpu(utr.ip); // D+ PullUp OFF
+        }
+        else
+        {
+            return FSP_ERR_USB_FAILED;
+        }
+    }
+
+    return FSP_SUCCESS;
+ #else                                 /* USB_CFG_OTG_USE */
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return FSP_ERR_USB_FAILED;
+ #endif                                /* USB_CFG_OTG_USE */
+#else                                  /* (BSP_CFG_RTOS == 1) */
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+
+    return FSP_ERR_USB_FAILED;
+#endif  /* (BSP_CFG_RTOS == 1) */
 }
 
 /*******************************************************************************************************************//**

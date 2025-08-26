@@ -75,19 +75,22 @@ typedef enum e_fsp_ip
     FSP_IP_TSU        = 33,            ///< Temperature Sensor
     FSP_IP_DOC        = 34,            ///< Data Operation Circuit
     FSP_IP_SYSRAM     = 35,            ///< System SRAM
-    FSP_IP_ENCIF      = 36,            ///< Encoder Interface
-    FSP_IP_SHOSTIF    = 37,            ///< Serial Host Interface
-    FSP_IP_PHOSTIF    = 38,            ///< Parallel Host Interface
-    FSP_IP_SCIE       = 39,            ///< Serial Communications Interface for encoder interface
-    FSP_IP_TRACECLOCK = 40,            ///< Trace Clock
-    FSP_IP_ENCOUT     = 41,            ///< Encoder Divided-Output
-    FSP_IP_DDRSS      = 42,            ///< LPDDR4 SDRAM Subsystem
-    FSP_IP_LCDC       = 43,            ///< LCD Controller
-    FSP_IP_PCIE       = 44,            ///< PCI Express 3.0 Interface
-    FSP_IP_SDHI       = 45,            ///< SDMMC Host Interface
-    FSP_IP_CPU1       = 46,            ///< CPU1 Module Stop
-    FSP_IP_CR52       = 47,            ///< Cortex-R52 CPUn Module Stop
-    FSP_IP_CA55       = 48             ///< Cortex-A55 CPUn Module Stop
+    FSP_IP_SHOSTIF    = 36,            ///< Serial Host Interface
+    FSP_IP_PHOSTIF    = 37,            ///< Parallel Host Interface
+    FSP_IP_AFMT       = 38,            ///< A-Format
+    FSP_IP_HDSL       = 39,            ///< HIPERFACE DSL
+    FSP_IP_BISS       = 40,            ///< BiSS-C
+    FSP_IP_ENDAT      = 41,            ///< EnDat 2.2
+    FSP_IP_SCIE       = 42,            ///< Serial Communications Interface for encoder interface
+    FSP_IP_TRACECLOCK = 43,            ///< Trace Clock
+    FSP_IP_ENCOUT     = 44,            ///< Encoder Divided-Output
+    FSP_IP_DDRSS      = 45,            ///< LPDDR4 SDRAM Subsystem
+    FSP_IP_LCDC       = 46,            ///< LCD Controller
+    FSP_IP_PCIE       = 47,            ///< PCI Express 3.0 Interface
+    FSP_IP_SDHI       = 48,            ///< SDMMC Host Interface
+    FSP_IP_CPU1       = 49,            ///< CPU1 Module Stop
+    FSP_IP_CR52       = 50,            ///< Cortex-R52 CPUn Module Stop
+    FSP_IP_CA55       = 51             ///< Cortex-A55 CPUn Module Stop
 } fsp_ip_t;
 
 /** Signals that can be mapped to an interrupt. */

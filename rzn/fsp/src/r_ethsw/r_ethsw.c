@@ -499,12 +499,12 @@ fsp_err_t R_ETHSW_Close (ether_switch_ctrl_t * const p_ctrl)
 
     R_ETHSW_Type * p_reg_switch;
 
-    p_reg_switch = p_instance_ctrl->p_reg_switch;
-
 #if (ETHSW_CFG_PARAM_CHECKING_ENABLE)
     FSP_ASSERT(p_instance_ctrl);
     ETHSW_ERROR_RETURN(ETHSW_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
 #endif
+
+    p_reg_switch = p_instance_ctrl->p_reg_switch;
 
     /* Set line port phy link change interrupt disable Bit (PORT0 - 2) */
     p_reg_switch->INT_CONFIG_b.IRQ_LINK = 0;

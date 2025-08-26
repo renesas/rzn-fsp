@@ -13,6 +13,10 @@
  #include "r_usb_dmac.h"
 #endif
 
+#if (BSP_CFG_RTOS == 2)
+ #include "r_usb_cstd_rtos.h"
+#endif                                 /* (BSP_CFG_RTOS == 2) */
+
 /*****************************************************************************
  * Public Variables
  ******************************************************************************/
@@ -116,16 +120,16 @@ extern usb_descriptor_t g_usb_descriptor;
 
  #if defined(USB_CFG_PMSC_USE)
 extern uint8_t g_usb_pmsc_usbip;
- #endif                                                /* defined(USB_CFG_PMSC_USE) */
+ #endif                                                    /* defined(USB_CFG_PMSC_USE) */
 
-#endif                                                 /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
+#endif                                                     /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
-extern uint16_t g_usb_pstd_remote_wakeup;              /* Remote Wake up Enable Flag */
-extern uint16_t g_usb_pstd_remote_wakeup_state;        /* Result for Remote wake up */
+extern uint16_t g_usb_pstd_remote_wakeup;                  /* Remote Wake up Enable Flag */
+extern uint16_t g_usb_pstd_remote_wakeup_state;            /* Result for Remote wake up */
 
 /* r_usb.c */
 
-extern volatile uint16_t g_usb_usbmode[USB_NUM_USBIP]; /* USB mode HOST/PERI */
+extern volatile uint16_t g_usb_usbmode[USB_NUM_USBIP + 1]; /* USB mode HOST/PERI */
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 extern usb_utr_t g_usb_hdata[USB_NUM_USBIP][USB_MAXPIPE_NUM + 1];
@@ -139,7 +143,7 @@ extern usb_utr_t g_usb_pdata[USB_MAXPIPE_NUM + 1];
 
 #if (BSP_CFG_RTOS == 2)
 extern usb_instance_ctrl_t g_usb_cstd_event[];
-extern usb_hdl_t           g_usb_cur_task_hdl[];
+extern rtos_task_id_t      g_usb_cur_task_hdl[];
 #else                                  /* #if (BSP_CFG_RTOS == 2) */
 extern usb_event_t g_usb_cstd_event;
 #endif                                 /*#if (BSP_CFG_RTOS == 2)*/
@@ -178,11 +182,12 @@ extern uint16_t g_usb_hstd_use_pipe[];
 #endif                                 /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 #if (BSP_CFG_RTOS == 2)
-extern SemaphoreHandle_t g_usb_semaphore_hdl[];
+extern rtos_sem_id_t g_usb_semaphore_hdl[];
 extern usb_utr_t * get_usb_int_buf(void);
 
-extern usb_callback_t * g_usb_apl_callback[USB_NUM_USBIP];
 #endif                                 /*#if (BSP_CFG_RTOS == 2)*/
+extern usb_callback_t      * g_usb_apl_callback[USB_NUM_USBIP];
+extern usb_callback_args_t * g_usb_apl_callback_memory[USB_NUM_USBIP];
 
 /* r_usb_pbc.c */
 #if USB_CFG_BC == USB_CFG_ENABLE
