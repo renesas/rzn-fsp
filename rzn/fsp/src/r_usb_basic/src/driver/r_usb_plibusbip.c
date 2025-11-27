@@ -740,7 +740,7 @@ void usb_pstd_data_end (uint16_t pipe, uint16_t status, usb_utr_t * p_utr)
     }
 
     /* Call Back */
-    if (USB_NULL != g_p_usb_pstd_pipe[pipe])
+    if (((void *) USB_NULL) != g_p_usb_pstd_pipe[pipe])
     {
         /* Transfer information set */
         g_p_usb_pstd_pipe[pipe]->tranlen = g_usb_pstd_data_cnt[pipe];
@@ -793,7 +793,7 @@ void usb_pstd_brdy_pipe_process (usb_utr_t * p_utr, uint16_t bitsts)
             /* Interrupt check */
             hw_usb_clear_status_bemp(p_utr, i);
 
-            if (USB_NULL != g_p_usb_pstd_pipe[i])
+            if (((void *) USB_NULL) != g_p_usb_pstd_pipe[i])
             {
                 /* Pipe number to FIFO port select */
                 useport = usb_pstd_pipe2fport(p_utr, i);
@@ -909,7 +909,7 @@ void usb_pstd_nrdy_pipe_process (usb_utr_t * p_utr, uint16_t bitsts)
         if (0 != (bitsts & USB_BITSET(i)))
         {
             /* Interrupt check */
-            if (USB_NULL != g_p_usb_pstd_pipe[i])
+            if (((void *) USB_NULL) != g_p_usb_pstd_pipe[i])
             {
                 if (USB_TYPFIELD_ISO == usb_cstd_get_pipe_type(p_utr, i))
                 {
@@ -960,7 +960,7 @@ void usb_pstd_bemp_pipe_process (usb_utr_t * p_utr, uint16_t bitsts)
         if (0 != (bitsts & USB_BITSET(i)))
         {
             /* Interrupt check */
-            if ((USB_NULL != g_p_usb_pstd_pipe[i]) && (USB_ON != g_usb_cstd_bemp_skip[p_utr->ip][i]))
+            if ((((void *) USB_NULL) != g_p_usb_pstd_pipe[i]) && (USB_ON != g_usb_cstd_bemp_skip[p_utr->ip][i]))
             {
                 buffer = usb_cstd_get_pid(p_utr, i);
 
@@ -994,7 +994,7 @@ void usb_pstd_bemp_pipe_process (usb_utr_t * p_utr, uint16_t bitsts)
         /* Interrupt check */
         if (0 != (bitsts & USB_BITSET(i)))
         {
-            if (USB_NULL != g_p_usb_pstd_pipe[i])
+            if (((void *) USB_NULL) != g_p_usb_pstd_pipe[i])
             {
                 buffer = usb_cstd_get_pid(p_utr, i);
 
@@ -1254,7 +1254,7 @@ uint8_t usb_pstd_get_pipe_no (uint8_t type, uint8_t dir, usb_utr_t * p_utr, uint
     (void) p_utr;
     (void) class_info;
  #if defined(USB_CFG_PVND_USE)
-    uint16_t pipe;
+    uint8_t pipe;
  #endif                                /* defined(USB_CFG_PVND_USE) */
 
  #if defined(USB_CFG_PCDC_USE)

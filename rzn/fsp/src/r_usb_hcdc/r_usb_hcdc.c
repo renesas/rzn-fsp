@@ -59,7 +59,7 @@ fsp_err_t R_USB_HCDC_ControlDataRead (usb_ctrl_t * const p_api_ctrl,
     usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
 
 #if USB_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(USB_NULL != p_api_ctrl)
+    FSP_ASSERT((void *) USB_NULL != p_api_ctrl)
 
     FSP_ERROR_RETURN(0 != device_address, FSP_ERR_USB_PARAMETER);
     FSP_ERROR_RETURN(USB_ADDRESS5 >= device_address, FSP_ERR_USB_PARAMETER)
@@ -69,7 +69,7 @@ fsp_err_t R_USB_HCDC_ControlDataRead (usb_ctrl_t * const p_api_ctrl,
     p_ctrl->type           = (usb_class_t) (USB_CLASS_HCDCC & USB_VALUE_7FH);
 
 #if USB_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(!(((USB_NULL == p_buf)) || (USB_NULL == size)))
+    FSP_ASSERT(!((((void *) USB_NULL == p_buf)) || (USB_NULL == size)))
 
     /* Argument Checking */
     FSP_ERROR_RETURN(!((USB_IP0 != p_ctrl->module_number) && (USB_IP1 != p_ctrl->module_number)), FSP_ERR_USB_PARAMETER)
@@ -126,7 +126,7 @@ fsp_err_t R_USB_HCDC_SpecificDeviceRegister (usb_ctrl_t * const p_api_ctrl, uint
     FSP_PARAMETER_NOT_USED(*p_ctrl);
 
 #if USB_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(USB_NULL != p_api_ctrl)
+    FSP_ASSERT((void *) USB_NULL != p_api_ctrl)
     FSP_ASSERT((0x0000 != vendor_id) && (0x0000 != product_id))
 
     /* Argument Checking */
@@ -178,8 +178,8 @@ fsp_err_t R_USB_HCDC_DeviceInfoGet (usb_ctrl_t * const       p_api_ctrl,
     usb_instance_ctrl_t * p_ctrl = (usb_instance_ctrl_t *) p_api_ctrl;
 
 #if USB_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(USB_NULL != p_api_ctrl)
-    FSP_ASSERT(USB_NULL != p_info)
+    FSP_ASSERT((void *) USB_NULL != p_api_ctrl)
+    FSP_ASSERT((void *) USB_NULL != p_info)
 
     FSP_ERROR_RETURN(0 != device_address, FSP_ERR_USB_PARAMETER);
     FSP_ERROR_RETURN(USB_ADDRESS5 >= device_address, FSP_ERR_USB_PARAMETER)

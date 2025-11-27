@@ -997,7 +997,7 @@ static void pmsc_atapi_get_mode_sense10_data (uint8_t page_code, uint32_t * size
         }
     }
 
-    if (USB_NULL != buff)
+    if ((void *) USB_NULL != buff)
     {
         *buff = p_data;
     }

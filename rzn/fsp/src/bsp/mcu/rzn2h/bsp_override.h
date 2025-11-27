@@ -69,6 +69,10 @@
  #include "../../src/bsp/mcu/all/bsp_ddr.h"
 #endif
 
+#if BSP_CFG_ESD_BOOT || BSP_CFG_EMMC_BOOT
+ #include "../../src/bsp/mcu/all/bsp_sdhi.h"
+#endif
+
 /** Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
 

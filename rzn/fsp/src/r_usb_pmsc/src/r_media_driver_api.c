@@ -68,7 +68,7 @@ fsp_err_t r_usb_pmsc_media_initialize (void const * p_context)
     rm_block_media_status_t status;
     rm_block_media_info_t   info;
 
-    if (USB_NULL != p_context)
+    if ((void *) USB_NULL != p_context)
     {
         gp_block_media_instance = (rm_block_media_instance_t *) p_context;
         err_code                = gp_block_media_instance->p_api->open(gp_block_media_instance->p_ctrl,

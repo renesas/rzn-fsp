@@ -64,6 +64,9 @@ fsp_err_t R_CMT_Enable(timer_ctrl_t * const p_ctrl);
 fsp_err_t R_CMT_Disable(timer_ctrl_t * const p_ctrl);
 fsp_err_t R_CMT_PeriodSet(timer_ctrl_t * const p_ctrl, uint32_t const period_counts);
 fsp_err_t R_CMT_DutyCycleSet(timer_ctrl_t * const p_ctrl, uint32_t const duty_cycle_counts, uint32_t const pin);
+fsp_err_t R_CMT_CompareMatchSet(timer_ctrl_t * const        p_ctrl,
+                                uint32_t const              compare_match_value,
+                                timer_compare_match_t const match_channel);
 fsp_err_t R_CMT_InfoGet(timer_ctrl_t * const p_ctrl, timer_info_t * const p_info);
 fsp_err_t R_CMT_StatusGet(timer_ctrl_t * const p_ctrl, timer_status_t * const p_status);
 fsp_err_t R_CMT_CounterSet(timer_ctrl_t * const p_ctrl, uint32_t counter);

@@ -448,7 +448,7 @@ usb_er_t usb_ctrl_write (usb_instance_ctrl_t * p_ctrl, uint8_t * buf, uint32_t s
 
     if (USB_MODE_PERI == g_usb_usbmode[p_ctrl->module_number])
     {
-        if ((USB_NULL == buf) && (USB_NULL == size))
+        if (((void *) USB_NULL == buf) && (USB_NULL == size))
         {
             if (USB_SETUP_STATUS_ACK == p_ctrl->status)
             {

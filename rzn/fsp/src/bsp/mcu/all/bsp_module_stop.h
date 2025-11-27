@@ -313,25 +313,45 @@ FSP_HEADER
  #define BSP_MSTP_BIT_FSP_IP_AFMT(channel)          (1U << (0U))
  #define BSP_MSTP_DMY_FSP_IP_AFMT(channel)          (0 == channel) ? R_AFMT0->ENC1RXDATA0 : R_AFMT1->ENC1RXDATA0
 #elif (14U == BSP_FEATURE_BSP_AFMT_UNIT)
- #define BSP_MSTP_REG_FSP_IP_AFMT(channel)          *((8U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
- #define BSP_MSTP_BIT_FSP_IP_AFMT(channel)          ((8U >= channel) ? \
+ #define BSP_MSTP_REG_FSP_IP_AFMT(channel)          *((7U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
+ #define BSP_MSTP_BIT_FSP_IP_AFMT(channel)          ((7U >= channel) ? \
                                                      (1U << (channel * 4U)) : (1U << ((channel - 8U) * 4U)))
- #define BSP_MSTP_DMY_FSP_IP_AFMT(channel)          (0 >= channel) ? R_AFMT0->ENC1RXDATA0 : \
-    ((1 >= channel) ? R_AFMT1->ENC1RXDATA0 :                                                \
-     ((2 >= channel) ? R_AFMT2->ENC1RXDATA0 :                                               \
-      ((3 >= channel) ? R_AFMT3->ENC1RXDATA0 :                                              \
-       ((4 >= channel) ? R_AFMT4->ENC1RXDATA0 :                                             \
-        ((5 >= channel) ? R_AFMT5->ENC1RXDATA0 :                                            \
-         ((6 >= channel) ? R_AFMT6->ENC1RXDATA0 :                                           \
-          ((7 >= channel) ? R_AFMT7->ENC1RXDATA0 :                                          \
-           ((8 >= channel) ? R_AFMT8->ENC1RXDATA0 :                                         \
-            ((9 >= channel) ? R_AFMT9->ENC1RXDATA0 :                                        \
-             ((10 >= channel) ? R_AFMT10->ENC1RXDATA0 :                                     \
-              ((11 >= channel) ? R_AFMT11->ENC1RXDATA0 :                                    \
-               ((12 >= channel) ? R_AFMT12->ENC1RXDATA0 :                                   \
-                ((13 >= channel) ? R_AFMT13->ENC1RXDATA0 :                                  \
-                 ((14 >= channel) ? R_AFMT14->ENC1RXDATA0 :                                 \
-                  R_AFMT15->ENC1RXDATA0))))))))))))))
+ #define BSP_MSTP_DMY_FSP_IP_AFMT(channel)  \
+    {                                       \
+        switch (channel)                    \
+        {                                   \
+            case 0:                         \
+            {R_AFMT0->ENC1RXDATA0; break;}  \
+            case 1:                         \
+            {R_AFMT1->ENC1RXDATA0; break;}  \
+            case 2:                         \
+            {R_AFMT2->ENC1RXDATA0; break;}  \
+            case 3:                         \
+            {R_AFMT3->ENC1RXDATA0; break;}  \
+            case 4:                         \
+            {R_AFMT4->ENC1RXDATA0; break;}  \
+            case 5:                         \
+            {R_AFMT5->ENC1RXDATA0; break;}  \
+            case 6:                         \
+            {R_AFMT6->ENC1RXDATA0; break;}  \
+            case 7:                         \
+            {R_AFMT7->ENC1RXDATA0; break;}  \
+            case 9:                         \
+            {R_AFMT9->ENC1RXDATA0; break;}  \
+            case 10:                        \
+            {R_AFMT10->ENC1RXDATA0; break;} \
+            case 11:                        \
+            {R_AFMT11->ENC1RXDATA0; break;} \
+            case 12:                        \
+            {R_AFMT12->ENC1RXDATA0; break;} \
+            case 13:                        \
+            {R_AFMT13->ENC1RXDATA0; break;} \
+            case 14:                        \
+            {R_AFMT14->ENC1RXDATA0; break;} \
+            default:                        \
+            {assert(0); break;}             \
+        }                                   \
+    }
 #endif
 
 #if (2 == BSP_FEATURE_BSP_HDSL_UNIT)
@@ -339,26 +359,46 @@ FSP_HEADER
  #define BSP_MSTP_BIT_FSP_IP_HDSL(channel)          (1U << (1U))
  #define BSP_MSTP_DMY_FSP_IP_HDSL(channel)          (0 == channel) ? R_HDSLD0->SYS_CTRL : R_HDSLD1->SYS_CTRL
 #elif (14 == BSP_FEATURE_BSP_HDSL_UNIT)
- #define BSP_MSTP_REG_FSP_IP_HDSL(channel)          *((8U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
- #define BSP_MSTP_BIT_FSP_IP_HDSL(channel)          ((8U >= channel) ?                      \
+ #define BSP_MSTP_REG_FSP_IP_HDSL(channel)          *((7U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
+ #define BSP_MSTP_BIT_FSP_IP_HDSL(channel)          ((7U >= channel) ?                      \
                                                      (1U << ((channel * 4U) + 1U)) : (1U << \
                                                                                       (((channel - 8U) * 4U) + 1U)))
- #define BSP_MSTP_DMY_FSP_IP_HDSL(channel)          (0 >= channel) ? R_HDSLD0->SYS_CTRL : \
-    ((1 >= channel) ? R_HDSLD1->SYS_CTRL :                                                \
-     ((2 >= channel) ? R_HDSLD2->SYS_CTRL :                                               \
-      ((3 >= channel) ? R_HDSLD3->SYS_CTRL :                                              \
-       ((4 >= channel) ? R_HDSLD4->SYS_CTRL :                                             \
-        ((5 >= channel) ? R_HDSLD5->SYS_CTRL :                                            \
-         ((6 >= channel) ? R_HDSLD6->SYS_CTRL :                                           \
-          ((7 >= channel) ? R_HDSLD7->SYS_CTRL :                                          \
-           ((8 >= channel) ? R_HDSLD8->SYS_CTRL :                                         \
-            ((9 >= channel) ? R_HDSLD9->SYS_CTRL :                                        \
-             ((10 >= channel) ? R_HDSLD10->SYS_CTRL :                                     \
-              ((11 >= channel) ? R_HDSLD11->SYS_CTRL :                                    \
-               ((12 >= channel) ? R_HDSLD12->SYS_CTRL :                                   \
-                ((13 >= channel) ? R_HDSLD13->SYS_CTRL :                                  \
-                 ((14 >= channel) ? R_HDSLD14->SYS_CTRL :                                 \
-                  R_HDSLD15->SYS_CTRL))))))))))))))
+ #define BSP_MSTP_DMY_FSP_IP_HDSL(channel) \
+    {                                      \
+        switch (channel)                   \
+        {                                  \
+            case 0:                        \
+            {R_HDSLD0->SYS_CTRL; break;}   \
+            case 1:                        \
+            {R_HDSLD1->SYS_CTRL; break;}   \
+            case 2:                        \
+            {R_HDSLD2->SYS_CTRL; break;}   \
+            case 3:                        \
+            {R_HDSLD3->SYS_CTRL; break;}   \
+            case 4:                        \
+            {R_HDSLD4->SYS_CTRL; break;}   \
+            case 5:                        \
+            {R_HDSLD5->SYS_CTRL; break;}   \
+            case 6:                        \
+            {R_HDSLD6->SYS_CTRL; break;}   \
+            case 7:                        \
+            {R_HDSLD7->SYS_CTRL; break;}   \
+            case 9:                        \
+            {R_HDSLD9->SYS_CTRL; break;}   \
+            case 10:                       \
+            {R_HDSLD10->SYS_CTRL; break;}  \
+            case 11:                       \
+            {R_HDSLD11->SYS_CTRL; break;}  \
+            case 12:                       \
+            {R_HDSLD12->SYS_CTRL; break;}  \
+            case 13:                       \
+            {R_HDSLD13->SYS_CTRL; break;}  \
+            case 14:                       \
+            {R_HDSLD14->SYS_CTRL; break;}  \
+            default:                       \
+            {assert(0); break;}            \
+        }                                  \
+    }
 #endif
 
 #if (2 == BSP_FEATURE_BSP_BISS_UNIT)
@@ -366,106 +406,146 @@ FSP_HEADER
  #define BSP_MSTP_BIT_FSP_IP_BISS(channel)          (1U << (2U))
  #define BSP_MSTP_DMY_FSP_IP_BISS(channel)          (0 == channel) ? R_BISS0->SCDATA[0].L : R_BISS1->SCDATA[0].L
 #elif (14 == BSP_FEATURE_BSP_BISS_UNIT)
- #define BSP_MSTP_REG_FSP_IP_BISS(channel)          *((0U == channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
- #define BSP_MSTP_BIT_FSP_IP_BISS(channel)          ((8U >= channel) ?                      \
+ #define BSP_MSTP_REG_FSP_IP_BISS(channel)          *((7U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
+ #define BSP_MSTP_BIT_FSP_IP_BISS(channel)          ((7U >= channel) ?                      \
                                                      (1U << ((channel * 4U) + 2U)) : (1U << \
                                                                                       (((channel - 8U) * 4U) + 2U)))
 
- #define BSP_MSTP_DMY_FSP_IP_BISS(channel)          (0 == channel) ? R_BISS0->SCDATAL1 : \
-    ((1 >= channel) ? R_BISS1->SCDATAL1 :                                                \
-     ((2 >= channel) ? R_BISS2->SCDATAL1 :                                               \
-      ((3 >= channel) ? R_BISS3->SCDATAL1 :                                              \
-       ((4 >= channel) ? R_BISS4->SCDATAL1 :                                             \
-        ((5 >= channel) ? R_BISS5->SCDATAL1 :                                            \
-         ((6 >= channel) ? R_BISS6->SCDATAL1 :                                           \
-          ((7 >= channel) ? R_BISS7->SCDATAL1 :                                          \
-           ((8 >= channel) ? R_BISS8->SCDATAL1 :                                         \
-            ((9 >= channel) ? R_BISS9->SCDATAL1 :                                        \
-             ((10 >= channel) ? R_BISS10->SCDATAL1 :                                     \
-              ((11 >= channel) ? R_BISS11->SCDATAL1 :                                    \
-               ((12 >= channel) ? R_BISS12->SCDATAL1 :                                   \
-                ((13 >= channel) ? R_BISS13->SCDATAL1 :                                  \
-                 ((14 >= channel) ? R_BISS14->SCDATAL1 :                                 \
-                  R_BISS5->SCDATAL1))))))))))))))
+ #define BSP_MSTP_DMY_FSP_IP_BISS(channel) \
+    {                                      \
+        switch (channel)                   \
+        {                                  \
+            case 0:                        \
+            {R_BISS0->SCDATA[0]; break;}   \
+            case 1:                        \
+            {R_BISS1->SCDATA[0]; break;}   \
+            case 2:                        \
+            {R_BISS2->SCDATA[0]; break;}   \
+            case 3:                        \
+            {R_BISS3->SCDATA[0]; break;}   \
+            case 4:                        \
+            {R_BISS4->SCDATA[0]; break;}   \
+            case 5:                        \
+            {R_BISS5->SCDATA[0]; break;}   \
+            case 6:                        \
+            {R_BISS6->SCDATA[0]; break;}   \
+            case 7:                        \
+            {R_BISS7->SCDATA[0]; break;}   \
+            case 9:                        \
+            {R_BISS9->SCDATA[0]; break;}   \
+            case 10:                       \
+            {R_BISS10->SCDATA[0]; break;}  \
+            case 11:                       \
+            {R_BISS11->SCDATA[0]; break;}  \
+            case 12:                       \
+            {R_BISS12->SCDATA[0]; break;}  \
+            case 13:                       \
+            {R_BISS13->SCDATA[0]; break;}  \
+            case 14:                       \
+            {R_BISS14->SCDATA[0]; break;}  \
+            default:                       \
+            {assert(0); break;}            \
+        }                                  \
+    }
 #endif
 
 #if (2 == BSP_FEATURE_BSP_ENDAT_UNIT)
- #define BSP_MSTP_REG_FSP_IP_ENDAT(channel)         *((0U == channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
- #define BSP_MSTP_BIT_FSP_IP_ENDAT(channel)         (1U << (3U))
- #define BSP_MSTP_DMY_FSP_IP_ENDAT(channel)         (0 == channel) ? R_ENDAT0->SEND : R_ENDAT1->SEND
+ #define BSP_MSTP_REG_FSP_IP_ENDAT(channel)     *((0U == channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
+ #define BSP_MSTP_BIT_FSP_IP_ENDAT(channel)     (1U << (3U))
+ #define BSP_MSTP_DMY_FSP_IP_ENDAT(channel)     (0 == channel) ? R_ENDAT0->SEND : R_ENDAT1->SEND
 #elif (14 == BSP_FEATURE_BSP_ENDAT_UNIT)
- #define BSP_MSTP_REG_FSP_IP_ENDAT(channel)         *((0U == channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
- #define BSP_MSTP_BIT_FSP_IP_ENDAT(channel)         ((8U >= channel) ?                      \
-                                                     (1U << ((channel * 4U) + 3U)) : (1U << \
-                                                                                      (((channel - 8U) * 4U) + 3U)))
- #define BSP_MSTP_DMY_FSP_IP_ENDAT(channel)         (0 >= channel) ? R_ENDAT0->SEND : \
-    ((1 >= channel) ? R_ENDAT1->SEND :                                                \
-     ((2 >= channel) ? R_ENDAT2->SEND :                                               \
-      ((3 >= channel) ? R_ENDAT3->SEND :                                              \
-       ((4 >= channel) ? R_ENDAT4->SEND :                                             \
-        ((5 >= channel) ? R_ENDAT5->SEND :                                            \
-         ((6 >= channel) ? R_ENDAT6->SEND :                                           \
-          ((7 >= channel) ? R_ENDAT7->SEND :                                          \
-           ((8 >= channel) ? R_ENDAT8->SEND :                                         \
-            ((9 >= channel) ? R_ENDAT9->SEND :                                        \
-             ((10 >= channel) ? R_ENDAT10->SEND :                                     \
-              ((11 >= channel) ? R_ENDAT11->SEND :                                    \
-               ((12 >= channel) ? R_ENDAT12->SEND :                                   \
-                ((13 >= channel) ? R_ENDAT13->SEND :                                  \
-                 ((14 >= channel) ? R_ENDAT14->SEND :                                 \
-                  R_ENDAT15->SEND))))))))))))))
+ #define BSP_MSTP_REG_FSP_IP_ENDAT(channel)     *((7U >= channel) ? &R_SYSC_NS->MSTPCRJ : &R_SYSC_NS->MSTPCRK)
+ #define BSP_MSTP_BIT_FSP_IP_ENDAT(channel)     ((7U >= channel) ?                      \
+                                                 (1U << ((channel * 4U) + 3U)) : (1U << \
+                                                                                  (((channel - 8U) * 4U) + 3U)))
+ #define BSP_MSTP_DMY_FSP_IP_ENDAT(channel) \
+    {                                       \
+        switch (channel)                    \
+        {                                   \
+            case 0:                         \
+            {R_ENDAT0->SEND; break;}        \
+            case 1:                         \
+            {R_ENDAT1->SEND; break;}        \
+            case 2:                         \
+            {R_ENDAT2->SEND; break;}        \
+            case 3:                         \
+            {R_ENDAT3->SEND; break;}        \
+            case 4:                         \
+            {R_ENDAT4->SEND; break;}        \
+            case 5:                         \
+            {R_ENDAT5->SEND; break;}        \
+            case 6:                         \
+            {R_ENDAT6->SEND; break;}        \
+            case 7:                         \
+            {R_ENDAT7->SEND; break;}        \
+            case 9:                         \
+            {R_ENDAT9->SEND; break;}        \
+            case 10:                        \
+            {R_ENDAT10->SEND; break;}       \
+            case 11:                        \
+            {R_ENDAT11->SEND; break;}       \
+            case 12:                        \
+            {R_ENDAT12->SEND; break;}       \
+            case 13:                        \
+            {R_ENDAT13->SEND; break;}       \
+            case 14:                        \
+            {R_ENDAT14->SEND; break;}       \
+            default:                        \
+            {assert(0); break;}             \
+        }                                   \
+    }
 #endif
 
 #if BSP_FEATURE_BSP_ENCOUT_SUPPORTED
- #define BSP_MSTP_REG_FSP_IP_ENCOUT(channel)        R_SYSC_NS->MSTPCRL
- #define BSP_MSTP_BIT_FSP_IP_ENCOUT(channel)        (1U << (0U))
- #define BSP_MSTP_DMY_FSP_IP_ENCOUT(channel)        R_ENCOUT->CTL
+ #define BSP_MSTP_REG_FSP_IP_ENCOUT(channel)    R_SYSC_NS->MSTPCRL
+ #define BSP_MSTP_BIT_FSP_IP_ENCOUT(channel)    (1U << (0U))
+ #define BSP_MSTP_DMY_FSP_IP_ENCOUT(channel)    R_ENCOUT->CTL
 #endif
 
 #if BSP_FEATURE_BSP_DDRSS_SUPPORTED
- #define BSP_MSTP_REG_FSP_IP_DDRSS(channel)         R_SYSC_NS->MSTPCRM
- #define BSP_MSTP_BIT_FSP_IP_DDRSS(channel)         (1U << (0U))
- #define BSP_MSTP_DMY_FSP_IP_DDRSS(channel)         R_DDRSS->DDR_MEMC_DENALI_CTL_00
+ #define BSP_MSTP_REG_FSP_IP_DDRSS(channel)     R_SYSC_NS->MSTPCRM
+ #define BSP_MSTP_BIT_FSP_IP_DDRSS(channel)     (1U << (0U))
+ #define BSP_MSTP_DMY_FSP_IP_DDRSS(channel)     R_DDRSS->DDR_MEMC_DENALI_CTL_00
 #endif
 
 #if BSP_FEATURE_BSP_LCDC_SUPPORTED
- #define BSP_MSTP_REG_FSP_IP_LCDC(channel)          R_SYSC_NS->MSTPCRM
- #define BSP_MSTP_BIT_FSP_IP_LCDC(channel)          (1U << (4U))
+ #define BSP_MSTP_REG_FSP_IP_LCDC(channel)      R_SYSC_NS->MSTPCRM
+ #define BSP_MSTP_BIT_FSP_IP_LCDC(channel)      (1U << (4U))
  #define BSP_MSTP_DMY_FSP_IP_LCDC(channel) /* After module stop release, the waiting process is performed by the driver, \
                                             * so this macro does not define a register for dummy read. */
 #endif
 
 #if BSP_FEATURE_BSP_PCIE_SUPPORTED
- #define BSP_MSTP_REG_FSP_IP_PCIE(channel)          R_SYSC_NS->MSTPCRM
- #define BSP_MSTP_BIT_FSP_IP_PCIE(channel)          (1U << (8U))
- #define BSP_MSTP_DMY_FSP_IP_PCIE(channel)          R_PCIE_LNK->PCIE_LINKMODE
+ #define BSP_MSTP_REG_FSP_IP_PCIE(channel)      R_SYSC_NS->MSTPCRM
+ #define BSP_MSTP_BIT_FSP_IP_PCIE(channel)      (1U << (8U))
+ #define BSP_MSTP_DMY_FSP_IP_PCIE(channel)      R_PCIE_LNK->PCIE_LINKMODE
 #endif
 
 #if BSP_FEATURE_BSP_SDHI_SUPPORTED
- #define BSP_MSTP_REG_FSP_IP_SDHI(channel)          R_SYSC_NS->MSTPCRM
- #define BSP_MSTP_BIT_FSP_IP_SDHI(channel)          (1U << (12U + channel))
- #define BSP_MSTP_DMY_FSP_IP_SDHI(channel)          (0 == channel) ? R_SDHI0->SD_CMD : R_SDHI1->SD_CMD
+ #define BSP_MSTP_REG_FSP_IP_SDHI(channel)      R_SYSC_NS->MSTPCRM
+ #define BSP_MSTP_BIT_FSP_IP_SDHI(channel)      (1U << (12U + channel))
+ #define BSP_MSTP_DMY_FSP_IP_SDHI(channel)      (0 == channel) ? R_SDHI0->SD_CMD : R_SDHI1->SD_CMD
 #endif
 
 #if BSP_FEATURE_BSP_MSTP_CR52_CPU1_HAS_MSTPCRH
- #define BSP_MSTP_REG_FSP_IP_CPU1(channel)          R_SYSC_S->MSTPCRH
- #define BSP_MSTP_BIT_FSP_IP_CPU1(channel)          (1U << (1U))
+ #define BSP_MSTP_REG_FSP_IP_CPU1(channel)      R_SYSC_S->MSTPCRH
+ #define BSP_MSTP_BIT_FSP_IP_CPU1(channel)      (1U << (1U))
  #define BSP_MSTP_DMY_FSP_IP_CPU1(channel) /* No dummy read is required after module stop. */
 #endif
 
 #if BSP_FEATURE_BSP_MSTP_CR52_HAS_MSTPCRN
- #define BSP_MSTP_REG_FSP_IP_CR52(channel)          R_SYSC_S->MSTPCRN
- #define BSP_MSTP_BIT_FSP_IP_CR52(channel)          (1U << (channel))
- #define BSP_MSTP_DMY_FSP_IP_CR52(channel)          (0 == channel) ? R_TCMAW->CPU0WAIT : \
+ #define BSP_MSTP_REG_FSP_IP_CR52(channel)      R_SYSC_S->MSTPCRN
+ #define BSP_MSTP_BIT_FSP_IP_CR52(channel)      (1U << (channel))
+ #define BSP_MSTP_DMY_FSP_IP_CR52(channel)      (0 == channel) ? R_TCMAW->CPU0WAIT : \
     R_TCMAW->CPU1WAIT
 #endif
 
 #if BSP_FEATURE_BSP_MSTP_CA55_HAS_MSTPCRN
- #define BSP_MSTP_REG_FSP_IP_CA55(channel)          R_SYSC_S->MSTPCRN
- #define BSP_MSTP_BIT_FSP_IP_CA55(channel)          (1U << (channel + 2U))
- #define BSP_MSTP_DMY_FSP_IP_CA55(channel)          (0 == channel) ? R_CA55->RVBA[0].L : \
-    ((1 >= channel) ? R_CA55->RVBA[1].L :                                                \
-     ((2 >= channel) ? R_CA55->RVBA[2].L :                                               \
+ #define BSP_MSTP_REG_FSP_IP_CA55(channel)      R_SYSC_S->MSTPCRN
+ #define BSP_MSTP_BIT_FSP_IP_CA55(channel)      (1U << (channel + 2U))
+ #define BSP_MSTP_DMY_FSP_IP_CA55(channel)      (0 == channel) ? R_CA55->RVBA[0].L : \
+    ((1 >= channel) ? R_CA55->RVBA[1].L :                                            \
+     ((2 >= channel) ? R_CA55->RVBA[2].L :                                           \
       R_CA55->RVBA[3].L))
 #endif
 

@@ -285,7 +285,7 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
 {
     uint8_t pipe_no = USB_NULL;
  #if defined(USB_CFG_HVND_USE)
-    uint16_t pipe;
+    uint8_t pipe;
  #endif                                /* defined(USB_CFG_HVND_USE) */
  #if defined(USB_CFG_HMSC_USE)
     uint16_t side;
