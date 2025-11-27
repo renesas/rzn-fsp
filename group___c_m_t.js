@@ -9,6 +9,7 @@ var group___c_m_t =
     [ "R_CMT_Disable", "group___c_m_t.html#ga72dd8beefbf8ca7123a24bbd9cd2e1f5", null ],
     [ "R_CMT_PeriodSet", "group___c_m_t.html#ga9151976a4b9b4c53dac63dc88a7eb122", null ],
     [ "R_CMT_DutyCycleSet", "group___c_m_t.html#ga89b862995d16141d9bc9ebc587b6310f", null ],
+    [ "R_CMT_CompareMatchSet", "group___c_m_t.html#ga054000e849f31daa817e95408c6c7ed0", null ],
     [ "R_CMT_InfoGet", "group___c_m_t.html#ga6dc30214b65a112efd2b41de3bac50cb", null ],
     [ "R_CMT_StatusGet", "group___c_m_t.html#ga721e3133aeb356538010ef8c6f45d026", null ],
     [ "R_CMT_CounterSet", "group___c_m_t.html#ga7e8b185343222e6e6606ccb6182a3623", null ],
